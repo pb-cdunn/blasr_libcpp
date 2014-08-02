@@ -1,6 +1,6 @@
 #changelist 137921
 #LEGACY := -I../../../../assembly/cpp/common
-INCLUDES = -I../../../../assembly/seymour/dist/common/include \
+INCLUDES = -I../../../../../assembly/seymour/dist/common/include \
 		   -I../pbdata \
 		   -I../hdf
 
