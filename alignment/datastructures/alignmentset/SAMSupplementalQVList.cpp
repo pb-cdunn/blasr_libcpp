@@ -1,7 +1,7 @@
 #include "SAMSupplementalQVList.hpp"
 
-const char* SupplementalQVList::qvNames[] = {"Insertion", "Deletion", "Substitution", "Merge", "SubstitutionTag", "DeletionTag"};
-const char* SupplementalQVList::qvTags[] = {"qi", "qd", "qs", "qm", "ts", "td"};
+const char* SupplementalQVList::qvNames[] = {"InsertionQV", "DeletionQV", "SubstitutionQV", "MergeQV", "SubstitutionTag", "DeletionTag"};
+const char* SupplementalQVList::qvTags[] = {"iq", "dq", "sq", "mq", "st", "dt"};
 
 // Only the first 4 tags are quality values.
 int SupplementalQVList::nqvTags = 4;

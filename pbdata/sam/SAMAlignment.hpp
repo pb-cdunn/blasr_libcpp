@@ -61,7 +61,7 @@ class SAMAlignment {
   //
   // Quality values.
   //
-  std::string qi, qd, qs, qm, ts, td;	
+  std::string iq, dq, sq, mq, st, dt;	
 
   //
   // Initialize all optional fields.  Required fields will be

@@ -152,23 +152,23 @@ bool SAMAlignment::StoreValues(std::string &line,  int lineNumber) {
       } // Add quality values, including QualityValue?, 
         // InsertionQV, DeletionQV, SubstitutionQV, 
         // MergeQV and SubstitutionTag and DeletionTag
-      else if (kvName == "qi") {
-          strm >> qi;
+      else if (kvName == "iq") {
+          strm >> iq;
       }
-      else if (kvName == "qd") {
-          strm >> qd;
+      else if (kvName == "dq") {
+          strm >> dq;
       }
-      else if (kvName == "qs") {
-          strm >> qs;
+      else if (kvName == "sq") {
+          strm >> sq;
       }
-      else if (kvName == "qm") {
-          strm >> qm;
+      else if (kvName == "mq") {
+          strm >> mq;
       }
-      else if (kvName == "ts") {
-          strm >> ts;
+      else if (kvName == "st") {
+          strm >> st;
       }
-      else if (kvName == "td") {
-          strm >> td;
+      else if (kvName == "dt") {
+          strm >> dt;
       }
     }
     else {
