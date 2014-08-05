@@ -9,7 +9,7 @@ public:
 	enum QVIndex {I_InsertionQV=1,I_DeletionQV=2,I_SubstitutionQV=3,I_MergeQV=4,I_SubstitutionTag=5,I_DeletionTag=6};
 	unsigned int useqv;
 	void SetDefaultQV() {
-		useqv = InsertionQV | DeletionQV | SubstitutionQV | MergeQV | SubstitutionTag | DeletionTag;
+		useqv = InsertionQV | DeletionQV | SubstitutionQV | MergeQV | DeletionTag;
 	}
 	static const char* qvTags[];
 	static const char* qvNames[];
