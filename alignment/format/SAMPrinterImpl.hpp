@@ -279,6 +279,9 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
         assert(read.length - suffixHardClip == prefixHardClip + alignedSequence.length);
         samFile << "XE:i:" << xe + 1 << "\t";
     }
+    samFile << "YS:i:" << read.subreadStart << "\t";
+    samFile << "YE:i:" << read.subreadEnd << "\t";
+    samFile << "ZM:i:" << read.zmwData.holeNumber << "\t";
     samFile << "XL:i:" << alignment.qAlignedSeq.length << "\t";
     samFile << "XT:i:1\t"; // reads are allways continuous reads, not
                         // referenced based circular consensus when
