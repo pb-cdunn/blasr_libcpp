@@ -149,7 +149,8 @@ int ReaderAgglomerate::Initialize() {
 
     string movieName;
     GetMovieName(movieName);
-    MakeMD5(movieName, readGroupId, 10);
+    string moviePlusFileName = movieName + fileName;
+    MakeMD5(moviePlusFileName, readGroupId, 10);
 
     return 1;
 }
