@@ -236,7 +236,7 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
     // newline (by setting the line length to alignedSequence.length
     ((DNASequence)alignedSequence).PrintSeq(samFile, 0);  // SEQ
     samFile << "\t";
-    if (alignedSequence.qual.data != NULL) {
+    if (alignedSequence.qual.data != NULL && qvList.useqv == 0) {
       alignedSequence.PrintAsciiQual(samFile, 0);  // QUAL
     }
     else {
