@@ -13,6 +13,7 @@ public:
     std::string movieName, runCode;
     std::string whenStarted;
     std::map<char, int> baseMap;
+    ScanData();
     std::string GetMovieName(); 
 };
 

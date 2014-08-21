@@ -1,6 +1,8 @@
 #ifndef _BLASR_ALIGNMENT_MAP_HPP_
 #define _BLASR_ALIGNMENT_MAP_HPP_
 
+#include <vector>
+
 class AlignmentMap {
  public:
 	int qPos, tPos;

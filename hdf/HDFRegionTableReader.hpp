@@ -19,10 +19,10 @@ public:
     HDFGroup pulseDataGroup;
     HDF2DArray<int> regions;
 
-    HDFAtom<std::vector<std::string>> regionTypes;
-    HDFAtom<std::vector<std::string>> regionDescriptions;
-    HDFAtom<std::vector<std::string>> regionSources;
-    HDFAtom<std::vector<std::string>> columnNames;
+    HDFAtom<std::vector<std::string> > regionTypes;
+    HDFAtom<std::vector<std::string> > regionDescriptions;
+    HDFAtom<std::vector<std::string> > regionSources;
+    HDFAtom<std::vector<std::string> > columnNames;
     int curRow;
     int nRows;
     bool fileContainsRegionTable;

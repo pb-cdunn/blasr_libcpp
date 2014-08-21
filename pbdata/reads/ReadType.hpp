@@ -1,5 +1,5 @@
-#ifndef _BLASR_READ_TYPE_H 
-#define _BLASR_READ_TYPE_H 
+#ifndef _BLASR_READ_TYPE_HPP 
+#define _BLASR_READ_TYPE_HPP 
 
 #include <string>
 
