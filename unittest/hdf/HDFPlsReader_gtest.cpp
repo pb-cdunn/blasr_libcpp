@@ -18,7 +18,7 @@
 
 #include "HDFPlsReader.hpp"
 #include "gtest/gtest.h"
-#include "../pbdata/testdata.h"
+#include "pbdata/testdata.h"
 
 using namespace std;
 using namespace H5;

@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "FASTQReader.hpp"
-#include "testdata.h"
+#include "pbdata/testdata.h"
 
 const string movie = 
     "m130328_211423_ethan_c100499512550000001823070408081371_s1_p0";

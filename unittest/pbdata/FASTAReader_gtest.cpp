@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "FASTAReader.hpp"
-#include "testdata.h"
+#include "pbdata/testdata.h"
 
 class FASTAReaderTest:public::testing::Test{
 public:

@@ -21,7 +21,7 @@
 #include "HDFGroup.hpp"
 #include "HDF2DArray.hpp"
 #include "reads/HoleXY.hpp"
-#include "../pbdata/testdata.h"
+#include "pbdata/testdata.h"
 #include "gtest/gtest.h"
 
 using namespace std;

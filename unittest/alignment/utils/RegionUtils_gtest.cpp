@@ -21,7 +21,7 @@
 #include "utils/RegionUtils.hpp"
 #include "reads/RegionTable.hpp"
 #include "HDFRegionTableReader.hpp"
-#include "../pbdata/testdata.h"
+#include "pbdata/testdata.h"
 
 class RegionUtilTestFixture: public testing::Test {
 public:

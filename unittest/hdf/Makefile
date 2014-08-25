@@ -1,6 +1,7 @@
 include ../common.mk
 
-INCDIRS    = -I$(PBINCROOT)/pbdata \
+INCDIRS    = -I../ \
+             -I$(PBINCROOT)/pbdata \
              -I$(PBINCROOT)/hdf \
 		     -I$(HDFINC)
 

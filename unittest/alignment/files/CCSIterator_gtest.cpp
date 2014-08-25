@@ -21,7 +21,7 @@
 #include "files/CCSIterator.hpp"
 #include "reads/RegionTable.hpp"
 #include "HDFRegionTableReader.hpp"
-#include "../pbdata/testdata.h"
+#include "pbdata/testdata.h"
 
 using namespace std;
 

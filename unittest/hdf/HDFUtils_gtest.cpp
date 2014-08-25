@@ -18,7 +18,7 @@
 
 #include "HDFUtils.hpp"
 #include "gtest/gtest.h"
-#include "../pbdata/testdata.h"
+#include "pbdata/testdata.h"
 
 TEST(HDFUtils, Create) {
     EXPECT_EQ(GetH5MovieName(baxFile1), 

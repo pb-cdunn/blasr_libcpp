@@ -1,6 +1,7 @@
 include ../common.mk
 
-INCDIRS    = -I$(PBINCROOT)/pbdata
+INCDIRS    = -I../ \
+			 -I$(PBINCROOT)/pbdata
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata
 

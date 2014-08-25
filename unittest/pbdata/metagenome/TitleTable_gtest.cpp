@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "metagenome/TitleTable.hpp"
-#include "../pbdata/testdata.h"
+#include "pbdata/testdata.h"
 
 TEST(TitleTable, Read) {
     TitleTable tt;
