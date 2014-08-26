@@ -208,6 +208,33 @@ public:
         expGroup = refAlignGroups[refIndex]->GetExperimentGroup(experimentName);
         expGroup->AddAlignment(alnArray, offsetBegin, offsetEnd);
     }
+    
+    // Write a vector of quality values to the appropriate experiment group.
+    // This is similar to StoreAlignment, but for QVs 
+    int StoreQVs(const vector<UChar> &qvArray, const string &refName, const string &fieldName,
+                 const string &experimentName, unsigned int *offsetBegin,
+                 unsigned int *offsetEnd) {
+        assert(refNameToArrayIndex.find(refName) != refNameToArrayIndex.end());
+        int refIndex = refNameToArrayIndex[refName];
+        assert(refIndex < refAlignGroups.size());
+        HDFCmpExperimentGroup *expGroup;
+        expGroup = refAlignGroups[refIndex]->GetExperimentGroup(experimentName);
+        expGroup->AddQVs(qvArray, fieldName, offsetBegin, offsetEnd);
+    }
+
+    // Write a vector of tag to the appropriate experiment group.
+    // This is similar to StoreAlignment, but for DeletionTag and
+    // SubstitutionTag.
+    int StoreTags(const vector<char> &qvArray, const string &refName, const string &fieldName,
+                  const string &experimentName, unsigned int *offsetBegin,
+                  unsigned int *offsetEnd) {
+        assert(refNameToArrayIndex.find(refName) != refNameToArrayIndex.end());
+        int refIndex = refNameToArrayIndex[refName];
+        assert(refIndex < refAlignGroups.size());
+        HDFCmpExperimentGroup *expGroup;
+        expGroup = refAlignGroups[refIndex]->GetExperimentGroup(experimentName);
+        expGroup->AddTags(qvArray, fieldName, offsetBegin, offsetEnd);
+    }
 
     int Initialize(string &hdfCmpFileName, 
             unsigned int flags=H5F_ACC_RDONLY,

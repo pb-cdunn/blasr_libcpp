@@ -45,7 +45,16 @@ public:
 
     void AddAlignment(std::vector<unsigned char> &alignment, 
         unsigned int &offsetBegin, unsigned int &offsetEnd); 
-
+    
+    // AddQVs and AddTags are like AddAlignment, but for QVs and Tags,
+    // respectively. They are responsible for initializing and writing to the
+    // correct member HDFArray, given a vector of values to write and the name
+    // of the QV or Tag 
+    void AddQVs(const std::vector<UChar> &qualityValues, const std::string &fieldName,
+                unsigned int *offsetBegin, unsigned int *offsetEnd);
+    void AddTags(const std::vector<char> &qualityValues, const std::string &fieldName,
+                 unsigned int *offsetBegin, unsigned int *offsetEnd);
+                           
     int Initialize(HDFGroup &refGroup, std::string experimentGroupName, 
         std::set<string> &fieldNames); 
 

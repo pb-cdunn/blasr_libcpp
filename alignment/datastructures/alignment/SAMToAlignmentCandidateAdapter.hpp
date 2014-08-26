@@ -74,5 +74,6 @@ void SAMAlignmentsToCandidates(SAMAlignment &sam,
                                std::map<std::string,int> & refNameToRefListIndex,
                                std::vector<AlignmentCandidate<> > &candidates, 
                                bool parseSmrtTitle = false,
-                               bool keepRefAsForward = true);
+                               bool keepRefAsForward = true,
+                               bool copyQVs = false);
 #endif

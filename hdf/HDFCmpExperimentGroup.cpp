@@ -36,6 +36,48 @@ void HDFCmpExperimentGroup::AddAlignment(std::vector<unsigned char> &alignment,
     alignmentArray.Write(&paddedAlignment[0], paddedAlignment.size());
 }
 
+//template<typename T>
+//void HDFCmpExperimentGroup::AddQualityValues(const std::vector<T> &qualityValues,
+//                                             const std::string &fieldName,
+//                                             unsigned int *offsetBegin,
+//                                             unsigned int *offsetEnd) {
+//
+//  std::vector<T> paddedQualityValues = qualityValues;
+//  paddedQualityValues.push_back(0);
+//  HDFArray<T> *arrayPtr = NULL;
+//  
+//  // This seems to be how we do it 
+//  if (fieldName == "DeletionQV") {
+//      arrayPtr = &deletionQV;
+//  } else if (fieldName == "InsertionQV") {
+//      arrayPtr = &insertionQV;
+//  } else if (fieldName == "MergeQV") {
+//      arrayPtr = &mergeQV;
+//  } else if (fieldName == "SubstitutionQV") {
+//      arrayPtr = &substitutionQV;
+//  } else if (fieldName == "DeletionTag") {
+//      arrayPtr = &deletionTag;
+//  } else if (fieldName == "SubstitutionTag") {
+//      arrayPtr = &substitutionTag;
+//  } else {
+//      assert(false);
+//  }
+//
+//  *offsetBegin = arrayPtr->size();
+//  *offsetEnd = arrayPtr->size() + qualityValues.size();
+//  
+//  arrayPtr->Write(&paddedQualityValues[0], paddedQualityValues.size());
+//}
+//
+//// One for tags, one for QVs
+//template void HDFCmpExperimentGroup::AddQualityValues<char>(
+//        const std::vector<char>&, const std::string&,
+//        unsigned int*, unsigned int*);
+//
+//template void HDFCmpExperimentGroup::AddQualityValues<UChar>(
+//        const std::vector<UChar>&, const std::string&,
+//        unsigned int*, unsigned int*);
+//
 int HDFCmpExperimentGroup::Initialize(HDFGroup &refGroup, 
     string experimentGroupName, set<string> &fieldNames) {
     //
@@ -98,3 +140,55 @@ HDFCmpExperimentGroup::HDFCmpExperimentGroup() {
 UInt HDFCmpExperimentGroup::GetAlnArraySize() {
     return alignmentArray.arrayLength / 1024 * sizeof (unsigned char);
 }
+
+void HDFCmpExperimentGroup::AddQVs(const std::vector<UChar> &qualityValues,
+                                   const std::string &fieldName,
+                                   unsigned int *offsetBegin,
+                                   unsigned int *offsetEnd) {
+    std::vector<UChar> paddedQualityValues = qualityValues;
+    paddedQualityValues.push_back(0);
+    HDFArray<UChar> *arrayPtr = NULL;
+    
+    // This seems to be how we do it 
+    if (fieldName == "DeletionQV") {
+        arrayPtr = &deletionQV;
+    } else if (fieldName == "InsertionQV") {
+        arrayPtr = &insertionQV;
+    } else if (fieldName == "MergeQV") {
+        arrayPtr = &mergeQV;
+    } else if (fieldName == "SubstitutionQV") {
+        arrayPtr = &substitutionQV;
+    } else {
+        assert(false);
+    }
+    
+    if (!arrayPtr->isInitialized) arrayPtr->Initialize(experimentGroup, fieldName);
+    *offsetBegin = arrayPtr->size();
+    *offsetEnd = arrayPtr->size() + qualityValues.size();
+    
+    arrayPtr->Write(&paddedQualityValues[0], paddedQualityValues.size());
+}
+
+void HDFCmpExperimentGroup::AddTags(const std::vector<char> &qualityValues,
+                                    const std::string &fieldName,
+                                    unsigned int *offsetBegin,
+                                    unsigned int *offsetEnd) {
+    std::vector<char> paddedQualityValues = qualityValues;
+    paddedQualityValues.push_back(0);
+    HDFArray<char> *arrayPtr = NULL;
+    
+    if (fieldName == "DeletionTag") {
+        arrayPtr = &deletionTag;
+    } else if (fieldName == "SubstitutionTag") {
+        arrayPtr = &substitutionTag;
+    } else {
+        assert(false);
+    }
+
+    if (!arrayPtr->isInitialized) arrayPtr->Initialize(experimentGroup, fieldName);
+    *offsetBegin = arrayPtr->size();
+    *offsetEnd = arrayPtr->size() + qualityValues.size();
+    
+    arrayPtr->Write(&paddedQualityValues[0], paddedQualityValues.size());
+}
+

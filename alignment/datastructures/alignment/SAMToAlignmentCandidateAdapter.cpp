@@ -205,7 +205,8 @@ void SAMAlignmentsToCandidates(SAMAlignment &sam,
                                std::map<std::string,int> & refNameToRefListIndex,
                                std::vector<AlignmentCandidate<> > &candidates, 
                                bool parseSmrtTitle,
-                               bool keepRefAsForward) {
+                               bool keepRefAsForward,
+                               bool copyQVs) {
   //
   // First determine how many alignments there are from CIGAR string.
   //
@@ -221,6 +222,11 @@ void SAMAlignmentsToCandidates(SAMAlignment &sam,
 
   DNALength samTEnd = 0;
   DNALength samTStart = sam.pos - 1;
+
+  std::vector<std::string> optionalQVs;
+  if (copyQVs) {
+      sam.CopyQVs(&optionalQVs);    
+  }
   if (keepRefAsForward == false and IsReverseComplement(sam.flag)) {
     ReverseAlignmentOperations(lengths, ops);
     DNASequence rcQuerySeq;
@@ -234,6 +240,13 @@ void SAMAlignmentsToCandidates(SAMAlignment &sam,
     querySeq = rcQuerySeq;
     rcQuerySeq.Free();
     samTEnd = GetAlignedReferenceLengthByCIGARSum(ops, lengths);
+    
+    // We also need to reverse any optional QVs
+    if (copyQVs) {
+      for(int i=0; i<optionalQVs.size(); i++) {
+        std::reverse(optionalQVs[i].begin(), optionalQVs[i].end());
+      }
+    }
   }
 
 
@@ -363,6 +376,9 @@ void SAMAlignmentsToCandidates(SAMAlignment &sam,
     //
     // First, the query sequence is straight from the SAM line.
     ((DNASequence*)&alignment.qAlignedSeq)->Copy(querySeq, qAlignStart, alignment.qAlignedSeqLength);
+    if (copyQVs) {
+      alignment.ReadOptionalQVs(optionalQVs, qAlignStart, alignment.qAlignedSeqLength);
+    }
     
     // The SAM Alignments a
     alignment.qStrand = IsReverseComplement(sam.flag);

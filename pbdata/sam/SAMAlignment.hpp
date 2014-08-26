@@ -62,6 +62,8 @@ class SAMAlignment {
   // Quality values.
   //
   std::string iq, dq, sq, mq, st, dt;	
+  static const char* optionalQVTags[];
+  static const char* optionalQVNames[];
 
   //
   // Initialize all optional fields.  Required fields will be
@@ -78,6 +80,10 @@ class SAMAlignment {
   std::string TrimStringEnd(std::string str);
 
   bool StoreValues(std::string &line,  int lineNumber=0);
+  
+  // CopyQVs writes the strings from the optional QV tags to a vector. The
+  // order of QVs in the vector is given by optionalQVNames[]
+  void CopyQVs(std::vector<std::string> *optionalQVs);
 };
 
 

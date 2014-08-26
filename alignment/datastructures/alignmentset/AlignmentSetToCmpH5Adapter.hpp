@@ -61,11 +61,13 @@ public:
   void StoreAlignmentCandidate(AlignmentCandidate<> &alignment, 
                                int alnSegment,
                                T_CmpFile &cmpFile,
-                               int moleculeNumber = -1);
+                               int moleculeNumber = -1,
+                               bool copyQVs=false);
 
   void StoreAlignmentCandidateList(std::vector<AlignmentCandidate<> > &alignments,
                                    T_CmpFile &cmpFile,
-                                   int moleculeNumber=-1);
+                                   int moleculeNumber=-1,
+                                   bool copyQVs=false);
 
   void StoreAlignmentCandidate(AlignmentCandidate<> alignment, 
                                T_CmpFile &cmpFile) {

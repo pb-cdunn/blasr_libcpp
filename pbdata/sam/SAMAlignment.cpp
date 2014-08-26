@@ -177,8 +177,21 @@ bool SAMAlignment::StoreValues(std::string &line,  int lineNumber) {
   }
 }
 
+void SAMAlignment::CopyQVs(std::vector<std::string> *optionalQVs) {  
+  optionalQVs->clear();
+  optionalQVs->push_back(iq);
+  optionalQVs->push_back(dq);
+  optionalQVs->push_back(sq);
+  optionalQVs->push_back(mq);
+  optionalQVs->push_back(st);
+  optionalQVs->push_back(dt);
+}
+
 const char* SAMAlignment::SAMAlignmentRequiredFieldNames[] = { "QNAME", "FLAG", 
                                                                "RNAME", "POS", 
                                                                "MAPQV", "CIGAR", 
                                                                "RNEXT", "PNEXT", 
                                                                "TLEN", "SEQ", "QUAL"} ;
+const char* optionalQVTags[] = {"iq", "dq", "sq", "mq", "st", "dt"};
+const char* optionalQVNames[] = {"InsertionQV", "DeletionQV", "SubstitutionQV",
+                                 "MergeQV", "SubstitutionTag", "DeletionTag"};

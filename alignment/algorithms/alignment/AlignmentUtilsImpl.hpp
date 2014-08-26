@@ -510,4 +510,39 @@ void RemoveAlignmentPrefixGaps(T_Alignment &alignment) {
     alignment.qPos += qStart;
 }
 
+template<typename T>
+void QVsToCmpH5QVs(const std::string &qvs,
+                   const std::vector<unsigned char> &byteAlignment,
+                   bool isTag,
+                   std::vector<T> *gappedQVs) {
+    gappedQVs->clear();
+    
+    unsigned int qv_i = 0;
+    
+    // QVs and tags get different values at gaps in the read
+    char tagGapChar = 'N';
+    UChar qvGapChar = 255; 
+
+    for (int i=0; i<byteAlignment.size(); i++) {
+        if (byteAlignment[i] >> 4 == 0) { //Look at upper bits to get query char
+            if (isTag) {
+                gappedQVs->push_back(tagGapChar);
+            } else {
+                gappedQVs->push_back(qvGapChar);
+            }
+        } else {
+            if (isTag) {
+              //std::cout << "Pushing back " << (T)qvs[qv_i] << " for tag " << qvs[qv_i] << std::endl;
+              gappedQVs->push_back((T)qvs[qv_i]);        
+            } else {
+              //std::cout << "Pushing back " << (T)qvs[qv_i] - FASTQSequence::charToQuality << " for QV " << qvs[qv_i] << std::endl;
+              gappedQVs->push_back((T)qvs[qv_i] - FASTQSequence::charToQuality);
+            }
+              
+            qv_i++;
+        }
+    } 
+
+    assert(gappedQVs->size() == byteAlignment.size());
+}
 #endif

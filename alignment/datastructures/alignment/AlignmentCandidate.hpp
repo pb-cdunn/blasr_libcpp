@@ -31,12 +31,26 @@ private:
         }
         curSeq.ReferenceSubstring(newSeq, 0, newSeq.length);
     }
+    
+    // TryReadingQVs is a helper function for ReadOptionalQVs. It checks if the
+    // qvs that are supposed to be copied to a member of AlignmentCandidate are
+    // in fact empty. If so, then don't substr or copy anything
+    void TryReadingQVs(const std::string qvs, DNALength start, DNALength length,
+                       std::string *memberQVs) {
+        if (qvs.size() == 0) {
+            memberQVs->clear();
+        } else {
+            *memberQVs = qvs.substr(start, length);
+        }
+    }
 
 
 
 public:
     T_TSequence tAlignedSeq;
     T_QSequence qAlignedSeq;
+    std::string insertionQV, deletionQV, mergeQV, substitutionQV, deletionTag, substitutionTag;
+    std::vector<std::string> optionalQVNames;
     DNALength   tAlignedSeqPos, qAlignedSeqPos;
     DNALength   tAlignedSeqLength, qAlignedSeqLength;
     float       pvalVariance, weightVariance, pvalNStdDev, weightNStdDev;
@@ -78,6 +92,13 @@ public:
         pvalNStdDev  = rhs.pvalNStdDev;
         weightVariance=rhs.weightVariance;
         weightNStdDev= rhs.weightNStdDev;
+
+        insertionQV = rhs.insertionQV;
+        deletionQV = rhs.deletionQV;
+        substitutionQV = rhs.substitutionQV;
+        mergeQV = rhs.mergeQV;
+        substitutionTag = rhs.substitutionTag;
+        deletionTag = rhs.deletionTag;
 
         return *this;
     }
@@ -180,7 +201,36 @@ public:
     DNALength GetTBasesToStart() {
         return tPos + tAlignedSeqPos;
     }
-
+    
+    // ReadOptionalQVs populates the optional QV attributes of
+    // AlignmentCandidate with values read from a vector.  
+    void ReadOptionalQVs(const std::vector<std::string>& optionalQVs,
+                         DNALength start, DNALength length) {
+      TryReadingQVs(optionalQVs[0], start, length, &insertionQV);
+      TryReadingQVs(optionalQVs[1], start, length, &deletionQV);
+      TryReadingQVs(optionalQVs[2], start, length, &substitutionQV);
+      TryReadingQVs(optionalQVs[3], start, length, &mergeQV);
+      TryReadingQVs(optionalQVs[4], start, length, &substitutionTag);
+      TryReadingQVs(optionalQVs[5], start, length, &deletionTag);
+    } 
+    
+    // CopyQVs fills a vector with optional QV attributes.
+    void CopyQVs(std::vector<std::string> *optionalQVs) {  
+      optionalQVNames.clear();
+      optionalQVs->clear();
+      optionalQVs->push_back(insertionQV);
+      optionalQVNames.push_back("InsertionQV");
+      optionalQVs->push_back(deletionQV);
+      optionalQVNames.push_back("DeletionQV");
+      optionalQVs->push_back(substitutionQV);
+      optionalQVNames.push_back("SubstitutionQV");
+      optionalQVs->push_back(mergeQV);
+      optionalQVNames.push_back("MergeQV");
+      optionalQVs->push_back(substitutionTag);
+      optionalQVNames.push_back("SubstitutionTag");
+      optionalQVs->push_back(deletionTag);
+      optionalQVNames.push_back("DeletionTag");
+    }
 
     void AppendAlignment(AlignmentCandidate &next) {
 

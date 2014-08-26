@@ -124,6 +124,16 @@ int ComputeDrift(blasr::Block &cur, blasr::Block &next);
 template<typename T_Alignment>
 void RemoveAlignmentPrefixGaps(T_Alignment &alignment); 
 
+// QVsToCmpH5QVs converts the optional QVs read from a SAM file into something
+// that's ready to be written to the HDFArrays of a cmp.h5 file. This involves
+// two things: First, it needs to be converted from a std::string to a vector
+// of either chars or UChars. Second, it needs to have appropriate gap
+// characters inserted. The location of gaps if found using the byteAlignment.
+template<typename T>
+void QVsToCmpH5QVs(const std::string &fieldName, const std::string &qvs,
+                   const std::vector<unsigned char> &byteAlignment,
+                   bool isTag, std::vector<T> *gappedQVs);
+
 #include "AlignmentUtilsImpl.hpp"
 
 #endif // _BLASR_ALIGNMENT_UTILS_HPP_

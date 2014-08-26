@@ -104,7 +104,8 @@ void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidate(
     AlignmentCandidate<> &alignment, 
     int alnSegment,
     T_CmpFile &cmpFile,
-    int moleculeNumber = -1) {
+    int moleculeNumber=-1,
+    bool copyQVs=false) {
   //
   // Find out where the movie is going to get stored.
   //
@@ -166,6 +167,36 @@ void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidate(
 
   unsigned int offsetBegin, offsetEnd;
   cmpFile.StoreAlnArray(byteAlignment, alignment.tName, movieName, offsetBegin, offsetEnd);
+  // Copy QVs into cmp.h5
+  if (copyQVs) {
+    std::vector<std::string> optionalQVs;
+    alignment.CopyQVs(&optionalQVs);
+    for (int qv_i=0; qv_i<optionalQVs.size(); qv_i++) {
+      std::string *qvName = &alignment.optionalQVNames[qv_i];
+      std::string *qvString = &optionalQVs[qv_i];
+      
+      // If the qvString is empty, then the alignment is missing the quality
+      // value
+      if (qvString->size() == 0) {
+        continue;
+      }
+
+      unsigned int qvOffsetBegin, qvOffsetEnd;
+      if (qvName->compare(qvName->size() - 3, 3, "Tag") == 0) {
+        std::vector<char> qvVector;
+        QVsToCmpH5QVs(*qvString, byteAlignment, true, &qvVector);
+        cmpFile.StoreTags(qvVector, alignment.tName, *qvName,
+                          movieName, &qvOffsetBegin, &qvOffsetEnd);
+      } else {
+        std::vector<UChar> qvVector;
+        QVsToCmpH5QVs(*qvString, byteAlignment, false, &qvVector);
+        cmpFile.StoreQVs(qvVector, alignment.tName, *qvName,
+                         movieName, &qvOffsetBegin, &qvOffsetEnd);
+      }
+      assert(qvOffsetBegin == offsetBegin);
+      assert(qvOffsetEnd == offsetEnd);
+    }
+  }
 
   numAlignments++;
 
@@ -213,10 +244,12 @@ template<typename T_CmpFile>
 void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidateList(
     std::vector<AlignmentCandidate<> > &alignments,
     T_CmpFile &cmpFile,
-    int moleculeNumber=-1) {
+    int moleculeNumber=-1,
+    bool copyQVs=false) {
+  
   int a;
   for (a = 0; a < alignments.size(); a++) {
-    StoreAlignmentCandidate(alignments[a], a, cmpFile, moleculeNumber);
+    StoreAlignmentCandidate(alignments[a], a, cmpFile, moleculeNumber, copyQVs);
   }
 }
 
