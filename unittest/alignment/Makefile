@@ -4,12 +4,12 @@ INCDIRS    = -I../ \
              -I$(PBINCROOT)/alignment \
              -I$(PBINCROOT)/pbdata \
              -I$(PBINCROOT)/hdf \
-		     -I$(HDFINC)
+		     -I../$(HDFINC)
 
 LIBDIRS    = -L$(PBINCROOT)/alignment \
              -L$(PBINCROOT)/pbdata \
              -L$(PBINCROOT)/hdf \
-			 -L$(HDFLIB)
+			 -L../$(HDFLIB)
 
 LDFLAGS   := -lblasr -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz
 # The order of -l{lib} matters

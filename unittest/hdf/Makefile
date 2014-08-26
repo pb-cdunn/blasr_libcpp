@@ -3,11 +3,11 @@ include ../common.mk
 INCDIRS    = -I../ \
              -I$(PBINCROOT)/pbdata \
              -I$(PBINCROOT)/hdf \
-		     -I$(HDFINC)
+		     -I../$(HDFINC)
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata \
              -L$(PBINCROOT)/hdf \
-			 -L$(HDFLIB)
+			 -L../$(HDFLIB)
 
 LDFLAGS   := -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz
 # The order of -l{lib} matters
