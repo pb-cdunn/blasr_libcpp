@@ -74,6 +74,7 @@ int FASTQReader::GetNext(FASTQSequence &seq) {
         seq.qual.data = NULL;
     }
     curPos = p2;
+    seq.deleteOnExit = true;
     return true;
 }
 
