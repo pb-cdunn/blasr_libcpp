@@ -1,15 +1,23 @@
 #ifndef _BLASR_SAM_READER_IMPL_HPP_
 #define _BLASR_SAM_READER_IMPL_HPP_
+#include <iostream>
 #include "SAMReader.hpp"
 
 template<typename T_ReferenceSequence, typename T_ReadGroup, typename T_SAMAlignment>
 bool SAMReader<T_ReferenceSequence, T_ReadGroup, T_SAMAlignment>::Initialize(std::string samFileName) {
-  CrucialOpen(samFileName, samFile, std::ios::in);
+  if(samFileName != "stdin") {
+    CrucialOpen(samFileName, samFile, std::ios::in);
+    samFilePtr = &samFile;
+  } else {
+    samFilePtr = &std::cin;
+  }
 }
 
 template<typename T_ReferenceSequence, typename T_ReadGroup, typename T_SAMAlignment>
 void SAMReader<T_ReferenceSequence, T_ReadGroup, T_SAMAlignment>::Close() {
-  samFile.close();
+  if(samFile.is_open()) {
+    samFile.close();
+  }
 }
 
 template<typename T_ReferenceSequence, typename T_ReadGroup, typename T_SAMAlignment>
@@ -111,8 +119,8 @@ std::vector<std::string> SAMReader<T_ReferenceSequence, T_ReadGroup, T_SAMAlignm
   std::string line;
   LineType lineType;
   lineNumber = 0;
-  while (samFile and PeekLineIsHeader(samFile)) {
-    getline(samFile, line);
+  while (*samFilePtr and PeekLineIsHeader(*samFilePtr)) {
+    getline(*samFilePtr, line);
     lineType = GetLineType(line);
     if (LineTypeIsHeader(lineType)) {
       allHeaders.push_back(line);
@@ -150,7 +158,7 @@ void SAMReader<T_ReferenceSequence, T_ReadGroup, T_SAMAlignment>::Read(Alignment
   LineType lineType;
   lineNumber = 0;
   ReadHeader(alignments);
-  while (getline(samFile, line)) {
+  while (getline(*samFilePtr, line)) {
     lineType = GetLineType(line);
     if (LineTypeIsHeader(lineType)) {
       std::cout << "ERROR! Header line found outside of the header at " << lineNumber << std::endl;
@@ -170,9 +178,9 @@ void SAMReader<T_ReferenceSequence, T_ReadGroup, T_SAMAlignment>::Read(Alignment
 
 template<typename T_ReferenceSequence, typename T_ReadGroup, typename T_SAMAlignment>
 bool SAMReader<T_ReferenceSequence, T_ReadGroup, T_SAMAlignment>::GetNextAlignment(SAMAlignment &alignment) {
-  if (samFile) {
+  if (*samFilePtr) {
     std::string line;
-    if (getline(samFile, line)) {
+    if (getline(*samFilePtr, line)) {
       alignment.StoreValues(line, lineNumber);
       ++lineNumber;
       return true;

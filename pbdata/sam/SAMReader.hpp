@@ -14,6 +14,7 @@ class SAMReader {
   public:
   int lineNumber;
   std::ifstream samFile;
+  std::istream *samFilePtr;
   bool Initialize(std::string samFileName);
 
   void Close();
