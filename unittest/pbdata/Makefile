@@ -5,7 +5,7 @@ INCDIRS    = -I../ \
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata
 
-LDFLAGS   := -lpbdata -lpthread -lz
+LDFLAGS   := -lpbdata -lpthread -lz -ldl
 
 SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard utils/*.cpp) \
@@ -19,7 +19,7 @@ all: $(EXECS)
 
 
 $(EXECS): % : %.o
-	$(CXX) $(CCOPTS) $(CCFLAGS) $< $(GTEST_MAINA) -o $@ $(LIBDIRS) $(LDFLAGS)
+	$(CXX) $(CCOPTS) $(CCFLAGS) $< $(GTEST_MAINA) -static -o $@ $(LIBDIRS) $(LDFLAGS)
 
 .cpp.o:
 	$(CXX) $(CCOPTS) $(CCFLAGS) -c $< -o $@ $(INCDIRS) $(GTESTINCDIRS) 

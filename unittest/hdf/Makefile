@@ -9,11 +9,10 @@ LIBDIRS    = -L$(PBINCROOT)/pbdata \
              -L$(PBINCROOT)/hdf \
 			 -L../$(HDFLIB)
 
-LDFLAGS   := -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz
+LDFLAGS   := -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
 # The order of -l{lib} matters
 
-SOURCES    = $(wildcard *.cpp) \
-		     $(wildcard utils/*.cpp)
+SOURCES    = $(wildcard *.cpp) 
 OBJECTS    = $(SOURCES:.cpp=.o)
 EXECS      = $(SOURCES:.cpp=)
 
@@ -22,7 +21,7 @@ all: $(EXECS)
 
 
 $(EXECS): % : %.o
-	$(CXX) $(CCOPTS) $(CCFLAGS) $< $(GTEST_MAINA) -o $@ $(LIBDIRS) $(LDFLAGS)
+	$(CXX) $(CCOPTS) $(CCFLAGS) $< $(GTEST_MAINA) -static -o $@ $(LIBDIRS) $(LDFLAGS)
 
 .cpp.o:
 	$(CXX) $(CCOPTS) $(CCFLAGS) -c $< -o $@ $(INCDIRS) $(GTESTINCDIRS) 
