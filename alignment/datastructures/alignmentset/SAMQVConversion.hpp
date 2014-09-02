@@ -2,7 +2,7 @@
 #define _BLASR_SAMQVConversion_HPP_
 
 
-#define MAX_PRINTED_QUALITY 92
+#define MAX_PRINTED_QUALITY 93
 #define MAX_STORED_QUALITY 100
 #define SENTINAL 255
 #define MAP_SENTINAL 93
