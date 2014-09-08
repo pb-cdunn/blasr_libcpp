@@ -31,7 +31,7 @@ dependencies := $(sources:.cpp=.d)
 
 all : GCCOPTS = -O3
 
-debug : GCCOPTS = -g -ggdb
+debug : GCCOPTS = -g -ggdb -fno-inline
 
 profile : GCCOPTS = -Os -pg
 
