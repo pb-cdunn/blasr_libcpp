@@ -1,3 +1,4 @@
+#include <stdlib.h> 
 #include "SMRTSequence.hpp"
 
 using namespace std;
@@ -22,6 +23,13 @@ SMRTSequence::SMRTSequence() : FASTQSequence() {
 }
 
 void SMRTSequence::Allocate(DNALength length) {
+    // Assert *this has no allocated space.
+    if (not (seq == NULL && preBaseFrames == NULL &&
+             widthInFrames == NULL and pulseIndex == NULL)) {
+        cout << "ERROR, trying to double-allocate memory for a SMRTSequence." << endl;
+        exit(1);
+    }
+
     FASTQSequence::AllocateRichQualityValues(length);
     seq           = new Nucleotide[length];
     qual.Allocate(length);
@@ -50,69 +58,64 @@ void SMRTSequence::SetSubreadBoundaries(SMRTSequence &subread, DNALength &subrea
 
 void SMRTSequence::MakeSubreadAsMasked(SMRTSequence &subread, 
     DNALength subreadStart, int subreadEnd) {
-
+    subread.Free();
     //
     // This creates the entire subread, but masks out the portions
     // that do not correspond to this insert.
     //
-    subread.Copy(*this);
+    ((SMRTSequence&)subread).Copy(*this);
     SetSubreadBoundaries(subread, subreadStart, subreadEnd);
     DNALength pos;
     for (pos = 0; pos < subreadStart; pos++) { subread.seq[pos] = 'N'; }
     for (pos = subreadEnd; pos < length; pos++) { subread.seq[pos] = 'N'; }
     // This is newly allocated memory, free it on exit.
-    subread.deleteOnExit = true;
+    assert(subread.deleteOnExit);
 }
 
 void SMRTSequence::MakeSubreadAsReference(SMRTSequence &subread, 
     DNALength subreadStart, int subreadEnd) {
+    subread.Free();
     //
     // Just create a reference to a substring of this read.  
     //
+    ((FASTQSequence)subread).ReferenceSubstring(*this, subreadStart, subreadEnd - subreadStart);
     SetSubreadBoundaries(subread, subreadStart, subreadEnd);
-    subread.ReferenceSubstring(*this, subreadStart, subreadEnd - subreadStart);
     // The subread references this read, protect the memory.
-    subread.deleteOnExit = false;
+    assert(not subread.deleteOnExit);
 }
 
 void SMRTSequence::Copy(const SMRTSequence &rhs) {
-    Copy(rhs, 0, rhs.length);
+    SMRTSequence::Copy(rhs, 0, rhs.length);
 }
 
-
 void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
-    //
-    // Make sure not attempting to copy into self.
-    //
-    SMRTSequence subseq;
-    subseq.ReferenceSubstring(rhs, rhsPos, rhsLength);
-    subseq.title = rhs.title;
-    subseq.titleLength = strlen(rhs.title);
+    // Sanity check
+    CheckBeforeCopyOrReference(rhs, "SMRTSequence");
+    
+    // Free this SMRTSequence before copying anything from rhs.
+    SMRTSequence::Free();
+
+    FASTQSequence subseq; 
+    // subseq.seq is referenced, while seq.title is not, we need to call 
+    // subseq.Free() to prevent memory leak.
+    ((FASTQSequence&)subseq).ReferenceSubstring((FASTQSequence&)rhs, rhsPos, rhsLength);
+    ((FASTQSequence&)subseq).CopyTitle(rhs.title, rhs.titleLength); 
+
     if (rhs.length == 0) {
-        if (preBaseFrames != NULL) { 
-            delete[] preBaseFrames;
-            preBaseFrames = NULL;
-        }
-        if (widthInFrames != NULL) {
-            delete[] widthInFrames;
-            widthInFrames = NULL;
-        }
-        if (pulseIndex != NULL) {
-            delete[] pulseIndex;
-            pulseIndex = NULL;
-        }
         ((FASTQSequence*)this)->Copy(subseq);
         //
         // Make sure that no values of length 0 are allocated by returning here.
         //
     }
     else {
-
         assert(rhs.seq != seq);
         assert(rhsLength <= rhs.length);
         assert(rhsPos < rhs.length);
 
-        ((FASTQSequence*)this)->Copy(subseq);
+        // Copy seq, title and FASTQ QVs from subseq
+        ((FASTQSequence*)this)->Copy(subseq); 
+
+        // Copy SMRT QVs
         if (rhs.preBaseFrames != NULL) {
             preBaseFrames = new HalfWord[length];
             memcpy(preBaseFrames, rhs.preBaseFrames, length*sizeof(HalfWord));
@@ -126,11 +129,17 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
             memcpy(pulseIndex, rhs.pulseIndex, sizeof(int) * length);
         }
     }
+
+    // Copy other member variables from rhs
     subreadStart = rhs.subreadStart;
     subreadEnd   = rhs.subreadEnd;
     lowQualityPrefix = rhs.lowQualityPrefix;
     lowQualitySuffix = rhs.lowQualitySuffix;
     zmwData = rhs.zmwData;
+
+    assert(deleteOnExit); // should have control over seq and all QVs
+
+    subseq.Free();
 }
 
 void SMRTSequence::Print(ostream &out) {
@@ -140,35 +149,42 @@ void SMRTSequence::Print(ostream &out) {
 }
 
 SMRTSequence& SMRTSequence::operator=(const SMRTSequence &rhs) {
-    Copy(rhs);
+    SMRTSequence::Copy(rhs);
     return *this;
 }
 
 void SMRTSequence::Free() {
-    FASTQSequence::Free();
     if (deleteOnExit == true) {
         if (preBaseFrames)  {
             delete[] preBaseFrames;
-            preBaseFrames = NULL;
         }
         if (widthInFrames) {
             delete[] widthInFrames;
-            widthInFrames = NULL;
         }
         if (pulseIndex) {
             delete[] pulseIndex;
-            pulseIndex = NULL;
         }
         if (startFrame) {
             delete[] startFrame;
-            startFrame = NULL;
         }
         // meanSignal, maxSignal, midSignal and classifierQV
         // need to be handled separatedly.
     }
+
+    // Reset SMRT QV pointers anyway
+    preBaseFrames = NULL;
+    widthInFrames = NULL;
+    pulseIndex = NULL;
+    startFrame = NULL;
+
+    // Reset member variables
     xy[0] = 0; xy[1] = 0;
     lowQualityPrefix = lowQualitySuffix = 0;
     holeNumber = -1;
+
+    // Free seq, title and FASTQ QVs, also reset deleteOnExit.
+    // Don't call FASTQSequence::Free() before freeing SMRT QVs.
+    FASTQSequence::Free();
 }
 
 bool SMRTSequence::StoreXY(int16_t xyP[]) {

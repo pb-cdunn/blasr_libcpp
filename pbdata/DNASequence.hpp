@@ -2,7 +2,8 @@
 #define  _BLASR_DNA_SEQUENCE_HPP_
 
 #include <stdint.h>
-#include <ostream>
+#include <stdlib.h>
+#include <iostream>
 #include <string>
 #include <cassert>
 #include "NucConversion.hpp"
@@ -22,6 +23,8 @@ public:
     //--- functions ---//
     
     DNALength size();
+
+    inline void CheckBeforeCopyOrReference(const DNASequence & rhs, std::string seqType = "DNASequence"); 
 
     void TakeOwnership(DNASequence &rhs);
 
@@ -109,6 +112,19 @@ inline DNASequence::DNASequence() {
     deleteOnExit = false;
 }
 
+
+// Sanity check:
+// If this DNASequence and rhs are pointing to the same seq 
+// in memory, make sure this DNASequence's deleteOnExit is false.
+// (otherwise, seq in memory will be deleted before being copied)
+inline void DNASequence::CheckBeforeCopyOrReference(const DNASequence & rhs, std::string seqType) {
+
+    if (seq == rhs.seq and seq != NULL and deleteOnExit) {
+        std::cout << "ERROR, trying to copying a " << seqType << " to itself." << std::endl;
+        exit(1);
+    }
+}
+
 inline void DNASequence::ToThreeBit() {
     DNALength i;
     if (bitsPerNuc != 3) 
@@ -117,15 +133,17 @@ inline void DNASequence::ToThreeBit() {
 }
 
 inline void DNASequence::CopyAsRC(DNASequence &rc, DNALength pos, DNALength rcLength) {
+    // Free rc before copying any data to rc.
+    ((DNASequence&)rc).Free();
     //
-    // Different way of acocunting for position. The position is on
+    // Different way of accounting for position. The position is on
     // the rc strand, not the forward strand.
     //
     if (rcLength == 0) {
         rcLength = length - pos;
     }
     DNALength rcStart = length - (pos + rcLength);
-    rc.Resize(rcLength);
+    ((DNASequence&)rc).Resize(rcLength);
     DNALength i;
     for (i = 0; i < rcLength; i++) {
         rc.seq[i] = ReverseComplementNuc[seq[rcStart - 1 + (rcLength - i)]];
@@ -135,12 +153,11 @@ inline void DNASequence::CopyAsRC(DNASequence &rc, DNALength pos, DNALength rcLe
     rc.deleteOnExit = true;
 }
 
+
 template<typename T>
 DNALength ResizeSequence(T &dnaseq, DNALength newLength) {
     assert(newLength > 0);
-    if (dnaseq.seq != NULL) {
-        delete[] dnaseq.seq;
-    }
+    ((T&)dnaseq).Free();
     dnaseq.seq = new Nucleotide[newLength];
     dnaseq.length = newLength;
     dnaseq.deleteOnExit = true;

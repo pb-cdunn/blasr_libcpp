@@ -1,16 +1,22 @@
+#include <stdlib.h>
 #include "FASTASequence.hpp"
 
 using namespace std;
 
 FASTASequence::FASTASequence() : DNASequence() {
-    title =NULL;
+    title = NULL;
     titleLength = 0;
+    deleteTitleOnExit = false; 
+    // If deleteTitleOnExist is false, whether to delete title
+    // or not should depend on deleteOnExit; otherwise, delete title
+    // regardless of deleteOnExit.
 }
 
 void FASTASequence::PrintSeq(ostream &out, int lineLength, char delim) {
     out << delim << title <<endl;
-    ((DNASequence*)this)->PrintSeq(out, lineLength);
+    ((DNASequence*)this)->PrintSeq(out, lineLength); 
 }
+
 int FASTASequence::GetStorageSize() {
     if (!title) 
         return DNASequence::GetStorageSize();
@@ -65,29 +71,55 @@ bool FASTASequence::GetXY(int xyP[]) {
 
 
 void FASTASequence::ShallowCopy(const FASTASequence &rhs) {
-    // Be careful when using ShallowCopy(), because 
-    // title may double free. 
+    CheckBeforeCopyOrReference(rhs, "FASTASequence");
+    FASTASequence::Free();
+
+    ((DNASequence*)this)->ShallowCopy(rhs);
+
     title = rhs.title;
     titleLength = rhs.titleLength;
-    ((DNASequence*)this)->ShallowCopy(rhs);
+    deleteTitleOnExit = false;
 }
 
 string FASTASequence::GetTitle() const {
     return string(title);
 }
 
+// Delete title if this FASTASequence is under control or 
+// only title is under control.
+void FASTASequence::DeleteTitle() {
+    if (deleteOnExit or deleteTitleOnExit) {
+        if (title != NULL) {
+            delete[] title;
+        }
+    } // otherwise, title is controlled by another obj
+    title = NULL;
+    titleLength = 0;
+    deleteTitleOnExit = false;
+}
+
 void FASTASequence::CopyTitle(const char* str, int strlen) {
-    if (title != NULL) {
-        delete[] title;
+    FASTASequence::DeleteTitle();
+
+    // No segfault when str is NULL;
+    if (str == NULL) {
+        title = NULL;
+        titleLength = 0;
+    } else {
+        title = new char[strlen+1];
+        memcpy(title, str, strlen);
+        titleLength = strlen;
+        title[titleLength] = '\0';
     }
-    title = new char[strlen+1];
-    memcpy(title, str, strlen);
-    titleLength = strlen;
-    title[titleLength] = '\0';
+
+    // In some cases, (e.g., when ReferenceSubstring and CopyTitle
+    // are called together), this Sequence may only have control over
+    // title but not seq.
+    deleteTitleOnExit = true;
 }
 
 void FASTASequence::CopyTitle(string str) {
-    CopyTitle(str.c_str(), str.size());
+    FASTASequence::CopyTitle(str.c_str(), str.size());
 }
 
 void FASTASequence::GetFASTATitle(string& fastaTitle) {
@@ -102,26 +134,33 @@ void FASTASequence::GetFASTATitle(string& fastaTitle) {
     fastaTitle.assign(title, i);
 }
 
-
+// Copy rhs.seq[readStart:readEnd] to this Sequence.
 void FASTASequence::CopySubsequence(FASTASequence &rhs, int readStart, int readEnd) {
+    CheckBeforeCopyOrReference(rhs, "FASTASequence");
+    
+    // Free before copying anything 
+    FASTASequence::Free();
+
     if (readEnd == -1) {
         readEnd = rhs.length;
     }
-    else if (readEnd > readStart) {
-        seq = new Nucleotide[readEnd-readStart];
-        memcpy(seq, &rhs.seq[readStart], readEnd - readStart);
+
+    if (readEnd > readStart) {
+        length = readEnd - readStart;
+        DNASequence::Copy(rhs, readStart, length);
     }
     else {
         seq = NULL;
+        length = 0;
+        deleteOnExit = true;
     }
-    length = readEnd - readStart;
-    CopyTitle(rhs.title);
+    FASTASequence::CopyTitle(rhs.title);
 }
 
 void FASTASequence::AppendToTitle(string str) {
     int newLength = titleLength + str.size() + 1;
-    if ( newLength == 0) {
-        title = NULL;
+    if (newLength == 0) {
+        DeleteTitle();
         return;
     }
 
@@ -132,15 +171,18 @@ void FASTASequence::AppendToTitle(string str) {
     delete[] title;
     title = tmpTitle;
     titleLength = newLength;
-}
-void FASTASequence::Assign(FASTASequence &rhs) {
-    *this = rhs;
+    deleteTitleOnExit = true;
 }
 
+void FASTASequence::Assign(FASTASequence &rhs) {
+    *this = (FASTASequence&)rhs;
+}
+
+// Create a reverse complement FASTASequence of *this and assign to rhs.
 void FASTASequence::MakeRC(FASTASequence &rhs, DNALength rhsPos, DNALength rhsLength) {
     DNASequence::MakeRC((DNASequence&) rhs, rhsPos, rhsLength);
     if (title != NULL) {
-        rhs.CopyTitle(title);
+        ((FASTASequence&)rhs).CopyTitle(title);
     }
 }
 
@@ -154,21 +196,33 @@ void FASTASequence::ReverseComplementSelf() {
 }
 
 void FASTASequence::operator=(const FASTASequence &rhs) {
-    CopyTitle(rhs.title, rhs.titleLength);
+    CheckBeforeCopyOrReference(rhs, "FASTASequence");
+
+    // Free before copying anything 
+    FASTASequence::Free();
+
+    // Copy seq from rhs
     ((DNASequence*)this)->Copy((DNASequence&)rhs);
+
+    assert(deleteOnExit);
+
+    // Copy title from rhs
+    FASTASequence::CopyTitle(rhs.title, rhs.titleLength);
+
+    assert(deleteOnExit);
 }
 
 void FASTASequence::Copy(const FASTASequence &rhs) {
-    *this = rhs;
+    *this = (FASTASequence&)rhs;
 }
 
 void FASTASequence::Free() {
+    // Delete title if title is under control, reset deleteTitleOnExit.
+    FASTASequence::DeleteTitle();
+
+    // Delete seq if under control, reset deleteOnExit.
+    // Don't call Free() before calling DeleteTitle().
     DNASequence::Free();
-    if (title != NULL) {
-        delete[] title;
-        title = NULL;
-        titleLength = 0;
-    }
 }
 
 template DNALength ResizeSequence<FASTASequence>(FASTASequence &, DNALength);

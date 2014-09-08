@@ -475,6 +475,7 @@ int SDPAlign(T_QuerySequence &query, T_TargetSequence &target,
             // Do a detaied smith-waterman alignment between blocks, if this
             // is specified.  
             fragAlignment.Clear();
+            qFragment.Free();
             qFragment.ReferenceSubstring(query, chainAlignment.blocks[b].qPos + chainAlignment.blocks[b].length);
             qFragment.length = chainAlignment.blocks[b+1].qPos - 
                 (chainAlignment.blocks[b].qPos + chainAlignment.blocks[b].length);
@@ -530,7 +531,7 @@ int SDPAlign(T_QuerySequence &query, T_TargetSequence &target,
                     // the last block of the query should be aligned to the end of 
                     // the text.
                     //
-
+                    qFragment.Free();
                     qFragment.ReferenceSubstring(query, chainAlignment.blocks[lastBlock].qPos + chainAlignment.blocks[lastBlock].length,
                             query.length -  
                             (chainAlignment.blocks[lastBlock].qPos + chainAlignment.blocks[lastBlock].length));

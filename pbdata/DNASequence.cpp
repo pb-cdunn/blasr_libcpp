@@ -1,10 +1,4 @@
 #include <cassert>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ostream>
-#include <fstream>
-#include <iostream>
-#include <string>
 #include <cstring>
 #include "Types.h"
 #include "DNASequence.hpp"
@@ -14,14 +8,15 @@ DNALength DNASequence::size() {
 }
 
 void DNASequence::TakeOwnership(DNASequence &rhs) {
-    if (deleteOnExit) {
-        if (seq != NULL) {
-            delete[] seq;
-        }
-    }
+    CheckBeforeCopyOrReference(rhs);
+    // Free this DNASequence before take owner ship from rhs.
+    DNASequence::Free();
+
     seq = rhs.seq;
     length = rhs.length;
     deleteOnExit = rhs.deleteOnExit;
+
+    rhs.deleteOnExit = false;
 }
 
 void DNASequence::Append(const DNASequence &rhs, DNALength appendPos) {
@@ -73,12 +68,9 @@ void DNASequence::Append(const DNASequence &rhs, DNALength appendPos) {
 
 // Copie FROM rhs to this DNASequence. 
 DNASequence& DNASequence::Copy(const DNASequence &rhs, DNALength rhsPos, DNALength rhsLength) {
-    if (length != 0) {
-        if (seq != NULL)
-            delete[] seq;
-        seq = NULL;
-        length = 0;
-    }
+    CheckBeforeCopyOrReference(rhs);
+    // Free this DNASequence before copying from rhs
+    DNASequence::Free();
 
     //
     // When initializing a vector of DNASequence's, the copy
@@ -90,6 +82,9 @@ DNASequence& DNASequence::Copy(const DNASequence &rhs, DNALength rhsPos, DNALeng
     // work.
     //
     if (rhs.length == 0) {
+        seq = NULL;
+        length = 0;
+        deleteOnExit = true;
         return *this;
     }
 
@@ -99,10 +94,9 @@ DNASequence& DNASequence::Copy(const DNASequence &rhs, DNALength rhsPos, DNALeng
     // In case rhsLength + rhsPos > ULONG_MAX (4294967295), check 
     // both rhsLength and rhsPos, fix bug 21794
     //
-
     if (not (rhsLength <= rhs.length     && 
-                rhsPos    <= rhs.length + 1 &&
-                rhsLength + rhsPos <= rhs.length + 2 )) {
+             rhsPos    <= rhs.length + 1 &&
+             rhsLength + rhsPos <= rhs.length + 2 )) {
         std::cout << "ERROR.  The subsequence to copy is out of bounds." 
             << std::endl
             << "        Failed to copy a subsequence starting at " << rhsPos 
@@ -139,7 +133,7 @@ int DNASequence::GetStorageSize() {
 }
 
 DNASequence &DNASequence::operator=(const DNASequence &rhs){ 
-    Copy(rhs);
+    DNASequence::Copy(rhs);
     return *this;
 }
 
@@ -175,20 +169,24 @@ void DNASequence::PrintSeq(std::ostream &out, int lineLength) {
 }
 
 void DNASequence::Allocate(DNALength plength) {
-    if (seq != NULL) {
-        delete[] seq;
-    }
+    DNASequence::Free();
+
     seq = new Nucleotide [plength];
     length = plength;
     deleteOnExit = true;
 }
 
 void DNASequence::ReferenceSubstring(const DNASequence &rhs, DNALength pos, int substrLength) {
+    CheckBeforeCopyOrReference(rhs); 
+
+    // Free this DNASequence before referencing rhs.
+    DNASequence::Free();
+
     //
     // This makes a reference therefore it should not be deleted.
     //
     assert(pos >= 0 && pos <= rhs.length &&
-            substrLength >= 0 && substrLength <= rhs.length);
+           substrLength >= 0 && substrLength <= rhs.length);
     if (substrLength == 0) {
         substrLength = rhs.length - pos;
     }
@@ -202,13 +200,13 @@ DNALength DNASequence::MakeRCCoordinate(DNALength forPos ) {
     return length - forPos - 1;
 }
 
-
+// Create a reverse complement DNAsequence of this DNASequence and assign to rc.
 void DNASequence::MakeRC(DNASequence &rc, DNALength pos, DNALength rcLength) {
     if (rcLength == 0) {
         rcLength = length - pos;
     }
 
-    rc.Allocate(rcLength);
+    ((DNASequence&)rc).Allocate(rcLength);
     DNALength i;
     for (i = 0; i < rcLength; i++) {
         rc.seq[rcLength - i - 1] = ReverseComplementNuc[seq[i+pos]];
@@ -249,12 +247,12 @@ void DNASequence::ToAscii() {
     }
 }
 
+// Copy rhs[start:start+plength] to this DNASequence.
 void DNASequence::Assign(DNASequence &ref, DNALength start, DNALength plength) {
-    if (seq != NULL) {
-        delete[] seq;
-        seq = NULL;
-        length = 0;
-    }
+    CheckBeforeCopyOrReference(ref);
+    // Free this DNASequence before assigning anything
+    DNASequence::Free();
+    
     if (plength) {
         length = plength;
         seq = new Nucleotide[length];
@@ -266,7 +264,7 @@ void DNASequence::Assign(DNASequence &ref, DNALength start, DNALength plength) {
         memcpy(seq, &ref.seq[start], length);
     }
     else {
-        this->Copy(ref);
+        ((DNASequence*)this)->Copy(ref);
     }
     deleteOnExit = true;
 }
@@ -295,7 +293,7 @@ void DNASequence::Concatenate(const Nucleotide *moreSeq, DNALength moreSeqLength
         delete[] prev;
     }
     memcpy((Nucleotide*) &seq[prevLength], moreSeq, moreSeqLength);
-
+    deleteOnExit = true;
 }
 
 std::string DNASequence::GetTitle() const {
@@ -361,27 +359,32 @@ void DNASequence::CleanupOnFree() {
 
 void DNASequence::FreeIfControlled() {
     if (deleteOnExit) {
-        Free();
+        DNASequence::Free();
     }
 }
 
 void DNASequence::Free() {
-    if (deleteOnExit == false) { return; }
-    if (seq != NULL) {
-        delete[] seq;
-        seq = NULL;
-        length = 0;
-    }
+    if (deleteOnExit == true) {
+        // if has control, delete seq 
+        // Otherwise, seq in memory is controlled by another object, 
+        // and will be deleted later.
+        if (seq != NULL) {
+            delete[] seq;
+        }
+    } 
+    // Reset seq, length and deleteOnExit
+    seq = NULL;
+    length = 0;
+    deleteOnExit = false;
 }
+
 void DNASequence::Resize(DNALength newLength) {
-    if (seq != NULL) {
-        delete[] seq;
-    }
-    seq = new  Nucleotide[newLength];
+    DNASequence::Free();
+    seq = new Nucleotide[newLength];
     length = newLength;
     deleteOnExit = true;
 }
+
 DNALength DNASequence::GetSeqStorage() {
     return length;
 }
-

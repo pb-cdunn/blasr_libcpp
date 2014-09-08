@@ -16,6 +16,12 @@
 //
 // NO proteins for now.
 class FASTASequence : public DNASequence {
+private:
+    // Whether or not to delete title in Free() 
+    // regardless of deleteOnExit (to prevent memory leak
+    // when ReferenceSubstring and CopyTitle are called together).
+    bool deleteTitleOnExit; 
+
 public:
     char *title;
     int titleLength;
@@ -41,6 +47,8 @@ public:
     void ShallowCopy(const FASTASequence &rhs); 
 
     std::string GetTitle() const; 
+
+    void DeleteTitle();
 
     void CopyTitle(const char* str, int strlen); 
 

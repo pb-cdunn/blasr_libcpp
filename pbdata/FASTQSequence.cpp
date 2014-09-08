@@ -160,19 +160,28 @@ QualityValue FASTQSequence::GetPreBaseDeletionQV(DNALength pos, Nucleotide nuc) 
 }
 
 void FASTQSequence::ShallowCopy(const FASTQSequence &rhs) {
+    CheckBeforeCopyOrReference(rhs, "FASTQSequence");
+    FASTQSequence::Free();
+
     qual.ShallowCopy(rhs.qual);
     FASTASequence::ShallowCopy(rhs);
 }
 
 void FASTQSequence::ReferenceSubstring(const FASTQSequence &rhs) {
-    ReferenceSubstring(rhs, 0, rhs.length);
+    FASTQSequence::ReferenceSubstring(rhs, 0, rhs.length);
 }
 
 void FASTQSequence::ReferenceSubstring(const FASTQSequence &rhs, DNALength pos) {
-    ReferenceSubstring(rhs, pos, rhs.length - pos);
+    FASTQSequence::ReferenceSubstring(rhs, pos, rhs.length - pos);
 }
 
 void FASTQSequence::ReferenceSubstring(const FASTQSequence &rhs, DNALength pos, DNALength substrLength) {
+    // Sanity check.
+    CheckBeforeCopyOrReference(rhs, "FASTQSequence");
+
+    // Free this FASTQSequence before referencing rhs.
+    FASTQSequence::Free();
+
     SetQVScale(rhs.qvScale);
     if (substrLength == 0) {
         substrLength = rhs.length - pos;
@@ -214,7 +223,12 @@ void FASTQSequence::ClearAndNull(QualityValue *value) {
     }
     value = NULL;
 }
+
 void FASTQSequence::CopyQualityValues(const FASTQSequence &rhs) {
+    // Make sure QVs and seq are all under control, if seq is referenced
+    // while QVs are copied, memory leak can happen. 
+    assert(deleteOnExit);
+
     SetQVScale(rhs.qvScale);
     qual.Copy(rhs.qual, rhs.length);
     deletionQV.Copy(rhs.deletionQV, rhs.length);
@@ -286,27 +300,38 @@ void FASTQSequence::AllocateRichQualityValues(DNALength qualLength) {
 }
 
 void FASTQSequence::Copy(const FASTQSequence &rhs) {
-    FASTASequence::Copy(rhs);
-    CopyQualityValues(rhs);
+    CheckBeforeCopyOrReference(rhs, "FASTQSequence");
+
+    // Free *this before copying anything.
+    FASTQSequence::Free();
+
+    // Copy FASTASequence from rhs, including seq and title
+    FASTASequence::Copy(rhs); 
+
+    assert(deleteOnExit);
+
+    // Copy Quality values from rhs.
+    FASTQSequence::CopyQualityValues(rhs);
 }
 
 FASTQSequence& FASTQSequence::operator=(const FASTQSequence &rhs) {
-    this->Copy(rhs);
+    ((FASTQSequence*)this)->Copy(rhs);
     return *this;
 }
 
 FASTQSequence::FASTQSequence(const FASTQSequence &rhs) {
-    substitutionTag = NULL;
-    deletionTag = NULL;
-    this->Copy(rhs);
+    ((FASTQSequence*)this)->Copy(rhs);
 }
 
+// Copy rhs to this, including seq, title and QVs.
 void FASTQSequence::Assign(FASTQSequence &rhs) {
+    CheckBeforeCopyOrReference(rhs);
+    FASTQSequence::Free();
+
     // copy the nucleotide part
     FASTASequence::Assign(rhs);
-    // copy the qual part
-    CopyQualityValues(rhs);
-    SetQVScale(rhs.qvScale);
+    // copy the qual part, qual scal is set in CopyQualityValues
+    FASTQSequence::CopyQualityValues(rhs);
 }
 
 void FASTQSequence::PrintFastq(ostream &out, int lineLength) {
@@ -412,6 +437,7 @@ void FASTQSequence::PrintQualSeq(ostream &out, int lineLength) {
     PrintQual(out, lineLength);
 }
 
+// Create a reverse complement FASTQSequence of *this and assign to rhs.
 void FASTQSequence::MakeRC(FASTQSequence &rc) {
     rc.SetQVScale(qvScale);
     FASTASequence::MakeRC(rc);
@@ -423,7 +449,7 @@ void FASTQSequence::MakeRC(FASTQSequence &rc) {
     if (rc.qual.Empty() == false) {
         rc.qual.Free();
     }
-    rc.AllocateQualitySpace(length);
+    ((FASTQSequence&)rc).AllocateQualitySpace(length);
     int i;
     for (i = 0; i < length; i++ ){
         rc.qual.data[length - i - 1] = qual[i];
@@ -433,7 +459,7 @@ void FASTQSequence::MakeRC(FASTQSequence &rc) {
         //
         // The read contains rich quality values. Reverse them here.
         //
-        rc.AllocateRichQualityValues(length);
+        ((FASTQSequence&)rc).AllocateRichQualityValues(length);
         DNALength pos;
 
         for (pos = 0; pos < length; pos++) {
@@ -464,12 +490,9 @@ void FASTQSequence::MakeRC(FASTQSequence &rc) {
     preBaseDeletionQVPrior = rc.preBaseDeletionQVPrior;
 }
 
-
-
 void FASTQSequence::Free() {
-    FASTASequence::Free();
-    if (deleteOnExit == true) {
-       qual.Free();
+    if (deleteOnExit == true) { // Free Quality Values if under control
+        qual.Free();
         deletionQV.Free();
         preBaseDeletionQV.Free();
         insertionQV.Free();
@@ -477,13 +500,18 @@ void FASTQSequence::Free() {
         mergeQV.Free();
         if (deletionTag != NULL) {
             delete[] deletionTag;
-            deletionTag = NULL;
         }
         if (substitutionTag != NULL) {
             delete[] substitutionTag;
-            substitutionTag = NULL;
         }
     }
+    //Reset deletionTag and substitionTag anyway
+    deletionTag = NULL;
+    substitutionTag = NULL;
+
+    // Free seq and title, reset deleteOnExit. 
+    // Don't call FASTASequence::Free before freeing QVs.
+    FASTASequence::Free();
 }
 
 void FASTQSequence::LowerCaseMask(int qThreshold) {
