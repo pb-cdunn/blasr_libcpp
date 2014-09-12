@@ -2,7 +2,7 @@
 #define _BLASR_REGION_UTILS_HPP_
 
 #include <algorithm>
-#include <math>
+#include <cmath>
 #include "SMRTSequence.hpp"
 #include "statistics/StatUtils.hpp"
 #include "reads/ReadInterval.hpp"
