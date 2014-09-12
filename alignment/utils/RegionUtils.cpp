@@ -155,38 +155,108 @@ int GetHighQualitySubreadsIntervals(
     return ret;
 }
 
-// Given a vector of subreads and a vector of adapters, return
-// index of the (left-most) longest subread which has both
-// adapters before & after itself.
-int GetLongestFullSubreadIndex(
-    std::vector<ReadInterval> & subreadIntervals,
-    std::vector<ReadInterval> & adapterIntervals) {
 
-  int longestLength = 0;
-  int index = -1; // Index of the longest fullpass subread.
-  for(int i = 0; i < subreadIntervals.size(); i++) {
-    ReadInterval & subread = subreadIntervals[i];
-    bool ladapter = false, radapter = false;
-    for(int j = 0; j < adapterIntervals.size(); j++) {
-      ReadInterval & adapter = adapterIntervals[j];
-      if (abs(subread.start - adapter.end) < 10) {
-          ladapter = true;
-      } else if(abs(subread.end - adapter.start) < 10) {
-          radapter = true;
-      }
-      if (ladapter && radapter) {
-        if (longestLength < subread.end - subread.start) {
-          longestLength = subread.end - subread.start;
-          index = i;
-        } else {
-          break;
+// Given a vector of subreads and a vector of adapters, return 
+// indices of all fullpass subreads in the input subreads vector.
+std::vector<int> 
+GetFullPassSubreadIndices(std::vector<ReadInterval> & subreadIntervals,
+                          std::vector<ReadInterval> & adapterIntervals) {
+    std::vector<int> indices; // Indices of fullpass subread.
+    for(int i = 0; i < subreadIntervals.size(); i++) {
+        ReadInterval & subread = subreadIntervals[i];
+        bool ladapter = false, radapter = false;
+        for(int j = 0; j < adapterIntervals.size(); j++) {
+            ReadInterval & adapter = adapterIntervals[j];
+            if (abs(subread.start - adapter.end) < 10) {
+                ladapter = true;
+            } else if(abs(subread.end - adapter.start) < 10) {
+                radapter = true;
+            }
+            if (ladapter && radapter) {
+                indices.push_back(i);
+                break;
+            }
         }
-      }
     }
-  }
-  return index;
+    return indices;
 }
 
+
+// Given a vector of subreads and a vector of adapters, return
+// index of the (left-most) longest subread which has both
+// adapters before & after itself. If no full-pass subread available, 
+// return -1;
+int GetLongestFullSubreadIndex(std::vector<ReadInterval> & subreadIntervals,
+                               std::vector<ReadInterval> & adapterIntervals) {
+    int longestLength = 0;
+    int index = -1;
+    std::vector<int> indices = GetFullPassSubreadIndices(subreadIntervals, adapterIntervals);
+    for (int i = 0; i < indices.size(); i++) {
+        ReadInterval & subread = subreadIntervals[indices[i]];
+        if (longestLength < (subread.end - subread.start)) {
+            longestLength = subread.end - subread.start;
+            index = indices[i];
+        }
+    }
+    return index;
+}
+
+// Given a vector of subreads and a vector of adapters, return
+// index of the typical fullpass subread which can represent subreads
+// of this zmw.
+// * if there is no fullpass subread, return -1;
+// * if number of fullpass subreads is less than 4, return index of the 
+//   left-most longest subread
+// * if number of fullpass subreads is greater than or equal 4, 
+//   * if length of the longest read does not exceed 
+//      meanLength + 1.96 * deviationLength
+//     then, return index of the longest left-most subread 
+//   * otherwise, return index of the second longest left-most subread
+int GetTypicalFullSubreadIndex(std::vector<ReadInterval> & subreadIntervals,
+                               std::vector<ReadInterval> & adapterIntervals) {
+
+    std::vector<int> indices = GetFullPassSubreadIndices(subreadIntervals, adapterIntervals);
+
+    if (indices.size() == 0) {
+        return -1; // No fullpass subread in this zmw.
+    }
+
+    std::vector<int> lengths;
+    int longestLength = 0, secondLongestLength = 0;
+    int longestIndex = -1, secondLongestIndex = -1;
+    bool setLongest = false;
+    for(int i = 0; i < indices.size(); i++) {
+        ReadInterval & subread = subreadIntervals[indices[i]];
+        int curLength = subread.end - subread.start;
+        lengths.push_back(curLength);
+        if (longestLength < curLength) {
+            // Keep indices of the longest and second longest subreads.
+            if (setLongest) {
+                secondLongestLength = longestLength;
+                secondLongestIndex = longestIndex;
+            }
+            longestLength = curLength;
+            longestIndex = indices[i];
+            setLongest = true;
+        }
+    }
+
+    if (indices.size() < 4) { 
+        // very few fullpass subreads, use the longest subread anyway.
+        return longestIndex; 
+    } else { 
+        // if length of the longest falls out of 95% CI of all other 
+        // fullpass subreads, use the second longest. 
+        sort(lengths.begin(), lengths.end());
+        float meanLength, varLength;
+        MeanVar(lengths, meanLength, varLength);
+        if (longestLength  > meanLength + 1.96 * sqrt(varLength)) {
+            return secondLongestIndex;
+        } else {
+            return longestIndex;
+        }
+    }
+}
 
 // Create a vector of n directions consisting of interleaved 0 and 1s.
 void CreateDirections(std::vector<int> & directions, const int & n) {
