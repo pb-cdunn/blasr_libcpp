@@ -14,6 +14,7 @@ sources := $(wildcard algorithms/alignment/*.cpp) \
 		   $(wildcard datastructures/alignmentset/*.cpp) \
 		   $(wildcard datastructures/anchoring/*.cpp) \
 		   $(wildcard datastructures/tuplelists/*.cpp) \
+		   $(wildcard suffixarray/*.cpp) \
 		   $(wildcard qvs/*.cpp) \
 		   $(wildcard statistics/*.cpp) \
 		   $(wildcard tuples/*.cpp) \
