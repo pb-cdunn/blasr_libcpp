@@ -5,6 +5,7 @@
 #include <string>
 #include <errno.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/mman.h>
 
 template<typename T_Data>
