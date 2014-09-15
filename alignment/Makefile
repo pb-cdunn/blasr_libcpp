@@ -21,7 +21,8 @@ sources := $(wildcard algorithms/alignment/*.cpp) \
 		   $(wildcard utils/*.cpp) \
 		   $(wildcard files/*.cpp) \
 		   $(wildcard format/*.cpp) \
-		   $(wildcard *.cpp) \
+		   $(wildcard simulator/*.cpp) \
+		   $(wildcard *.cpp) 
 
 ifdef nohdf
 sources := $(filter-out files/% utils/FileOfFileNames.cpp, $(sources))
