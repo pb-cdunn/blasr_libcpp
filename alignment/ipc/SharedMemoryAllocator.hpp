@@ -2,12 +2,13 @@
 #define _BLASR_SHARED_MEMORY_ALLOCATOR_HPP_
 
 #include <iostream>
+#include <string>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 
 template<typename T_Data>
-int AllocateMappedShare(string &handle, int dataLength, T_Data *&dataPtr, int &shmId) {
+int AllocateMappedShare(std::string &handle, int dataLength, T_Data *&dataPtr, int &shmId) {
     std::cout << "opening shm" << std::endl;
     shmId = shm_open(handle.c_str(), O_CREAT| O_RDWR, S_IRUSR | S_IWUSR);
     if (ftruncate(shmId, sizeof(T_Data[dataLength])) == -1) {

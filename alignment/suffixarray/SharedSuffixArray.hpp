@@ -2,6 +2,7 @@
 #define _BLASR_SHARED_SUFFIX_ARRAY_HPP_
 
 #include <stdlib.h>
+#include <fstream>
 #include <sstream>
 #include "SuffixArray.hpp"
 #include "ipc/SharedMemoryAllocator.hpp"
@@ -26,13 +27,13 @@ public:
     int lookupPrefixLength;
 
     void InitShmIdTag() {
-        stringstream tagStrm;
+        std::stringstream tagStrm;
         tagStrm << "_" << getpid();
         shmIdTag = tagStrm.str();
     }
 
 
-    void ReadSharedArray(ifstream &saIn) {
+    void ReadSharedArray(std::ifstream &saIn) {
         std::cout << "reading a shared suffix array index." << std::endl;
         saIn.read((char*) &this->length, sizeof(int));
         indexHandle = "suffixarray.index." + shmIdTag;
@@ -43,7 +44,7 @@ public:
         this->ReadAllocatedArray(saIn);
     }
 
-    void ReadSharedLookupTable(ifstream &saIn) {
+    void ReadSharedLookupTable(std::ifstream &saIn) {
         this->ReadLookupTableLengths(saIn);
         lookupTableHandle = "suffixarray.lookuptable." + shmIdTag;
         AllocateMappedShare(lookupTableHandle, this->lookupTableLength + 1, lookupTableShared, lookupTableID);
@@ -51,10 +52,10 @@ public:
         this->ReadAllocatedLookupTable(saIn);
     }
 
-    void ReadShared(string &inFileName) {
-        ifstream saIn;
+    void ReadShared(std::string &inFileName) {
+        std::ifstream saIn;
         InitShmIdTag();
-        saIn.open(inFileName.c_str(), ios::binary);
+        saIn.open(inFileName.c_str(), std::ios::binary);
         this->ReadComponentList(saIn);
         if (this->componentList[SuffixArray<T,Sigma,Compare,Tuple>::CompArray]) {
             this->ReadSharedArray(saIn);
