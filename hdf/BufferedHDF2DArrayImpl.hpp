@@ -53,7 +53,7 @@ BufferedHDF2DArray<T>::~BufferedHDF2DArray() {
  */
 template<typename T>
 int BufferedHDF2DArray<T>::Initialize(HDFGroup &group, std::string datasetName,
-    int _rowLength, int _bufferSize, bool createIfMissing) {
+    unsigned int _rowLength, int _bufferSize, bool createIfMissing) {
 
     bool groupContainsDataset = group.ContainsObject(datasetName);
     if (groupContainsDataset == false) {
@@ -160,10 +160,10 @@ void BufferedHDF2DArray<T>::Read(int startX, int endX, int startY, int endY, H5:
 }
 
 template<typename T>
-void BufferedHDF2DArray<T>::Create(H5::CommonFG *_container, string _datasetName, int _rowLength) {
+void BufferedHDF2DArray<T>::Create(H5::CommonFG *_container, string _datasetName, unsigned int _rowLength) {
     container   = _container;
     datasetName = _datasetName;
-    rowLength   = _rowLength;
+    rowLength   = (unsigned int)_rowLength;
     //
     // Make life easy if the buffer is too small to fit a row --
     // resize it so that rows may be copied and written out in an
@@ -180,8 +180,8 @@ void BufferedHDF2DArray<T>::Create(H5::CommonFG *_container, string _datasetName
         this->bufferSize = rowLength;
     }
 
-    hsize_t dataSize[2]    = {0, rowLength};
-    hsize_t maxDataSize[2] = {H5S_UNLIMITED, rowLength};
+    hsize_t dataSize[2]    = {0, hsize_t(rowLength)};
+    hsize_t maxDataSize[2] = {H5S_UNLIMITED, hsize_t(rowLength)};
     H5::DataSpace fileSpace(2, dataSize, maxDataSize);
     H5::DSetCreatPropList cparms;
 
@@ -192,7 +192,7 @@ void BufferedHDF2DArray<T>::Create(H5::CommonFG *_container, string _datasetName
      * docuemntation was written for people who enjoy learning how to
      * use an API by reading comments in source code.
      */
-    hsize_t chunkDims[2] = {16384, rowLength};
+    hsize_t chunkDims[2] = {16384, hsize_t(rowLength)};
     cparms.setChunk( 2, chunkDims );
     TypedCreate(fileSpace, cparms);
     fileSpace.close();

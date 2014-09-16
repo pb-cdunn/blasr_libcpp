@@ -237,8 +237,8 @@ public:
             }
             endPosTable[curPrefix.tuple] = indexPos;
         }
-        while (indexPos < targetLength - lookupPrefixLength + 1 and 
-                curPrefix.tuple < lookupTableLength-1);
+        while ((indexPos < targetLength - lookupPrefixLength + 1) and 
+               (uint32_t(curPrefix.tuple) < uint32_t(lookupTableLength - 1)));
     }
 
     void AllocateSuffixArray(SAIndexLength stringLength) {

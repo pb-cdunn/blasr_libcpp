@@ -67,7 +67,7 @@ public:
      * required.  The assumption is that the dataspace is in two
      * dimensions, and this exits without grace if it is not. 
      */
-    int Initialize(HDFGroup &group, std::string datasetName, int _rowLength=0, 
+    int Initialize(HDFGroup &group, std::string datasetName, unsigned int _rowLength=0, 
         int _bufferSize=0, bool createIfMissing=true); 
 
     int size(); 
@@ -89,7 +89,7 @@ public:
     void Read(int startX, int endX, int startY, int endY, H5::DataType typeID, 
         T *dest); 
 
-    void Create(H5::CommonFG *_container, std::string _datasetName, int _rowLength); 
+    void Create(H5::CommonFG *_container, std::string _datasetName, unsigned int _rowLength); 
 
     void TypedCreate(H5::DataSpace &fileSpace, H5::DSetCreatPropList &cparms); 
     
