@@ -24,6 +24,8 @@ class PulseFile : public PulseBaseCommon {
     std::vector<int>      pulseStartPositions;
     std::vector<float>    classifierQV;
 
+    PulseFile(){numFrames = 0; platformId = Springfield;}
+
     void CopySignal(HalfWord *signalData, // either a vector or matrix
                     int signalNDims,
                     int pulseStartPos,    // 0 if baseToPulseIndex maps to abs position
