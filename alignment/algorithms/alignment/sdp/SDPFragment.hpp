@@ -64,21 +64,37 @@ inline Fragment::Fragment() {
 }
 
 inline int Fragment::LessThanXY(const Fragment &f) const {
+    if (x == f.x) {
+        if (y == f.y) {
+            if (length == f.length) return 0;
+            else return length < f.length;
+        } else return y < f.y;
+    } else return x < f.x;
+    /*
     if (x < f.x)
         return 1;
     else if (x == f.x) 
         return y < f.y;
     else 
         return 0;
+    */
 }
 
 inline int Fragment::LessThanYX(const Fragment &f) const {
+    if (y == f.y) {
+        if (x == f.x) {
+            if (length == f.length) return 0;
+            else return length < f.length;
+        } else return x < f.x;
+    } else return y < f.y;
+    /*
     if (y < f.y)
         return 1;
     else if (y == f.y) 
         return x < f.x;
     else 
-        return 0;
+        return 0; 
+    */
 }
 
 inline Fragment& Fragment::operator=(const Fragment &rhs) {
