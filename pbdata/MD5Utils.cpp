@@ -104,25 +104,19 @@ void MD5::update (uint1 *input, uint4 input_length) {
 }
 
 
-
 // MD5 update for files.
 // Like above, except that it works on files (and uses above as a primitive.)
 
 void MD5::update(FILE *file){
 
-  unsigned char buffer[1024];
-  int len;
+    unsigned char buffer[1024];
+    int len = 0;
 
-  while (len=fread(buffer, 1, 1024, file))
-    update(buffer, len);
+    while ( (len=fread(buffer, 1, 1024, file) and len != 0))
+        update(buffer, len);
 
-  fclose (file);
-
+    fclose (file);
 }
-
-
-
-
 
 
 // MD5 update for istreams.

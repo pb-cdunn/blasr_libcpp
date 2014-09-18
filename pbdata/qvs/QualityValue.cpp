@@ -1,7 +1,7 @@
 #include <math.h>
 #include "defs.h"
+#include <assert.h>
 #include "QualityValue.hpp"
-//#include "../utils/ChangeListID.h"
 
 QualityValue 
 ProbabilityToQualityValue(QualityProbability pErr, QVScale qvScale) {
@@ -13,6 +13,8 @@ ProbabilityToQualityValue(QualityProbability pErr, QVScale qvScale) {
     }
     else if (qvScale == PHRED) {
         return -10*log10(pErr);
+    } else {
+        assert(false);
     }
 }
 
@@ -45,6 +47,8 @@ QualityValueToProbability(QualityValue qv, QVScale qvScale) {
     }
     else if (qvScale == PHRED) {
         return pow(10, qv/-10.0);
+    } else {
+        assert(false);
     }
 }
 

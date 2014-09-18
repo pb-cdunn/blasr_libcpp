@@ -29,7 +29,7 @@ libpbdata.a: libpbdata.a($(objects))
 	$(AR) $(ARFLAGS)s $@ $%
 
 %.o: %.cpp
-	$(CXX) $(GCCOPTS) $(CXXOPTS) $(INCLUDE) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -o $@ $<
+	$(CXX) $(GCCOPTS) $(CXXOPTS) $(INCLUDE) -MF "$(@:%.o=%.d)" -MT "$(@:%.o=%.o) $(@:%.o=%.d)" -o $@ $<
 
 .INTERMEDIATE: $(objects)
 

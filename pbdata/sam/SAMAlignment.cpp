@@ -108,8 +108,8 @@ bool SAMAlignment::StoreValues(std::string &line,  int lineNumber) {
   }
 
   if (parseError) {
-    cout << "Error parsing alignment line " << lineNumber << ". Missing or error in field " << SAMAlignmentRequiredFieldNames[field] << endl;
-    exit(1);
+      std::cout << "Error parsing alignment line " << lineNumber << ". Missing or error in field " << SAMAlignmentRequiredFieldNames[field] << std::endl;
+      exit(1);
   }
   
   //
@@ -173,8 +173,10 @@ bool SAMAlignment::StoreValues(std::string &line,  int lineNumber) {
     }
     else {
       std::cout << "ERROR. Could not parse typed keyword value " << typedKVPair << std::endl;
+      exit(0);
     }
   }
+  return true;
 }
 
 void SAMAlignment::CopyQVs(std::vector<std::string> *optionalQVs) {  

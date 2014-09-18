@@ -19,7 +19,7 @@ int RegionAnnotation::GetHoleNumber() {
     return row[HoleNumber];
 }
 
-int RegionAnnotation::SetHoleNumber(int holeNumber) {
+void RegionAnnotation::SetHoleNumber(int holeNumber) {
     row[HoleNumber] = holeNumber;
 }
 
@@ -27,7 +27,7 @@ int RegionAnnotation::GetType() {
     return row[RegionType];
 }
 
-int RegionAnnotation::SetType(int regionType) {
+void RegionAnnotation::SetType(int regionType) {
     row[RegionType] = regionType;
 }
 
@@ -109,10 +109,10 @@ int RegionTable::GetHoleNumber(int regionIndex) {
     return table[regionIndex].GetHoleNumber();
 }
 
-int RegionTable::SetHoleNumber(int regionIndex, int holeNumber) {
+void RegionTable::SetHoleNumber(int regionIndex, int holeNumber) {
     assert(regionIndex < table.size());
     assert(regionIndex >= 0);
-    return table[regionIndex].SetHoleNumber(holeNumber);
+    table[regionIndex].SetHoleNumber(holeNumber);
 }
 
 int RegionTable::GetScore(int regionIndex) {
@@ -121,10 +121,10 @@ int RegionTable::GetScore(int regionIndex) {
     return table[regionIndex].row[RegionAnnotation::RegionScore];
 }
 
-int RegionTable::SetScore(int regionIndex, int score) {
+void RegionTable::SetScore(int regionIndex, int score) {
     assert(regionIndex < table.size());
     assert(regionIndex >= 0);
-    return table[regionIndex].row[RegionAnnotation::RegionScore] = score;
+    table[regionIndex].row[RegionAnnotation::RegionScore] = score;
 }
 
 void RegionTable::SortTableByHoleNumber() {

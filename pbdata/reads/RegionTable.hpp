@@ -21,11 +21,11 @@ public:
 
     int GetHoleNumber(); 
 
-    int SetHoleNumber(int holeNumber); 
+    void SetHoleNumber(int holeNumber); 
 
     int GetType(); 
 
-    int SetType(int regionType); 
+    void SetType(int regionType); 
 
     int GetStart(); 
 
@@ -73,11 +73,11 @@ public:
 
     int GetHoleNumber(int regionIndex); 
 
-    int SetHoleNumber(int regionIndex, int holeNumber); 
+    void SetHoleNumber(int regionIndex, int holeNumber); 
 
     int GetScore(int regionIndex); 
 
-    int SetScore(int regionIndex, int score); 
+    void SetScore(int regionIndex, int score); 
 
     void SortTableByHoleNumber(); 
 

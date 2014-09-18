@@ -350,7 +350,9 @@ int FASTAReader::CriticalGetNext(FASTASequence &seq) {
         cout << "Could not read a sequence." << endl;
         exit(1);
     }
+    return 1;
 }
+
 int FASTAReader::ConcatenateNext(FASTASequence &cur) {
     FASTASequence next;
     int retVal;	
