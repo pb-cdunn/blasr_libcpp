@@ -33,6 +33,7 @@ public:
     unsigned int *startFrame;
     int *pulseIndex;
     DNALength lowQualityPrefix, lowQualitySuffix;
+    int highQualityRegionScore; // High quality region score in region table.
 
     void SetNull(); 
 

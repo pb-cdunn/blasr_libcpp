@@ -73,8 +73,7 @@ void CollectAdapterIntervals(T_Sequence &read, RegionTable *regionTablePtr,
 // Given a vecotr of ReadInterval objects and their corresponding 
 // directions, intersect each object with an interval 
 // [hqStart, hqEnd), if there is no intersection or the intersected
-// interval is less than minIntervalLength, or raw subread score
-// is less than minRawSubreadScore, remove this object and
+// interval is less than minIntervalLength, remove this object and
 // their corresponding directions; otherwise, replace this object 
 // with the intersected interval and keep their directions. 
 // Return index of the (left-most) longest subread interval in the
@@ -82,8 +81,7 @@ void CollectAdapterIntervals(T_Sequence &read, RegionTable *regionTablePtr,
 int GetHighQualitySubreadsIntervals(
     std::vector<ReadInterval> & subreadIntervals, 
     std::vector<int> & subreadDirections, 
-    int hqStart, int hqEnd, int minIntervalLength = 0, 
-    int minRawSubreadScore = 0);
+    int hqStart, int hqEnd, int minIntervalLength = 0); 
 
 // Given a vector of subreads and a vector of adapters, return
 // indices of all full-pass subreads.

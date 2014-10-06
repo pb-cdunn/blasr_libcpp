@@ -15,6 +15,7 @@ void SMRTSequence::SetNull() {
     platform     = NoPlatform;
     // By default, allow the entire read.
     lowQualityPrefix = lowQualitySuffix = 0;
+    highQualityRegionScore = 0;
 }
 
 SMRTSequence::SMRTSequence() : FASTQSequence() {
@@ -135,6 +136,7 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
     subreadEnd   = rhs.subreadEnd;
     lowQualityPrefix = rhs.lowQualityPrefix;
     lowQualitySuffix = rhs.lowQualitySuffix;
+    highQualityRegionScore = rhs.highQualityRegionScore;
     zmwData = rhs.zmwData;
 
     assert(deleteOnExit); // should have control over seq and all QVs
@@ -180,6 +182,7 @@ void SMRTSequence::Free() {
     // Reset member variables
     xy[0] = 0; xy[1] = 0;
     lowQualityPrefix = lowQualitySuffix = 0;
+    highQualityRegionScore = 0;
     holeNumber = -1;
 
     // Free seq, title and FASTQ QVs, also reset deleteOnExit.

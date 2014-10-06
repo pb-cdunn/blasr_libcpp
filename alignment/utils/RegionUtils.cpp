@@ -113,8 +113,7 @@ int CollectRegionIndices(SMRTSequence &read, RegionTable &regionTable,
 // Given a vecotr of ReadInterval objects and their corresponding 
 // directions, intersect each object with an interval 
 // [hqStart, hqEnd), if there is no intersection or the intersected
-// interval is less than minIntervalLength, or the raw subread score
-// is less than minRawSubreadScore remove this object and
+// interval is less than minIntervalLength, remove this object and
 // their corresponding directions; otherwise, replace this object 
 // with the intersected interval and keep their directions. 
 // Return index of the (left-most) longest subread interval in the
@@ -122,8 +121,7 @@ int CollectRegionIndices(SMRTSequence &read, RegionTable &regionTable,
 int GetHighQualitySubreadsIntervals(
     std::vector<ReadInterval> & subreadIntervals, 
     std::vector<int> & subreadDirections, 
-    int hqStart, int hqEnd, int minIntervalLength,
-    int minRawSubreadScore) {
+    int hqStart, int hqEnd, int minIntervalLength) {
 
    // Avoid using vector.erase() when possible, as it is slow.
     int ret = -1;
@@ -145,8 +143,7 @@ int GetHighQualitySubreadsIntervals(
         if (thisStart < hqEnd   and thisEnd > hqEnd  ) {
             thisEnd   = hqEnd;
         }
-        if (thisEnd - thisStart >= minIntervalLength and 
-            thisScore >= minRawSubreadScore) {
+        if (thisEnd - thisStart >= minIntervalLength) {
             if (maxLength < thisEnd - thisStart) {
                 ret = subreadIntervals2.size();
                 maxLength = thisEnd - thisStart;
