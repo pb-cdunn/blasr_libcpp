@@ -125,7 +125,8 @@ void CollectSubreadIntervals(T_Sequence &read, RegionTable *regionTablePtr,
 	regionTablePtr->LookupRegionsByHoleNumber(read.zmwData.holeNumber,
         regionLowIndex, regionHighIndex);
 
-	if (byAdapter == false) {
+	if (byAdapter == false) { 
+        // read subreads (insert) directly from region table. 
 		for (regionIndex = regionLowIndex; 
              regionIndex < regionHighIndex; regionIndex++) {
 			if (regionTablePtr->GetType(regionIndex) ==  Insert) {
@@ -138,7 +139,7 @@ void CollectSubreadIntervals(T_Sequence &read, RegionTable *regionTablePtr,
 			}
 		}
 	}
-	else {
+	else { // Determine subreads according to adapters only.
         std::vector<int> adapterIntervalIndices;
 		for (regionIndex = regionLowIndex; 
              regionIndex < regionHighIndex; regionIndex++) {
@@ -151,13 +152,16 @@ void CollectSubreadIntervals(T_Sequence &read, RegionTable *regionTablePtr,
 		int curIntervalStart = 0;
 		int i;
 		if (adapterIntervalIndices.size() == 0) {
+            // no adapter, this zmw has only one subread (pass)
 			subreadIntervals.push_back(ReadInterval(0, read.length));
 		}
 		else {
+            // The first subread covers [0, RegionStart of first adapter)
 			subreadIntervals.push_back(ReadInterval(0, 
                 regionTablePtr->table[adapterIntervalIndices[0]].
                     row[RegionAnnotation::RegionStart]));
 
+            // The subread[i] covers (RegionEnd of i-1-th adapter, RegionStart of i-th adapter)
 			for (i = 0; i + 1 < adapterIntervalIndices.size(); i++) {
 				subreadIntervals.push_back(ReadInterval(
                     regionTablePtr->table[adapterIntervalIndices[i]].
@@ -165,6 +169,7 @@ void CollectSubreadIntervals(T_Sequence &read, RegionTable *regionTablePtr,
 				    regionTablePtr->table[adapterIntervalIndices[i+1]].
                         row[RegionAnnotation::RegionStart]));
 			}
+            // The last subread covers (RegionEnd of last adapter, end of read)
 			subreadIntervals.push_back(
                 ReadInterval(regionTablePtr->table[
                     adapterIntervalIndices[adapterIntervalIndices.size()-1]].
