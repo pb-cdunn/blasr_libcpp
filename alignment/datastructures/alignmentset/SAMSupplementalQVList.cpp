@@ -49,7 +49,7 @@ void SupplementalQVList::PrintQVOptionalFields(SMRTSequence &alignedSubsequence,
         }
     }
     for (i = 0; i < nTags; i++) {
-        if (alignedSubsequence.GetQVPointerByIndex(i) != NULL and (useqv & (1 << i)) ) {
+        if (alignedSubsequence.GetQVPointerByIndex(i+1) != NULL and (useqv & (1 << i)) ) {
             out << "\t" << qvTags[i] << ":Z:";
             alignedSubsequence.PrintAsciiRichQuality(out, i + 1, 0);
         }
