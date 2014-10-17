@@ -22,6 +22,7 @@
 #include "files/FragmentCCSIterator.hpp"
 #include "reads/RegionTable.hpp"
 #include "HDFRegionTableReader.hpp"
+#include "pbdata/testdata.h"
 #include <gtest/gtest.h>
 using namespace std;
 
@@ -31,7 +32,7 @@ public:
     }
 
     void SetUp() {
-        fileName = "/home/UNIXHOME/yli/yliWorkspace/private/yli/data/testLoadPulses/m130302_011223_pd1_c000000092559900001500000112311511_s1_p0.1.bax.h5";
+        fileName = baxFile1;
         reader = new HDFRegionTableReader();
         ccs = new CCSSequence();
         rgn = new RegionTable();
