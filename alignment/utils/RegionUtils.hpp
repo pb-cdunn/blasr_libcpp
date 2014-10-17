@@ -98,6 +98,15 @@ int GetLongestFullSubreadIndex(
     std::vector<ReadInterval> & adapterIntervals);
 
 // Given a vector of subreads and a vector of adapters, return
+// index of the median length subread which has both
+// adapters before & after itself. If no full-pass subreads are
+// available, return -1.
+int GetMedianLengthFullSubreadIndex(
+    std::vector<ReadInterval> & subreadIntervals,
+    std::vector<ReadInterval> & adapterIntervals);
+
+
+// Given a vector of subreads and a vector of adapters, return
 // index of the typical fullpass subread which can represent subreads
 // of this zmw.
 // * if there is no fullpass subread, return -1;
