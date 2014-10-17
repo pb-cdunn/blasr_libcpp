@@ -81,6 +81,11 @@ int FASTAReader::Init(string &seqInName, int passive) {
     }
     SetFileSize();
     filePtr = (char*) mmap(0, fileSize, PROT_READ, MAP_PRIVATE, fileDes, 0);
+    if (filePtr == NULL) {
+        cout << "ERROR, Fail to load FASTA file " << seqInName 
+             << " to virtual memory." << endl;
+        exit(1);
+    }
     curPos = 0;
     return 1;
 }
