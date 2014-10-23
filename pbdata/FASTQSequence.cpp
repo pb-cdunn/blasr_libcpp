@@ -455,35 +455,58 @@ void FASTQSequence::MakeRC(FASTQSequence &rc) {
         rc.qual.data[length - i - 1] = qual[i];
     }
 
+    //
+    // The read contains rich quality values. Reverse them here.
+    //
     if (deletionQV.Empty() == false) {
-        //
-        // The read contains rich quality values. Reverse them here.
-        //
-        ((FASTQSequence&)rc).AllocateRichQualityValues(length);
-        DNALength pos;
-
-        for (pos = 0; pos < length; pos++) {
-            if (insertionQV.Empty() == false) {
-                rc.insertionQV[length - pos - 1] = insertionQV[pos];
-            }
-            if (substitutionQV.Empty() == false) {
-                rc.substitutionQV[length - pos - 1]           = substitutionQV[pos];
-            }
-            if (deletionQV.Empty() == false) {
-                rc.deletionQV[length - pos - 1]               = deletionQV[pos];
-            }
-
-            if (mergeQV.Empty() == false) {
-                rc.mergeQV[length - pos - 1]               = mergeQV[pos];
-            }
-          if (substitutionTag != NULL) {
-                rc.substitutionTag[length - pos - 1] = ReverseComplementNuc[substitutionTag[pos]];
-            }
-            if (deletionTag != NULL) {
-                rc.deletionTag[length - pos - 1]     = ReverseComplementNuc[deletionTag[pos]];
-            }
+        ((FASTQSequence&)rc).AllocateDeletionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.deletionQV[length - pos - 1] = deletionQV[pos];
         }
     }
+
+    if (insertionQV.Empty() == false) {
+        ((FASTQSequence&)rc).AllocateInsertionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.insertionQV[length - pos - 1] = insertionQV[pos];
+        }
+    }
+
+    if (substitutionQV.Empty() == false) {
+        ((FASTQSequence&)rc).AllocateSubstitutionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.substitutionQV[length - pos - 1] = substitutionQV[pos];
+        }
+    }
+
+    if (mergeQV.Empty() == false) {
+        ((FASTQSequence&)rc).AllocateMergeQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.mergeQV[length - pos - 1] = mergeQV[pos];
+        }
+    }
+
+    if (substitutionTag != NULL) {
+        ((FASTQSequence&)rc).AllocateSubstitutionTagSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.substitutionTag[length - pos - 1] = ReverseComplementNuc[substitutionTag[pos]];
+        }
+    }
+
+    if (deletionTag != NULL) {
+        ((FASTQSequence&)rc).AllocateDeletionTagSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.deletionTag[length - pos - 1] = ReverseComplementNuc[deletionTag[pos]];
+        }
+    }
+
+    if (preBaseDeletionQV.Empty() == false) {
+        ((FASTQSequence&)rc).AllocatePreBaseDeletionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.preBaseDeletionQV[length - pos - 1] = preBaseDeletionQV[pos];
+        }
+    }
+
     deletionQVPrior = rc.deletionQVPrior;
     insertionQVPrior = rc.insertionQVPrior;
     substitutionQVPrior = rc.substitutionQVPrior;
