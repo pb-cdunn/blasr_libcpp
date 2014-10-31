@@ -213,7 +213,7 @@ void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidate(
     (20): "nBackRead", "nReadOverlap"
   */
   if (moleculeNumber == -1) {
-    moleculeNumber = holeNumber * movieId;
+    moleculeNumber =  numZMWsPerMovieSpringField * (movieId - 1) + holeNumber;
   }
   alnIndex[0]  = numAlignments;  // AlnId
   alnIndex[1]  = pathId;        // AlnGroupID
