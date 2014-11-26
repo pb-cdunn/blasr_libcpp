@@ -1,4 +1,7 @@
-INCLUDES = -I../../../../../assembly/seymour/dist/common/include \
+
+HDF5_INC = ../../../../../assembly/seymour/dist/common/include
+
+INCLUDES = -I$(HDF_INC) \
 		   -I../pbdata
 CXXOPTS := -std=c++0x -pedantic -c -fmessage-length=0 -MMD -MP
 sources := $(wildcard *.cpp)
