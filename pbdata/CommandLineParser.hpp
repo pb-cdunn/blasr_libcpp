@@ -116,10 +116,10 @@ public:
     static void CommandLineToString(int argc, char* argv[], 
         std::string& commandLine);
 
-    int ParseCommandLine(int argc, char* argv[]);
+    int ParseCommandLine(int argc, char* argv[], bool isProgramNameOnlyAllowed=false);
 
     int ParseCommandLine(int argc, char* argv[], 
-        std::vector<std::string> &unflaggedValues);
+        std::vector<std::string> &unflaggedValues, bool isProgramNameOnlyAllowed=false);
 
     ErrorValue ParseOption(VectorIndex optionIndex,
         VectorIndex &argi, int argc, char *argv[]);
