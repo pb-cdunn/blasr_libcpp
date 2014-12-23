@@ -9,7 +9,7 @@ sources := $(wildcard *.cpp)
 objects := $(sources:.cpp=.o)
 dependencies := $(sources:.cpp=.d)
 
-all : CXXFLAGS ?= -O3 -flto
+all : CXXFLAGS ?= -O3
 
 debug : CXXFLAGS ?= -g -ggdb -fno-inline
 
