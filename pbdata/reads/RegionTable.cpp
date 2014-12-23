@@ -7,7 +7,7 @@ int RegionAnnotation::operator<(const RegionAnnotation &rhs) const {
     return row[0] < rhs.row[0];
 }
 
-int RegionAnnotation::operator<(int holeNumber) {
+int RegionAnnotation::operator<(int holeNumber) const {
     return row[0] < holeNumber;
 }
 

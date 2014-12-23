@@ -31,7 +31,7 @@ BufferedHDFArray<T>::~BufferedHDFArray() {
         delete[] dimSize;
         dimSize = NULL;
     }
-    this->HDFWriteBuffer<T>::~HDFWriteBuffer();
+    this->HDFWriteBuffer<T>::~HDFWriteBuffer<T>();
 }
 
 template<typename T>

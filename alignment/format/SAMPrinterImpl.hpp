@@ -1,4 +1,5 @@
 #include "SAMPrinter.hpp"
+#include <algorithm> //max
 #include <utility> //swap
 
 using namespace SAMOutput; 
@@ -7,7 +8,7 @@ using namespace SAMOutput;
 template<typename T_Sequence>
 void SAMOutput::SetAlignedSequence(T_AlignmentCandidate &alignment, T_Sequence &read,
         T_Sequence &alignedSeq,
-        Clipping clipping = none) {
+        Clipping clipping) {
     //
     // In both no, and hard clipping, the dna sequence that is output
     // solely corresponds to the aligned sequence.
@@ -128,8 +129,8 @@ void SAMOutput::CreateCIGARString(T_AlignmentCandidate &alignment,
           suffixHardClip = read.lowQualitySuffix;
       }
       else if (clipping == subread) {
-          prefixHardClip = max((DNALength) read.subreadStart, read.lowQualityPrefix);
-          suffixHardClip = max((DNALength)(read.length - read.subreadEnd), read.lowQualitySuffix);
+          prefixHardClip = std::max((DNALength) read.subreadStart, read.lowQualityPrefix);
+          suffixHardClip = std::max((DNALength)(read.length - read.subreadEnd), read.lowQualitySuffix);
       }
 
       SetSoftClip(alignment, read, prefixHardClip, suffixHardClip, prefixSoftClip, suffixSoftClip);
@@ -175,9 +176,9 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
         std::ostream &samFile,
         AlignmentContext &context,
         SupplementalQVList & qvList,
-        Clipping clipping = none,
-        int subreadIndex = 0,
-        int nSubreads = 0) {
+        Clipping clipping,
+        int subreadIndex,
+        int nSubreads) {
 
     std::string cigarString;
     uint16_t flag;

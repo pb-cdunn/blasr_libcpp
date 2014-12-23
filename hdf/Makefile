@@ -1,31 +1,32 @@
 
-HDF5_INC = ../../../../../assembly/seymour/dist/common/include
+include ../common.mk
 
-INCLUDES = -I$(HDF5_INC) \
+INCLUDES = -I$(HDF5_ROOT)/src \
+		   -I$(HDF5_ROOT)/c++/src \
 		   -I../pbdata
-CXXOPTS := -std=c++0x -pedantic -c -fmessage-length=0 -MMD -MP
+CXXOPTS := -std=c++0x -pedantic -MMD -MP
 sources := $(wildcard *.cpp)
 objects := $(sources:.cpp=.o)
 dependencies := $(sources:.cpp=.d)
 
-all : GCCOPTS = -O3
+all : CXXFLAGS ?= -O3 -flto
 
-debug : GCCOPTS = -g -ggdb -fno-inline
+debug : CXXFLAGS ?= -g -ggdb -fno-inline
 
-profile : GCCOPTS = -Os -pg
+profile : CXXFLAGS ?= -Os -pg
 
 all debug profile: libpbihdf.a
 
-libpbihdf.a: libpbihdf.a($(objects))
-	$(AR) $(ARFLAGS)s $@ $%
+libpbihdf.a: $(objects)
+	$(AR_pp) $(ARFLAGS) $@ $^
 
 %.o: %.cpp
-	$(CXX) $(GCCOPTS) $(CXXOPTS) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -o $@ $<
+	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
 
-.INTERMEDIATE: $(objects)
+# .INTERMEDIATE: $(objects)
 
 clean: 
-	rm -f libpbihdf.a
-	rm -f $(objects) $(dependencies)
+	@rm -f libpbihdf.a
+	@rm -f $(objects) $(dependencies)
 
 -include $(dependencies)

@@ -11,12 +11,12 @@ void CreateFlatMatrix(int rows, int cols, std::vector<T> &matrix) {
 }
 
 template<typename T>
-void PrintFlatMatrix(std::vector<T> &matrix, int rows, int cols, std::ostream &out, int width=6) {
+void PrintFlatMatrix(std::vector<T> &matrix, int rows, int cols, std::ostream &out, int width) {
 	PrintFlatMatrix((const T*) &matrix[0], rows, cols, out, width);
 }
 
 template<typename T>
-void PrintFlatMatrix(const T* matrix, int rows, int cols, std::ostream &out, int width=6) { 
+void PrintFlatMatrix(const T* matrix, int rows, int cols, std::ostream &out, int width) { 
 	int r, c, i;
 	i = 0;
 	for (r = 0; r < rows; r++ ) {

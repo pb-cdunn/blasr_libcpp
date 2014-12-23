@@ -1,6 +1,8 @@
-#LEGACY := -I../../../../assembly/cpp/common
-CXXOPTS := -I . -pedantic -c -fmessage-length=0 -MMD -MP
-INCLUDE := -I matrix -I reads -I qvs -I metagenome -I saf -I utils -I alignment
+
+include ../common.mk
+
+CXXOPTS := -std=c++0x -pedantic -MMD -MP
+INCLUDES := -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils -Ialignment
 
 sources := $(wildcard *.cpp) \
 	       $(wildcard matrix/*.cpp) \
@@ -17,24 +19,24 @@ sources := $(wildcard *.cpp) \
 objects := $(sources:.cpp=.o)
 dependencies := $(sources:.cpp=.d)
 
-all : GCCOPTS = -O3
+all : CXXFLAGS ?= -O3
 
-debug : GCCOPTS = -g -ggdb -fno-inline
+debug : CXXFLAGS ?= -g -ggdb -fno-inline
 
-profile : GCCOPTS = -Os -pg
+profile : CXXFLAGS ?= -Os -pg
 
 all debug profile: libpbdata.a
 
-libpbdata.a: libpbdata.a($(objects))
-	$(AR) $(ARFLAGS)s $@ $%
+libpbdata.a: $(objects)
+	$(AR_pp) $(ARFLAGS) $@ $^
 
 %.o: %.cpp
-	$(CXX) $(GCCOPTS) $(CXXOPTS) $(INCLUDE) -MF "$(@:%.o=%.d)" -MT "$(@:%.o=%.o) $(@:%.o=%.d)" -o $@ $<
+	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
 
-.INTERMEDIATE: $(objects)
+# .INTERMEDIATE: $(objects)
 
 clean: 
-	rm -f libpbdata.a
-	rm -f $(objects) $(dependencies)
+	@rm -f libpbdata.a
+	@rm -f $(objects) $(dependencies)
 
 -include $(dependencies)

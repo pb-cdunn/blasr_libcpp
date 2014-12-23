@@ -116,7 +116,7 @@ bool TrimRead(T_Sequence &fastaRead, ZMWGroupEntry &zmwData,
 
 template<typename T_Sequence>
 void CollectSubreadIntervals(T_Sequence &read, RegionTable *regionTablePtr, 
-    std::vector<ReadInterval> &subreadIntervals, bool byAdapter=false) {
+    std::vector<ReadInterval> &subreadIntervals, bool byAdapter) {
 
 	int regionIndex;						 
 	int regionLowIndex, regionHighIndex;

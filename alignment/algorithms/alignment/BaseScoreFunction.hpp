@@ -10,10 +10,8 @@ class BaseScoreFunction {
         int affineExtend;
         int affineOpen;
 
-        BaseScoreFunction();
-
-        BaseScoreFunction(int insP, int delP, int subPriorP, 
-            int delPriorP, int affineExtensionP, int affineOpenP); 
+        BaseScoreFunction(int insP = 0, int delP = 0, int subPriorP = 0, 
+            int delPriorP = 0, int affineExtensionP = 0, int affineOpenP = 0); 
 };
 
 #endif // _BLASR_BASE_SCORE_FUNCTION_HPP_`

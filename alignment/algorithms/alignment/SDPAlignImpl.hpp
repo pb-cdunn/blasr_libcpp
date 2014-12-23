@@ -25,12 +25,12 @@ int SDPAlign(T_QuerySequence &query, T_TargetSequence &target,
         T_ScoreFn &scoreFn, int wordSize, 
         int sdpIns, int sdpDel, float indelRate,
         blasr::Alignment &alignment, 
-        AlignmentType alignType=Global,
-        bool detailedAlignment=true,
-        bool extendFrontByLocalAlignment=true,
-        DNALength noRecurseUnder=10000,
-        bool fastSDP=true,
-        unsigned int minFragmentsToUseGraphPaper=100000) {
+        AlignmentType alignType,
+        bool detailedAlignment,
+        bool extendFrontByLocalAlignment,
+        DNALength noRecurseUnder,
+        bool fastSDP,
+        unsigned int minFragmentsToUseGraphPaper) {
     /*
        Since SDP Align uses a large list of buffers, but none are
        provided with this mechanism of calling SDPAlign, allocate the
@@ -62,12 +62,12 @@ int SDPAlign(T_QuerySequence &query, T_TargetSequence &target,
         int sdpIns, int sdpDel, float indelRate,
         blasr::Alignment &alignment, 
         T_BufferCache &buffers,
-        AlignmentType alignType=Global,
-        bool detailedAlignment=true,
-        bool extendFrontByLocalAlignment=true, 
-        DNALength noRecurseUnder=10000,
-        bool fastSDP=true,
-        unsigned int minFragmentsToUseGraphPaper=100000) {
+        AlignmentType alignType,
+        bool detailedAlignment,
+        bool extendFrontByLocalAlignment, 
+        DNALength noRecurseUnder,
+        bool fastSDP,
+        unsigned int minFragmentsToUseGraphPaper) {
 
     return SDPAlign(query, target, scoreFn, wordSize, 
             sdpIns, sdpDel, indelRate,
@@ -98,12 +98,12 @@ int SDPAlign(T_QuerySequence &query, T_TargetSequence &target,
         T_TupleList &targetSuffixTupleList,
         std::vector<int> &maxFragmentChain,
         // A few optinal parameters, should delete that last one.
-        AlignmentType alignType=Global,
-        bool detailedAlignment=true,
-        bool extendFrontByLocalAlignment=true, 
-        DNALength noRecurseUnder=10000,
-        bool fastSDP=true,
-        unsigned int minFragmentsToUseGraphPaper=100000) {
+        AlignmentType alignType,
+        bool detailedAlignment,
+        bool extendFrontByLocalAlignment, 
+        DNALength noRecurseUnder,
+        bool fastSDP,
+        unsigned int minFragmentsToUseGraphPaper) {
     // minFragmentsToUseGraphPaper: minimum number of fragments to 
     // use Graph Paper for speed up.
 

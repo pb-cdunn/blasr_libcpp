@@ -15,7 +15,7 @@ public:
     int row[NCOLS];
     int operator<(const RegionAnnotation &rhs) const; 
 
-    int operator<(int holeNumber); 
+    int operator<(int holeNumber) const; 
 
     RegionAnnotation& operator=(const RegionAnnotation &rhs); 
 

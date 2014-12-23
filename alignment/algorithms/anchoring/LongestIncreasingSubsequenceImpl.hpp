@@ -54,7 +54,7 @@ int BinarySearch(T *x, vector<int> &m, int i, int lenM, F_IntValue IntValue) {
 template<typename T, typename F_IntValue >
 int LongestIncreasingSubset(T *x, int xLength, vector<int> &subsetIndices, 
 	vector<int> &m, vector<int> &p, F_IntValue IntValue, 
-	int start=0, int end = -1) {
+	int start, int end) {
 
 	//
 	// m[i] is the index of the LIS of length i+1

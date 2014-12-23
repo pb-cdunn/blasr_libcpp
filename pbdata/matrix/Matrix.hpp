@@ -45,4 +45,6 @@ public:
     void Print(std::ofstream &out); 
 };
 
+#include "MatrixImpl.hpp"
+	
 #endif // _BLASR_MATRIX_HPP_

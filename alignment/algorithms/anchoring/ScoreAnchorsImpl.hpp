@@ -136,7 +136,7 @@ int SumRightShiftMarginalTupleCounts(TupleMetrics &tm,
 template<typename TSequence, typename T_Tuple>
 int ComputeTotalTupleCount(TupleMetrics &tm,
     TupleCountTable<TSequence, T_Tuple> &ct, TSequence &seq, 
-    int start=0, int end=-1) {
+    int start, int end) {
 	if (end == -1) {
 		end = seq.length;
 	}

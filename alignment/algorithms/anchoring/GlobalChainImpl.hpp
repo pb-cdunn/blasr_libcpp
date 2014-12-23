@@ -104,7 +104,7 @@ template<typename T_Fragment, typename T_Endpoint>
 int GlobalChain(T_Fragment *fragments, 
 	DNALength nFragments, 
     vector<VectorIndex> & optFragmentChainIndices,
-    vector<T_Endpoint> * bufEndpointsPtr = NULL) {
+    vector<T_Endpoint> * bufEndpointsPtr) {
 
 	//
 	// Initialize the fragment score to be the length of each fragment.
@@ -217,7 +217,7 @@ template<typename T_Fragment, typename T_Endpoint>
 int GlobalChain(vector<T_Fragment> &fragments, 
     DNALength start, DNALength end, 
     vector<VectorIndex> &optFragmentChainIndices,
-    vector<T_Endpoint> *bufEndpointsPtr = NULL) {
+    vector<T_Endpoint> *bufEndpointsPtr) {
 	return GlobalChain<T_Fragment, T_Endpoint>(&fragments[start], 
         end - start, optFragmentChainIndices, bufEndpointsPtr);
 }
