@@ -1,25 +1,28 @@
+SHELL=bash
+
+.PHONY: all debug profile clean
+
 #
 # Definitions common to all make files for unit tests.
+# All paths are relative from inside the subdirectories, not this file
 #
 
-# All Google Test headers.  Usually you shouldn't change this
-# definition.
-GTEST_DIR = /mnt/secondary-siv/third_party_source/gtest-1.6.0
-GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
-                $(GTEST_DIR)/include/gtest/internal/*.h
-GTEST_MAINA   = $(GTEST_DIR)/make/gtest_main.a  
-GTESTINCDIRS  = -I$(GTEST_DIR) \
-				-I$(GTEST_DIR)/include \
+PBINCROOT 		   ?= ../..
+PREBUILT    	   ?= ../../../../../prebuilt.out
+THIRD_PARTY_PREFIX ?= ../../..
 
-PBINCROOT ?= ../..
-HDFINC    ?= ../../../../../assembly/seymour/dist/common/include 
-HDFLIB    ?= ../../../../../assembly/seymour/dist/common/lib 
+include $(PBINCROOT)/common.mk
 
+# All Google Test headers.  Usually you shouldn't change this.
+GTEST_ROOT := $(THIRD_PARTY)/gtest/fused-src
+GTEST_SRC  := $(GTEST_ROOT)/gtest/gtest-all.cc \
+			  $(GTEST_ROOT)/gtest/gtest_main.cc
 
-#LDFLAGS := -lblasr -lpbdata -lpbihdf -lhdf5_cpp -lhdf5 -lz -lpthread -lrt -ldl
+CXX := g++
+CXXOPTS := -std=c++0x -Wno-div-by-zero 
 
-CCOPTS := -O3 
+all : CXXFLAGS ?= -O3
 
-CCFLAGS := -std=c++0x -Wno-div-by-zero 
+debug : CXXFLAGS ?= -g -ggdb -fno-inline
 
-CXX = g++
+profile : CXXFLAGS ?= -Os -pg
