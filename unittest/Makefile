@@ -10,7 +10,11 @@ LIBDIRS := -L$(PBINCROOT)/alignment \
            -L$(PBINCROOT)/pbdata \
            -L$(PBINCROOT)/hdf \
            -L$(HDF5_ROOT)/src/.libs \
-           -L$(HDF5_ROOT)/c++/src/.libs 
+           -L$(HDF5_ROOT)/c++/src/.libs
+
+ifneq ($(ZLIB_ROOT), notfound)
+	LIBDIRS += -L$(ZLIB_ROOT)/lib
+endif
 
 LDFLAGS := -lblasr -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
 

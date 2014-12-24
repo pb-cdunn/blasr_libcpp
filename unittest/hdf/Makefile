@@ -12,6 +12,11 @@ LIBDIRS    = -L$(PBINCROOT)/pbdata \
              -L$(HDF5_ROOT)/src/.libs \
              -L$(HDF5_ROOT)/c++/src/.libs
 
+ifneq ($(ZLIB_ROOT), notfound)
+	INCDIRS += -I$(ZLIB_ROOT)/include
+	LIBDIRS += -L$(ZLIB_ROOT)/lib
+endif
+
 LDFLAGS   := -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
 # The order of -l{lib} matters
 

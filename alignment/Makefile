@@ -7,6 +7,10 @@ INCLUDES = -I$(HDF5_ROOT)/src \
            -I../hdf \
 		   -I.
 
+ifneq ($(ZLIB_ROOT), notfound)
+	INCLUDES += -I$(ZLIB_ROOT)/include
+endif
+
 CXXOPTS := -std=c++0x -pedantic -Wno-long-long -MMD -MP
 
 sources := $(wildcard algorithms/alignment/*.cpp) \

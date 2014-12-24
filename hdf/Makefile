@@ -4,6 +4,11 @@ include ../common.mk
 INCLUDES = -I$(HDF5_ROOT)/src \
 		   -I$(HDF5_ROOT)/c++/src \
 		   -I../pbdata
+
+ifneq ($(ZLIB_ROOT), notfound)
+	INCLUDES += -I$(ZLIB_ROOT)/include
+endif
+
 CXXOPTS := -std=c++0x -pedantic -MMD -MP
 sources := $(wildcard *.cpp)
 objects := $(sources:.cpp=.o)
