@@ -40,7 +40,7 @@ LIBS := alignment/libblasr_gtest.a \
 		pbdata/libpbdata_gtest.a
 
 $(EXE): $(LIBS)
-	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $(GTEST_SRC) -Wl,$(LD_WHOLE_ARCHIVE) $^ -Wl,$(LD_NO_WHOLE_ARCHVIE) -o $@ -I$(GTEST_ROOT) $(LIBDIRS) $(LDFLAGS)
+	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $(GTEST_SRC) -Wl,$(LD_WHOLE_ARCHIVE) $^ -Wl,$(LD_NO_WHOLE_ARCHIVE) -o $@ -I$(GTEST_ROOT) $(LIBDIRS) $(LDFLAGS)
 
 $(LIBS):
 	make -C $(dir $@) $(notdir $@)
