@@ -119,7 +119,7 @@ long FASTAReader::ReadAllSequencesIntoOne(FASTASequence &seq, SequenceIndexDatab
     }
     long seqLength;
     seqLength = fileSize - p;
-    long memorySize = seqLength+padding;
+    long memorySize = seqLength+padding+1;
 
     long a = memorySize;
     if (memorySize > UINT_MAX) {
@@ -281,7 +281,7 @@ int FASTAReader::GetNext(FASTASequence &seq) {
     seq.length = 0;
     if (seqLength > 0) {
         seq.length = seqLength;
-        seq.seq = new Nucleotide[seqLength+padding];
+        seq.seq = new Nucleotide[seqLength+padding+1];
         p = curPos;
         seq.deleteOnExit = true;
         long s = 0;
@@ -296,6 +296,7 @@ int FASTAReader::GetNext(FASTASequence &seq) {
             }
             p++;
         }
+        seq.seq[seqLength] = 0;
     }
     curPos = p;
 
