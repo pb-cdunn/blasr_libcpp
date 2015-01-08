@@ -28,7 +28,7 @@ EXE := test-runner
 all debug profile: $(EXE)
 
 libpbihdf_gtest.a: $(OBJECTS)
-	$(AR) $(ARFLAGS)c $@ $^
+	$(AR_pp) $(ARFLAGS)c $@ $^
 
 $(EXE): $(OBJECTS)
 	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $^ $(GTEST_SRC) -o $@ -I$(GTEST_ROOT) $(LIBDIRS) $(LDFLAGS)

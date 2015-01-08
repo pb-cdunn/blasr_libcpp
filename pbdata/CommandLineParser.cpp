@@ -239,10 +239,10 @@ ParseCommandLine(int argc, char* argv[],
     //
     int i;
     for (i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-h")==0 or
-            strcmp(argv[i], "--help") == 0 and 
+        if (strcmp(argv[i], "-h") == 0 or
+            (strcmp(argv[i], "--help") == 0 and 
             // Check to see if there is non default argument for help
-            (IsOption(argv[i]) and !FindOption(&argv[i][1]))) {
+            IsOption(argv[i]) and !FindOption(&argv[i][1]))) {
             PrintUsage();
             exit(0);
         }

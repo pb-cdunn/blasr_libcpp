@@ -16,7 +16,7 @@ include $(PBINCROOT)/common.mk
 # All Google Test headers.  Usually you shouldn't change this.
 GTEST_ROOT := $(THIRD_PARTY)/gtest/fused-src
 GTEST_SRC  := $(GTEST_ROOT)/gtest/gtest-all.cc \
-			  $(GTEST_ROOT)/gtest/gtest_main.cc
+              $(GTEST_ROOT)/gtest/gtest_main.cc
 
 CXX := g++
 CXXOPTS := -std=c++0x -Wno-div-by-zero 

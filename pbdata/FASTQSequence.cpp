@@ -82,11 +82,14 @@ FASTQSequence::FASTQSequence() : FASTASequence() {
 
     //
     // For now assume a prior distribution to be the variation of the human genome.
+    // FIXME: these were set to 0.001, which ends up being 0 because these priors are integer types
+    //        I'm setting these explicitly to 0 to silence the warning and maintain behavior,
+    //        but mkinsella recommends revisiting these for potential removal
     //
-    deletionQVPrior = 0.001; 
-    insertionQVPrior = 0.001; 
-    substitutionQVPrior = 0.001;
-    preBaseDeletionQVPrior = 0.001;
+    deletionQVPrior = 0;
+    insertionQVPrior = 0;
+    substitutionQVPrior = 0;
+    preBaseDeletionQVPrior = 0;
 
     subreadStart = subreadEnd = 0;
     qvScale = PHRED;

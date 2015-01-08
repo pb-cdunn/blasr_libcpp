@@ -34,13 +34,13 @@ public:
 
     std::string GetName();
 
-    bool StoreHoleNumber(int holeNumber);
-    bool StoreHoleStatus(unsigned char holeStatus);
-    bool StorePlatformId(PlatformId platformId);
-    bool StoreZMWData(ZMWGroupEntry &data);
-    bool GetHoleNumber (int &holeNumberP); 
+    virtual bool StoreHoleNumber(int holeNumber);
+    virtual bool StoreHoleStatus(unsigned char holeStatus);
+    virtual bool StorePlatformId(PlatformId platformId);
+    virtual bool StoreZMWData(ZMWGroupEntry &data);
+    virtual bool StoreXY(int16_t xy[]);
 
-    bool StoreXY(int16_t xy[]);
+    bool GetHoleNumber (int &holeNumberP); 
 
     bool GetXY(int xyP[]); 
 

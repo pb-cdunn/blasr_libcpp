@@ -15,7 +15,7 @@ public:
     T_QV   *data;
     QVScale qvScale;
 
-    T_QV &operator[](unsigned int pos); 
+    T_QV &operator[](unsigned int pos) const; 
 
     QualityValueVector(); 
 

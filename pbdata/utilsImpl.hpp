@@ -29,6 +29,4 @@ T* ProtectedNew(unsigned long size) {
     return ptr;
 }
 
-template unsigned char* ProtectedNew<unsigned char>(unsigned long size);
-
 #endif

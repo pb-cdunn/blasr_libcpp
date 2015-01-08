@@ -1,8 +1,10 @@
 #include <iomanip>
+#include <unistd.h>
 #include "MappingMetrics.hpp"
 //In order to use clock_gettime in LINUX, add -lrt 
 
 #ifdef __APPLE__
+#pragma weak clock_gettime
 int clock_gettime(clockid_t clk_id, struct timespec *tp) {
     kern_return_t   ret;
     clock_serv_t    clk;

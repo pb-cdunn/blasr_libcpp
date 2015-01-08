@@ -1,8 +1,9 @@
 SHELL=bash
 
 PBINCROOT   := ..
-PREBUILT    := ../../../../prebuilt.out
-THIRD_PARTY := $(abspath ../../../third-party/cpp)
+
+PREBUILT           ?= ../../../../prebuilt.out
+THIRD_PARTY_PREFIX ?= ../../..
 
 include ./common.mk
 

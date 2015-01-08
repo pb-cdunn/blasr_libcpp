@@ -84,11 +84,13 @@ int ReaderAgglomerate::Initialize(FileType &pFileType, string &pFileName) {
     return Initialize();
 }
 
+#define UNREACHABLE() \
+    cout << "ERROR! Hit unreachable code in " << __FILE__ << ':' << __LINE__ << endl; \
+    assert(0)
+
 bool ReaderAgglomerate::HasRegionTable() {
     switch(fileType) {
         case Fasta:
-            return false;
-            break;
         case Fastq:
             return false;
             break;
@@ -99,6 +101,10 @@ bool ReaderAgglomerate::HasRegionTable() {
         case HDFCCSONLY:
         case HDFCCS:
             return hdfCcsReader.HasRegionTable();
+            break;
+        case Fourbit:
+        case None:
+            UNREACHABLE();
             break;
     }
     return false;
@@ -140,6 +146,11 @@ int ReaderAgglomerate::Initialize() {
                 // information.
                 if (init == 0) return 0;
             }
+            break;
+        case HDFCCS:
+        case Fourbit:
+        case None:
+            UNREACHABLE();
             break;
     }
     readGroupId = "";
@@ -188,6 +199,10 @@ int ReaderAgglomerate::GetNext(FASTASequence &seq) {
             cout << "ERROR! Reading CCS into a structure that cannot handle it." << endl;
             assert(0);
             break;
+        case Fourbit:
+        case None:
+            UNREACHABLE();
+            break;
     }
     seq.CleanupOnFree();
     return numRecords;
@@ -213,6 +228,10 @@ int ReaderAgglomerate::GetNext(FASTQSequence &seq) {
         case HDFCCS:
             cout << "ERROR! Reading CCS into a structure that cannot handle it." << endl;
             assert(0);
+            break;
+        case Fourbit:
+        case None:
+            UNREACHABLE();
             break;
     }
     if (stride > 1)
@@ -245,6 +264,10 @@ int ReaderAgglomerate::GetNext(SMRTSequence &seq) {
             assert(ignoreCCS == false);
             assert(hdfBasReader.readBasesFromCCS == true);
             numRecords = hdfBasReader.GetNext(seq);
+            break;
+        case Fourbit:
+        case None:
+            UNREACHABLE();
             break;
     }
     if (stride > 1)
@@ -279,6 +302,10 @@ int ReaderAgglomerate::GetNextBases(SMRTSequence &seq, bool readQVs) {
             cout << "ERROR! Can only GetNextBases from a Pulse or Base File." << endl;
             assert(0);
             break;
+        case Fourbit:
+        case None:
+            UNREACHABLE();
+            break;
     }
     if (stride > 1)
         Advance(stride-1);
@@ -311,6 +338,10 @@ int ReaderAgglomerate::GetNext(CCSSequence &seq) {
         case HDFCCS:
             numRecords = hdfCcsReader.GetNext(seq);
             break;
+        case Fourbit:
+        case None:
+            UNREACHABLE();
+            break;
     }
 
     if (stride > 1)
@@ -332,6 +363,10 @@ int ReaderAgglomerate::Advance(int nSteps) {
             return hdfCcsReader.Advance(nSteps);
         case Fastq:
             return fastqReader.Advance(nSteps);
+        case Fourbit:
+        case None:
+            UNREACHABLE();
+            break;
     }
     return false;
 }
@@ -341,13 +376,21 @@ void ReaderAgglomerate::Close() {
         case Fasta:
             fastaReader.Close();
             break;
+        case Fastq:
+            fastqReader.Close();
+            break;
         case HDFPulse:
         case HDFBase:
             hdfBasReader.Close();
             // zmwReader.Close();
             break;
+        case HDFCCSONLY:
         case HDFCCS:
             hdfCcsReader.Close();
+            break;
+        case Fourbit:
+        case None:
+            UNREACHABLE();
             break;
     }
 }

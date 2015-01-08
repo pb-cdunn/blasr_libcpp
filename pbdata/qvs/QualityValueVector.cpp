@@ -1,7 +1,7 @@
 #include "QualityValueVector.hpp"
 
 template<typename T_QV>
-T_QV& QualityValueVector<T_QV>::operator[](unsigned int pos) {
+T_QV& QualityValueVector<T_QV>::operator[](unsigned int pos) const {
     return data[pos];
 }
 

@@ -407,7 +407,7 @@ public:
                 // current bucket (from l ... bh[c]==true).
                 for (c = l; c == l or bh[c] == false; c++)  {
                     d = index[c] - h;
-                    if (d >= 0 and d < targetLength) {
+                    if (d < targetLength) {
                         b2h[prm[d]] = true;
                     }
                 }
@@ -417,7 +417,7 @@ public:
                 //
                 for (c = l; c == l or bh[c] == false; c++) {
                     d = index[c] - h;
-                    if (d >= 0 and d < targetLength) {
+                    if (d < targetLength) {
                         if (b2h[prm[d]] == true) {
                             j = prm[d] + 1;
                             // advance j to the next bucket.

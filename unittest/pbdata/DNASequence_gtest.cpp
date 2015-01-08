@@ -138,17 +138,17 @@ TEST_F(DNASequenceTest, TakeOwnership) {
     dnaOne.length = oneLen;
 
     DNASequence dnaTwo;
+    
+    //a bug may occur if deleteOneExit is true and 
+    //TakeOwnership() is called twice. In that case, both
+    //dnaOne and dnaTwo will become wild pointers 
+    dnaTwo.deleteOnExit = true;
     dnaTwo.TakeOwnership(dnaOne);
+    
     EXPECT_EQ(dnaTwo.length, dnaOne.length);
     EXPECT_EQ(dnaTwo.deleteOnExit, dnaOne.deleteOnExit);
     EXPECT_EQ(dnaTwo.seq, dnaOne.seq);
 
-    dnaTwo.deleteOnExit = true;
-    dnaTwo.TakeOwnership(dnaOne);
-    //a bug may occur if deleteOneExit is true and 
-    //TakeOwnership() is called twice. In that case, both
-    //dnaOne and dnaTwo will become wild pointers 
-    EXPECT_EQ(dnaOne.seq, dnaTwo.seq);
     if(!one) delete one;
 }
 

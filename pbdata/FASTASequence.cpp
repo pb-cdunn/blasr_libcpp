@@ -13,7 +13,9 @@ FASTASequence::FASTASequence() : DNASequence() {
 }
 
 void FASTASequence::PrintSeq(ostream &out, int lineLength, char delim) {
-    out << delim << title <<endl;
+    out << delim;
+    if (title) out << title;
+    out << endl;
     ((DNASequence*)this)->PrintSeq(out, lineLength); 
 }
 
