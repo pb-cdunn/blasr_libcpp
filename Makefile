@@ -19,6 +19,11 @@ profile:
 	make -C hdf profile
 	make -C alignment profile
 
+g:
+	make -C pbdata g
+	make -C hdf g
+	make -C alignment g
+
 gtest:
 	make -C unittest gtest
 

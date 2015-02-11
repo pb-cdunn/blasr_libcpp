@@ -20,7 +20,9 @@ debug : CXXFLAGS ?= -g -ggdb -fno-inline
 
 profile : CXXFLAGS ?= -Os -pg
 
-all debug profile: libpbihdf.a
+g : CXXFLAGS ?= -g -ggdb -fno-inline -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer 
+
+all debug profile g: libpbihdf.a
 
 libpbihdf.a: $(objects)
 	$(AR_pp) $(ARFLAGS) $@ $^
