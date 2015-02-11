@@ -80,12 +80,11 @@ public:
 
 };
 
-
 class FilterCriteria {
 public:
-    int minAccuracy;
+    float minAccuracy;
+    float minPctSimilarity;
     int minLength;
-    int minPctSimilarity;
     Score scoreCutoff; 
     bool useScore;
     int verbosity;
@@ -93,7 +92,6 @@ public:
     // Potential fileters to use 
     int minAnchorBases;
     int minAnchorSize;
-    int minZ;
 
     FilterCriteria() {
         SetDefault();
@@ -101,11 +99,10 @@ public:
 
     // Set default filter criteria.
     void SetDefault() {
-        minAccuracy   = 75;
+        minAccuracy   = 70;
         minLength = 50;
         minPctSimilarity = 70;
         minAnchorSize = 12;
-        minZ          = 0;
         useScore      = false; 
         verbosity     = 0;
         // score is not a filter criteria unless sepecified.
@@ -127,20 +124,17 @@ public:
         return ss;
     }
 
-    void SetMinAccuracy(const int & a) {
+    void SetMinAccuracy(const float & a) {
         minAccuracy = a;
     }
     void SetMinReadLength(const int & l) {
         minLength = l;
     }
-    void SetMinPctSimilarity(const int & s) {
+    void SetMinPctSimilarity(const float & s) {
         minPctSimilarity = s;
     }
     void SetMinAnchorSize(const int & a) {
         minAnchorSize = a;
-    }
-    void SetMinZ(const int & z) {
-        minZ = z;
     }
     
     // Return whether or not the filter criteria make sense.
@@ -164,16 +158,27 @@ public:
     // mapQV, clusterScore, clusterWeight, tIsSbustring, qIsSubstring
     // tTitle, qTitle, nMatch, nIns, nDel, pctSimilarity
     // 
-        if (alignment.qAlignedSeqLength   < minLength ||
-            alignment.pctSimilarity * 100 < minPctSimilarity) {
+        if (alignment.qAlignedSeqLength   < minLength) {
             if (verbosity > 0) 
-                cout << "Alignment length is too short or pctcentage similarity is too low." << endl;
+                cout << "Alignment length is too short (" 
+                     << alignment.qAlignedSeqLength 
+                     << " < " << minLength << ")." <<endl;
+            return false;
+        } 
+        if (alignment.pctSimilarity * 100 < minPctSimilarity) {
+            if (verbosity > 0) 
+                cout << "Percentage similarity (" 
+                     << alignment.pctSimilarity
+                     << " < " << minPctSimilarity 
+                     << ") is too low." << endl;
             return false;
         }
         
         if (useScore && scoreCutoff.BetterThanOrEqual(alignment.score)) {
             if (verbosity > 0)
-                cout << "Alignment score is bad." << endl;
+                cout << "Alignment score (" << alignment.score 
+                     << " worse than " << scoreCutoff.score 
+                     << ") is bad." << endl;
             return false;
         }
 
@@ -183,20 +188,10 @@ public:
 
         if (accuracy < minAccuracy) {
             if (verbosity > 0)
-                cout << "Accuracy is too low." << endl;
+                cout << "Accuracy (" << accuracy << " < "
+                     << minAccuracy << ") is too low." << endl;
             return false;
         }
-
-
-        //int nAnchors, nAnchorBases;
-        // nAnchors = nAnchorBases = 0;
-        //Update alignment anchor info
-        //alignment.ComputeNumAnchors(minAnchorSize, nAnchors, nAnchorBases);
-        //if (nAnchors <= 0) {
-        //    if (verbosity > 0) 
-        //        cout << "No anchor exists in the alignment." << endl;
-        //    return false;
-        // }
 
         return true;
     }
