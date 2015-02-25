@@ -54,3 +54,7 @@ const string rgnFile1 =
     ("/mnt/secondary-siv/testdata/BlasrTestData/utest/"
      "data/test_regionTable.rgn.h5");
 
+const string scanDataFile1 = 
+    ("/mnt/secondary-siv/testdata/BlasrTestData/utest/"
+     "data/scandata.h5");
+

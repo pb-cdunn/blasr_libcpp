@@ -121,6 +121,7 @@ int HDFScanDataReader::Read(ScanData &scanData) {
         whenStartedAtom.Read(scanData.whenStarted);
     }
 
+    return 1;
 }
 
 void HDFScanDataReader::ReadWhenStarted(string &whenStarted) {
@@ -142,6 +143,29 @@ int HDFScanDataReader::ReadPlatformId(PlatformId &pid) {
         pid = Astro;
     }
     return 1;
+}
+
+int HDFScanDataReader::ReadStringAttribute(std::string & attributeValue,
+        const std::string & attributeName, HDFGroup & group,
+        HDFAtom<std::string> & atom) {
+
+    if (runInfoGroup.ContainsAttribute(attributeName) and
+        atom.Initialize(runInfoGroup, attributeName)) {
+        atom.Read(attributeValue);
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int HDFScanDataReader::ReadBindingKit(std::string &bindingKit)
+{
+    return ReadStringAttribute(bindingKit, "BindingKit", runInfoGroup, bindingKitAtom);
+}
+
+int HDFScanDataReader::ReadSequencingKit(std::string &sequencingKit)
+{
+    return ReadStringAttribute(sequencingKit, "SequencingKit", runInfoGroup, sequencingKitAtom);
 }
 
 int HDFScanDataReader::LoadMovieName(string &movieName) {
@@ -195,6 +219,8 @@ void HDFScanDataReader::Close() {
     platformIdAtom.dataspace.close();
     frameRateAtom.dataspace.close();
     numFramesAtom.dataspace.close();
+    sequencingKitAtom.dataspace.close();
+    bindingKitAtom.dataspace.close();
 
     scanDataGroup.Close();
     dyeSetGroup.Close();
