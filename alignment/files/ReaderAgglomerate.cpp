@@ -43,6 +43,16 @@ void ReaderAgglomerate::GetMovieName(string &movieName) {
     }
 }
 
+void ReaderAgglomerate::GetChemistryTriple(string & bindingKit, 
+        string & sequencingKit, string & baseCallerVersion) {
+    if (fileType == HDFPulse || fileType == HDFBase ||
+        fileType == HDFCCS || fileType == HDFCCSONLY) {
+         hdfBasReader.GetChemistryTriple(bindingKit, sequencingKit, baseCallerVersion);
+    } else {
+        sequencingKit = bindingKit = baseCallerVersion = "";
+    }
+}
+
 bool ReaderAgglomerate::FileHasZMWInformation() {
     return (fileType == HDFPulse || fileType == HDFBase || 
             fileType == HDFCCS || fileType == HDFCCSONLY);
@@ -163,7 +173,7 @@ int ReaderAgglomerate::Initialize() {
     string moviePlusFileName = movieName + fileName;
     MakeMD5(moviePlusFileName, readGroupId, 10);
 
-    return 1;
+   return 1;
 }
 
 ReaderAgglomerate & ReaderAgglomerate::operator=(ReaderAgglomerate &rhs) {

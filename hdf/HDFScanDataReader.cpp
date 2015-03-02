@@ -7,6 +7,10 @@ HDFScanDataReader::HDFScanDataReader() {
     // Assume the file is written without a movie name.  This is
     // flipped when a movie name is found.
     //
+    Reset();
+}
+
+void HDFScanDataReader::Reset() {
     useMovieName    = false;
     useRunCode      = false;
     useWhenStarted  = false;
@@ -97,7 +101,8 @@ int HDFScanDataReader::Initialize(HDFGroup *pulseDataGroup) {
 }
 
 string HDFScanDataReader::GetMovieName() {
-    LoadMovieName(movieName);
+    // If this object is correctly initialized, movieName
+    // is guaranteed to be loaded if it exists, no need to reload.
     return movieName;
 }
 
@@ -149,8 +154,8 @@ int HDFScanDataReader::ReadStringAttribute(std::string & attributeValue,
         const std::string & attributeName, HDFGroup & group,
         HDFAtom<std::string> & atom) {
 
-    if (runInfoGroup.ContainsAttribute(attributeName) and
-        atom.Initialize(runInfoGroup, attributeName)) {
+    if (group.ContainsAttribute(attributeName) and
+        (atom.isInitialized or atom.Initialize(group, attributeName))) {
         atom.Read(attributeValue);
         return 1;
     } else {
@@ -168,19 +173,16 @@ int HDFScanDataReader::ReadSequencingKit(std::string &sequencingKit)
     return ReadStringAttribute(sequencingKit, "SequencingKit", runInfoGroup, sequencingKitAtom);
 }
 
-int HDFScanDataReader::LoadMovieName(string &movieName) {
+int HDFScanDataReader::LoadMovieName(string &movieNameP) {
     // Groups for building read names
-    if (runInfoGroup.ContainsAttribute("MovieName") and
-            movieNameAtom.Initialize(runInfoGroup, "MovieName")) {
-        useMovieName = true;
-        movieNameAtom.Read(movieName);
-        int e = movieName.size() - 1;
-        while (e > 0 and movieName[e] == ' ') e--;
-        movieName= movieName.substr(0,e+1);
-        return 1;
-    }
-    else {
+    if (ReadStringAttribute(movieNameP, "MovieName", runInfoGroup, movieNameAtom) == 0) {
         return 0;
+    } else {
+        useMovieName = true;
+        int e = movieNameP.size() - 1;
+        while (e > 0 and movieNameP[e] == ' ') e--;
+        movieNameP = movieNameP.substr(0, e+1);
+        return 1;
     }
 }
 
@@ -226,6 +228,7 @@ void HDFScanDataReader::Close() {
     dyeSetGroup.Close();
     acqParamsGroup.Close();
     runInfoGroup.Close();
+    Reset();
 }
 
 

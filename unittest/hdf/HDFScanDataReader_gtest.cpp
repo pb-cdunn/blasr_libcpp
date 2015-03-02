@@ -34,10 +34,18 @@ TEST_F(HDFScanDataReaderTEST, ReadBindingKit) {
     string bindingKit;
     EXPECT_EQ(reader.ReadBindingKit(bindingKit), 1);
     EXPECT_EQ(bindingKit, "100356300");
+
+    // Test if bindkingKit can be read multiple times.
+    EXPECT_EQ(reader.ReadBindingKit(bindingKit), 1);
+    EXPECT_EQ(bindingKit, "100356300");
 }
 
 TEST_F(HDFScanDataReaderTEST, ReadSequencingKit) {
     string sequencingKit;
+    EXPECT_EQ(reader.ReadSequencingKit(sequencingKit), 1);
+    EXPECT_EQ(sequencingKit, "100356200");
+
+    // Test if sequencingKit can be read multiple times.
     EXPECT_EQ(reader.ReadSequencingKit(sequencingKit), 1);
     EXPECT_EQ(sequencingKit, "100356200");
 }

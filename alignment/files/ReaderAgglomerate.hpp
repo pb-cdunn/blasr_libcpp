@@ -47,6 +47,21 @@ public:
 
   void GetMovieName(string &movieName);
 
+  /// Get BindingKit, SequencingKit and Base Caller Version from h5.
+  ///
+  /// /param [out] sequencingKit - sequencingKit from 
+  /// /ScanData/RunInfo/SequencingKit.
+  ///
+  /// /param [out] bindingKit - BindingKit from 
+  /// /ScanData/RunInfo/BindingKit.
+  ///
+  /// /param [out] baseCallerVersion - Base Caller Version
+  /// from /PulseData/BaseCalls/ChangeListID.
+  ///
+  void GetChemistryTriple(string & bindingKit, 
+                          string & sequencingKit, 
+                          string & baseCallerVersion);
+ 
   bool FileHasZMWInformation();
 
   void SkipReadQuality();

@@ -40,7 +40,10 @@ public:
     std::string movieName, runCode;
     std::map<char, int> baseMap;
     PlatformId platformId;
+
     HDFScanDataReader(); 
+
+    void Reset();
 
     int InitializeAcqParamsAtoms(); 
 
