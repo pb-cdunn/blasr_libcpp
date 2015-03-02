@@ -107,6 +107,7 @@ public:
     //bool useBasecall;
     //bool useQuality;
     bool readBasesFromCCS;
+    ChangeListID changeList;
     QVScale qvScale;
 
     PlatformId GetPlatform() {
@@ -238,6 +239,15 @@ public:
             changeListID = "0";
         }
     }
+ 
+    /// Get BindingKit, SequencingKit and Base Caller Version.
+    void GetChemistryTriple(std::string & bindingKit,
+                            std::string & sequencingKit, 
+                            std::string & baseCallerVersion) {
+        scanDataReader.ReadBindingKit(bindingKit);
+        scanDataReader.ReadSequencingKit(sequencingKit);
+        baseCallerVersion = changeList.GetVersion();
+    }
 
     int InitializeForReadingBases() {
 
@@ -260,8 +270,8 @@ public:
         if (baseCallsGroup.ContainsAttribute("ChangeListID")) {
             changeListIDAtom.Initialize(baseCallsGroup.group, "ChangeListID");
             std::string changeListIdString;
-            ChangeListID changeList;
             GetChangeListID(changeListIdString);
+            changeList = ChangeListID(changeListIdString);
             qvScale = changeList.DetermineQVScaleFromChangeListID();
         }
         if (pulseDataGroup.ContainsObject("Regions")) {
@@ -756,8 +766,6 @@ public:
         if (includedFields["SimulatedCoordinate"] == true) {
             simulatedCoordinateArray.Read(curRead, curRead+1, &simCoordinate);
         }
-
-
 
         BuildReadTitle(scanDataReader.GetMovieName(), holeNumber, readTitle, simIndex, simCoordinate);
 
