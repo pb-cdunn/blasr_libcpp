@@ -168,12 +168,15 @@ int ReaderAgglomerate::Initialize() {
         return 0;
     };
 
+    // Movies from the same SMRTCell (e.g., *.1.bax.h5 and *.2.bax.h5)
+    // should have the same movieName, and the same MD5 according to
+    // PBBAM specification 3.0b3.
+    // moviePlusFileName = movieName + params.readsFileNames[readsFileIndex];
     string movieName;
     GetMovieName(movieName);
-    string moviePlusFileName = movieName + fileName;
-    MakeMD5(moviePlusFileName, readGroupId, 10);
+    MakeMD5(movieName, readGroupId, 10);
 
-   return 1;
+    return 1;
 }
 
 ReaderAgglomerate & ReaderAgglomerate::operator=(ReaderAgglomerate &rhs) {
