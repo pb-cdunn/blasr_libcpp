@@ -9,9 +9,7 @@
 #include "NucConversion.hpp"
 #include "DNASequence.hpp"
 #include "Enumerations.h"
-#include "ReverseCompressIndex.hpp"
 #include "FASTQSequence.hpp"
-#include "CompressedSequence.hpp"
 
 using namespace std;
 
@@ -353,38 +351,81 @@ void FASTQSequence::PrintFastqQuality(ostream &out, int lineLength) {
     PrintAsciiQual(out, lineLength);
 }
 
+bool FASTQSequence::GetQVs(const QVIndex qvIndex, std::vector<uint8_t> & qvs) {
+    qvs.clear();
+    uint8_t *  qualPtr;
+    int charOffset = charToQuality;
+    if (qvIndex == I_QualityValue) {
+        qualPtr = qual.data;
+    } else if (qvIndex == I_InsertionQV) {
+        qualPtr = insertionQV.data;
+    } else if (qvIndex == I_DeletionQV) {
+        qualPtr = deletionQV.data;
+    } else if (qvIndex == I_SubstitutionQV) {
+        qualPtr = substitutionQV.data;
+    } else if (qvIndex == I_MergeQV) {
+        qualPtr = mergeQV.data;
+    } else if (qvIndex == I_SubstitutionTag) {
+        qualPtr = (uint8_t*)(substitutionTag);
+        charOffset = 0;
+    } else if (qvIndex == I_DeletionTag) {
+        qualPtr = (uint8_t*)(deletionTag);
+        charOffset = 0;
+    }
+    if (qualPtr == NULL) {
+        return false;
+    }
+
+    qvs.resize(length);
+    for (int i =0; i < length; i++) {
+        qvs[i] = static_cast<uint8_t>(qualPtr[i] + charOffset);
+        assert(qvs[i] > 32 and qvs[i] < 127);
+    }
+    return true;
+}
+
+QVIndex FASTQSequence::GetQVIndex(const std::string qvName) {
+    if (qvName == "QualityValue") {
+        return I_QualityValue;
+    } else if (qvName == "InsertionQV") {
+        return I_InsertionQV;
+    } else if (qvName == "DeletionQV") {
+        return I_DeletionQV;
+    } else if (qvName == "SubstitutionQV") {
+        return I_SubstitutionQV;
+    } else if (qvName == "MergeQV") {
+        return I_MergeQV;
+    } else if (qvName == "SubstitutionTag") {
+        return  I_SubstitutionTag;
+    } else if (qvName == "DeletionTag"){
+        return I_DeletionTag;
+    } else {
+        std::cout << "ERROR: unknown Quality Value " << qvName << std::endl;
+        assert(false);
+    }
+}
+
+bool FASTQSequence::GetQVs(const std::string qvName, std::vector<uint8_t> & qvs){
+    return GetQVs(GetQVIndex(qvName), qvs);
+}
+
+bool FASTQSequence::GetQVs(const std::string qvName, std::string & qvsStr) {
+    std::vector<uint8_t> qvs;
+    bool OK = GetQVs(qvName, qvs);
+    qvsStr = string(qvs.begin(), qvs.end());
+    return OK;
+}
+
 void FASTQSequence::PrintAsciiRichQuality(ostream &out, 
         int whichQuality, int lineLength) {
-    unsigned char* qualPtr;
-    int charOffset = charToQuality;
-    if (whichQuality == 0) {
-        qualPtr = qual.data;
-    }
-    else if (whichQuality == 1) {
-        qualPtr = insertionQV.data;
-    }
-    else if (whichQuality == 2) {
-        qualPtr = deletionQV.data;
-    }
-    else if (whichQuality == 3) {
-        qualPtr = substitutionQV.data; 
-    }
-    else if (whichQuality == 4) {
-        qualPtr = mergeQV.data;
-    }
-    else if (whichQuality == 5) {
-        qualPtr = (unsigned char*) substitutionTag;
-        charOffset = 0;
-    }
-    else if (whichQuality == 6) {
-        qualPtr = (unsigned char*) deletionTag;
-        charOffset = 0;
-    }
+    vector<uint8_t> qvs;
+    bool OK = GetQVs(static_cast<QVIndex>(whichQuality), qvs);
+    
     int i;
     if (lineLength == 0) {
         for (i = 0; i < length; i++) {
-            if (qualPtr != NULL) {
-                out << (char)(qualPtr[i]+charOffset);
+            if (OK) {
+                out << static_cast<char>(qvs[i]);
             }
             else {
                 // Fake bad quality
@@ -394,10 +435,8 @@ void FASTQSequence::PrintAsciiRichQuality(ostream &out,
     }
     else {
         for (i = 0; i < length; i++) {
-            assert(((unsigned char) (qualPtr[i] + charOffset) > 32) &&
-                    ((unsigned char) (qualPtr[i] + charOffset) < 127));
-            if (qualPtr != NULL) {
-                out << (char)(qualPtr[i]+charOffset);
+            if (OK) {
+                out << static_cast<char>(qvs[i]);
             }
             else {
                 // Fake pretty bad quality.
@@ -442,8 +481,9 @@ void FASTQSequence::PrintQualSeq(ostream &out, int lineLength) {
 
 // Create a reverse complement FASTQSequence of *this and assign to rhs.
 void FASTQSequence::MakeRC(FASTQSequence &rc) {
-    rc.SetQVScale(qvScale);
+    rc.Free();
     FASTASequence::MakeRC(rc);
+    rc.SetQVScale(qvScale);
     if (qual.Empty() == true) {
         // there is no quality values, don't make an rc.
         return;
