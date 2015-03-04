@@ -27,11 +27,15 @@ H5Location* HDFAttributable::GetObject() {
 int HDFAttributable::ContainsAttribute(string attributeName) {
     int i;
     std::vector<std::string> tmpAttributeNames;
-    H5Location *obj = GetObject();
-    assert(obj != NULL);
-    StoreAttributeNames(*obj, tmpAttributeNames);
-    for (i = 0; i < tmpAttributeNames.size(); i++) {
-        if (tmpAttributeNames[i] == attributeName) return true;
+    try{
+        H5Location *obj = GetObject();
+        assert(obj != NULL);
+        StoreAttributeNames(*obj, tmpAttributeNames);
+        for (i = 0; i < tmpAttributeNames.size(); i++) {
+            if (tmpAttributeNames[i] == attributeName) return true;
+        }
+    } catch (H5::Exception e) {
+        //Failed to read attribute // e.printError();
     }
     return false;
 }
