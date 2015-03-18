@@ -16,6 +16,8 @@ class SMRTSequence : public FASTQSequence {
 public:
     int16_t xy[2];
     int holeNumber;
+    float hqRegionSnr[4];
+    float readScore;
     ZMWGroupEntry zmwData;
     PlatformId platform;
     HalfWord *preBaseFrames;

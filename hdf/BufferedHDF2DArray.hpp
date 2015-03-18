@@ -4,7 +4,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+
 #include "H5Cpp.h"
+
+#include "Types.h"
 #include "HDFConfig.hpp"
 #include "HDFData.hpp"
 #include "HDFGroup.hpp"
@@ -62,6 +65,8 @@ public:
 
     ~BufferedHDF2DArray(); 
 
+    int InitializeForReading(HDFGroup &group, std::string datasetName);
+
     /*
      * Initialize HDF2D for reading.  No write buffer initialization is
      * required.  The assumption is that the dataspace is in two
@@ -109,6 +114,8 @@ public:
     void Flush(int destRow = -1); 
 };
 
+UInt GetDatasetNDim(H5::CommonFG &parentGroup, std::string datasetName);
+
 #define DECLARE_TYPED_WRITE_ROW(T, Pred) template<>\
 void BufferedHDF2DArray<T>::TypedWriteRow(const T *data, \
     const H5::DataSpace &memorySpace, const H5::DataSpace &fileSpace) ;
@@ -119,6 +126,7 @@ DECLARE_TYPED_WRITE_ROW(unsigned int, H5::PredType::NATIVE_UINT)
 DECLARE_TYPED_WRITE_ROW(unsigned char, H5::PredType::NATIVE_UINT8)
 DECLARE_TYPED_WRITE_ROW(uint16_t, H5::PredType::NATIVE_UINT16)
 DECLARE_TYPED_WRITE_ROW(int16_t, H5::PredType::NATIVE_INT16)
+DECLARE_TYPED_WRITE_ROW(float, H5::PredType::NATIVE_FLOAT)
 
 
 #define DECLARE_TYPED_READ_ROW(T, Pred) template<>\
@@ -131,6 +139,7 @@ DECLARE_TYPED_READ_ROW(char, H5::PredType::NATIVE_INT8)
 DECLARE_TYPED_READ_ROW(unsigned char, H5::PredType::NATIVE_UINT8)
 DECLARE_TYPED_READ_ROW(uint16_t, H5::PredType::NATIVE_UINT16)
 DECLARE_TYPED_READ_ROW(int16_t, H5::PredType::NATIVE_INT16)
+DECLARE_TYPED_READ_ROW(float, H5::PredType::NATIVE_FLOAT)
 
 #define DECLARE_TYPED_CREATE_ROW(T, Pred)template<>\
 void BufferedHDF2DArray<T>::TypedCreate(H5::DataSpace &fileSpace, \
@@ -142,6 +151,7 @@ DECLARE_TYPED_CREATE_ROW(char, H5::PredType::NATIVE_INT8)
 DECLARE_TYPED_CREATE_ROW(unsigned char, H5::PredType::NATIVE_UINT8)
 DECLARE_TYPED_CREATE_ROW(uint16_t, H5::PredType::NATIVE_UINT16)
 DECLARE_TYPED_CREATE_ROW(int16_t, H5::PredType::NATIVE_INT16)
+DECLARE_TYPED_CREATE_ROW(float, H5::PredType::NATIVE_FLOAT)
 
 #include "BufferedHDF2DArrayImpl.hpp"
 

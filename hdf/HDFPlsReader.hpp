@@ -127,16 +127,6 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
         return startFrameArray.arrayLength;
     }
 
-  UInt  GetDatasetNDim(CommonFG &parentGroup, string datasetName) {
-    HDFData tmpDataset;
-    tmpDataset.InitializeDataset(parentGroup, datasetName);
-    DataSpace dataspace = tmpDataset.dataset.getSpace();
-    UInt nDims = dataspace.getSimpleExtentNdims();
-    dataspace.close();
-    tmpDataset.dataset.close();
-    return nDims;
-  }
-
 	void GetAllMeanSignal(vector<uint16_t> &meanSignal) {
     if (meanSignalNDims == 1) {
       CheckMemoryAllocation(meanSignalArray.arrayLength, maxAllocNElements, "MeanSignal");
@@ -432,7 +422,7 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
     curRead = holeNumber;
     curPos  = eventOffset[holeNumber];
     zmwReader.curZMW = holeNumber;
-    GetNextFlattenedToBase(read, basToPlsIndex);
+    return GetNextFlattenedToBase(read, basToPlsIndex);
   }
 
   template<typename T_FieldType>
@@ -533,6 +523,7 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
              << read.GetName() << endl;
         exit(1);
     }
+    return 1;
 	}
 	
 

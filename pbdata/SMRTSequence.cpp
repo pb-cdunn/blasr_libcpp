@@ -16,6 +16,11 @@ void SMRTSequence::SetNull() {
     // By default, allow the entire read.
     lowQualityPrefix = lowQualitySuffix = 0;
     highQualityRegionScore = 0;
+    // ZMWMetrics
+    for (size_t i = 0; i < 4; i++) {
+        hqRegionSnr[i] = -1;
+    }
+    readScore = -1;
 }
 
 SMRTSequence::SMRTSequence() : FASTQSequence() {

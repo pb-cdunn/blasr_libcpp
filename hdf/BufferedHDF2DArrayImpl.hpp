@@ -46,6 +46,12 @@ BufferedHDF2DArray<T>::~BufferedHDF2DArray() {
     Close();
 }
 
+template<typename T>
+int BufferedHDF2DArray<T>::InitializeForReading(HDFGroup& group, std::string datasetName)
+{
+    return Initialize(group, datasetName, 0, 0, false);
+}
+
 /*
  * Initialize HDF2D for reading.  No write buffer initialization is
  * required.  The assumption is that the dataspace is in two
