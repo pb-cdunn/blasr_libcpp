@@ -681,6 +681,11 @@ public:
         //
 
         try {
+            // must check before looking at HQRegionSNR/ReadScore!!
+            if (curRead == nReads) {
+                return 0;
+            }
+
             // get ZMWMetrics fields, must be done before GetNext
             // (which calls GetNextWithoutAdvancePos, which increments curRead)
             if (includedFields["HQRegionSNR"]) {
