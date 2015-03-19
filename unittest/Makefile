@@ -10,14 +10,19 @@ include ./common.mk
 LIBDIRS := -L$(PBINCROOT)/alignment \
            -L$(PBINCROOT)/pbdata \
            -L$(PBINCROOT)/hdf \
-           -L$(HDF5_ROOT)/src/.libs \
-           -L$(HDF5_ROOT)/c++/src/.libs
+           -L$(HDF5_ROOT)/lib
 
 ifneq ($(ZLIB_ROOT), notfound)
 	LIBDIRS += -L$(ZLIB_ROOT)/lib
 endif
 
-LDFLAGS := -lblasr -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
+ifneq ($(wildcard "$(HDF5_ROOT)/lib/libhdf5_cpp.a"),"")
+    LDFLAGS := -lblasr -lpbihdf -lpbdata \
+               $(HDF5_ROOT)/lib/libhdf5_cpp.a $(HDF5_ROOT)/lib/libhdf5.a \
+               -lpthread -lz -ldl
+else
+    LDFLAGS := -lblasr -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
+endif
 
 OS := $(shell uname)
 

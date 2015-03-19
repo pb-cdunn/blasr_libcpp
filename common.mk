@@ -1,4 +1,6 @@
-SHELL=bash
+SHELL          = bash
+G_BUILDOS_CMD := bash -c 'set -e; set -o pipefail; id=$$(lsb_release -si | tr "[:upper:]" "[:lower:]"); rel=$$(lsb_release -sr); case $$id in ubuntu) printf "$$id-%04d\n" $${rel/./};; centos) echo "$$id-$${rel%%.*}";; *) echo "$$id-$$rel";; esac'
+OS_STRING     ?= $(shell $(G_BUILDOS_CMD))
 
 #
 # Definitions common to all make files for library code.
@@ -20,7 +22,7 @@ PREBUILT ?= ../../../../prebuilt.out
 
 # handle HDF5_ROOT
 ifeq ($(origin HDF5_ROOT), undefined)
-	HDF5_ROOT := $(shell cd $(PREBUILT)/hdf5/hdf5-1.8.12/centos-5/artifact 2>/dev/null && pwd || echo -n notfound)
+	HDF5_ROOT := $(shell cd $(PREBUILT)/hdf5/hdf5-1.8.12/$(OS_STRING) 2>/dev/null && pwd || echo -n notfound)
 else
 	HDF5_ROOT := $(shell cd $(HDF5_ROOT) 2>/dev/null && pwd || echo -n notfound)
 endif
@@ -32,12 +34,9 @@ ifeq ($(HDF5_ROOT), notfound)
 	endif
 endif
 
-# this is a magic string from our build system
-OS_STRING2 ?= centos-5
-
 # handle ZLIB_ROOT
 ifeq ($(origin ZLIB_ROOT), undefined)
-	ZLIB_ROOT := $(shell cd $(PREBUILT)/zlib/zlib-1.2.5/$(OS_STRING2) 2>/dev/null && pwd || echo -n notfound)
+	ZLIB_ROOT := $(shell cd $(PREBUILT)/zlib/zlib-1.2.5/$(OS_STRING) 2>/dev/null && pwd || echo -n notfound)
 else
 	ZLIB_ROOT := $(shell cd $(ZLIB_ROOT) 2>/dev/null && pwd || echo -n notfound)
 endif

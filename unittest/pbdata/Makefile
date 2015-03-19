@@ -3,12 +3,10 @@ include ../common.mk
 INCDIRS    = -I.. \
              -I$(PBINCROOT)/pbdata \
              -I$(GTEST_ROOT) \
-             -I$(HDF5_ROOT)/src \
-             -I$(HDF5_ROOT)/c++/src
+             -I$(HDF5_ROOT)/include
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata \
-             -L$(HDF5_ROOT)/src/.libs \
-             -L$(HDF5_ROOT)/c++/src/.libs
+             -L$(HDF5_ROOT)/lib
 
 ifneq ($(ZLIB_ROOT), notfound)
 	INCDIRS += -I$(ZLIB_ROOT)/include
