@@ -807,6 +807,8 @@ public:
         unsigned char holeStatus;
         zmwReader.holeNumberArray.Read(curRead, curRead+1, &holeNumber);
         seq.StoreHoleNumber(holeNumber);
+
+        zmwReader.holeStatusArray.Read(curRead, curRead+1, &holeStatus);
         seq.StoreHoleStatus(holeStatus);
 
         DNALength simIndex=0, simCoordinate=0;
