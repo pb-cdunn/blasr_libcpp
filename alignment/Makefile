@@ -10,7 +10,7 @@ ifneq ($(ZLIB_ROOT), notfound)
 	INCLUDES += -I$(ZLIB_ROOT)/include
 endif
 
-CXXOPTS := -std=c++0x -pedantic -Wno-long-long -MMD -MP
+CXXOPTS := -std=c++11 -pedantic -Wno-long-long -MMD -MP
 
 sources := $(wildcard algorithms/alignment/*.cpp) \
 		   $(wildcard algorithms/alignment/sdp/*.cpp) \

@@ -19,7 +19,7 @@ GTEST_SRC  := $(GTEST_ROOT)/gtest/gtest-all.cc \
               $(GTEST_ROOT)/gtest/gtest_main.cc
 
 CXX := g++
-CXXOPTS := -std=c++0x -Wno-div-by-zero 
+CXXOPTS := -std=c++11 -Wno-div-by-zero 
 
 all : CXXFLAGS ?= -O3
 

@@ -1,7 +1,7 @@
 
 include ../common.mk
 
-CXXOPTS := -std=c++0x -pedantic -MMD -MP
+CXXOPTS := -std=c++11 -pedantic -MMD -MP
 INCLUDES := -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils -Ialignment
 
 sources := $(wildcard *.cpp) \

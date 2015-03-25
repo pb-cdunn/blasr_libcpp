@@ -8,7 +8,7 @@ ifneq ($(ZLIB_ROOT), notfound)
 	INCLUDES += -I$(ZLIB_ROOT)/include
 endif
 
-CXXOPTS := -std=c++0x -pedantic -MMD -MP
+CXXOPTS := -std=c++11 -pedantic -MMD -MP
 sources := $(wildcard *.cpp)
 objects := $(sources:.cpp=.o)
 dependencies := $(sources:.cpp=.d)
