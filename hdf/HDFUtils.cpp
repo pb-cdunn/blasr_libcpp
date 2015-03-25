@@ -7,7 +7,7 @@ std::string GetH5MovieName(std::string fileName) {
 
 std::vector<std::string> GetH5MovieNames(const std::vector<std::string> & fileNames) {
     std::vector<std::string> ret;
-    for (int i = 0 ; i < fileNames.size(); i++) {
+    for (size_t i = 0 ; i < fileNames.size(); i++) {
         ret.push_back(GetH5MovieName(fileNames[i]));
     }
     return ret;
@@ -16,7 +16,7 @@ std::vector<std::string> GetH5MovieNames(const std::vector<std::string> & fileNa
 std::vector< std::pair<UInt, UInt> > GetMinMaxHoleNumbers(
     const std::vector<std::string> & fileNames, bool isRGN) {
     std::vector< std::pair<UInt, UInt> > ret;
-    for (int i = 0 ; i < fileNames.size(); i++) {
+    for (size_t i = 0 ; i < fileNames.size(); i++) {
         ret.push_back(GetMinMaxHoleNumber(fileNames[i], isRGN));
     }
     return ret;
@@ -60,8 +60,8 @@ std::vector<int> MapPls2Rgn(const std::vector<std::string> & plsFNs,
     std::vector< std::pair<UInt, UInt> > rgnHoles = GetMinMaxHoleNumbers(rgnFNs, true);
 
     std::vector<int> ret;
-    for (int i = 0; i < plsFNs.size(); i++) {
-        int j = 0;
+    for (size_t i = 0; i < plsFNs.size(); i++) {
+        size_t j = 0;
         for (; j < rgnFNs.size(); j++) {
             if (plsMovies[i] == rgnMovies[j] and
                 plsHoles[i].first <= rgnHoles[j].first and

@@ -198,7 +198,7 @@ int HDFScanDataReader::LoadBaseMap(map<char, int> & baseMap) {
             exit(1);
         }
         baseMap.clear();
-        for(int i = 0; i < baseMapStr.size(); i++) {
+        for(size_t i = 0; i < baseMapStr.size(); i++) {
             baseMap[toupper(baseMapStr[i])] = i;
             baseMap[tolower(baseMapStr[i])] = i;
         }
@@ -235,7 +235,6 @@ void HDFScanDataReader::Close() {
 std::string HDFScanDataReader::GetMovieName_and_Close(std::string & fileName) {
     HDFFile file;
     file.Open(fileName, H5F_ACC_RDONLY);
-    int init = 0;
 
     fileHasScanData = false;
     if (file.rootGroup.ContainsObject("ScanData") == 0 or 

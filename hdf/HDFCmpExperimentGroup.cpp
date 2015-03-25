@@ -16,7 +16,6 @@ bool HDFCmpExperimentGroup::Create(HDFGroup &parent,
 void HDFCmpExperimentGroup::AddAlignment(std::vector<unsigned char> &alignment, 
     unsigned int &offsetBegin, unsigned int &offsetEnd) {
 
-    int curNRows = alignmentArray.size();
     offsetBegin = offsetEnd = 0;
     if (alignment.size() == 0 ) {
         // 

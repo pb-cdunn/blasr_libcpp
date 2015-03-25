@@ -211,7 +211,7 @@ bool SMRTSequence::StoreHoleNumber(int holeNumberP){
     return true;
 }
 
-bool SMRTSequence::StoreHoleStatus(unsigned int s) {
+bool SMRTSequence::StoreHoleStatus(unsigned char s) {
     zmwData.holeStatus = s;
     return true;
 }

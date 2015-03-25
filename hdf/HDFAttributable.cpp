@@ -10,7 +10,6 @@ void CallStoreAttributeName(H5Location &obj, string attrName, void *attrList){
 
 void HDFAttributable::StoreAttributeNames(H5Location &thisobject, 
     std::vector<std::string> &attributeNames) {
-    void *destAndData[2];
     int nAttr = thisobject.getNumAttrs();
     unsigned int bounds[2];
     bounds[0] = 0;
@@ -25,7 +24,7 @@ H5Location* HDFAttributable::GetObject() {
 }
 
 int HDFAttributable::ContainsAttribute(string attributeName) {
-    int i;
+    size_t i;
     std::vector<std::string> tmpAttributeNames;
     try{
         H5Location *obj = GetObject();

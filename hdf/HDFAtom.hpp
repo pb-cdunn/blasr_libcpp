@@ -85,7 +85,6 @@ public:
     void Create(H5::H5Location &object, std::string name, std::vector<int> &vect) {
         hsize_t length = vect.size();
         H5::ArrayType arrayDataType(H5::PredType::NATIVE_INT, 1, &length);
-        hsize_t one = 1;
         attribute = object.createAttribute(name.c_str(), H5::PredType::NATIVE_INT, H5::DataSpace(1, &length));
         attribute.write(H5::PredType::NATIVE_INT, &((vect)[0]));    
     }
@@ -94,7 +93,6 @@ public:
         hsize_t length = vect.size();
         H5::StrType strType(0,H5T_VARIABLE);
         H5::ArrayType arrayDataType(strType, 1, &length);
-        hsize_t one = 1;
         attribute = object.createAttribute(name.c_str(), strType, H5::DataSpace(1, &length));
         attribute.write(strType, &((vect)[0]));    
     }

@@ -34,7 +34,6 @@ void HDFFile::Open(string fileName, unsigned int flags,
             // Open a new file with TRUNC permissions, always read/write.
             //
             FileCreatPropList filePropList;
-            hsize_t ub = filePropList.getUserblock();
             filePropList.setUserblock(512);
             hdfFile = H5File(fileName.c_str(), H5F_ACC_TRUNC, filePropList);
         }

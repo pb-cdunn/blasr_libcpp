@@ -279,7 +279,8 @@ void BufferedHDF2DArray<T>::Flush(int destRow) {
     //
     // A default writeRow of -1 implies append
     //
-    int numRowsToCreate, numDataRows;
+    int numRowsToCreate; // FIXME(yli): why is numRowsToCreate assigned but not used?
+    int numDataRows;
     //
     // this->bufferIndex points after the end of the last data in the
     // buffer (full rows), so this->bufferIndex / rowLength is the
@@ -336,7 +337,7 @@ void BufferedHDF2DArray<T>::Flush(int destRow) {
         // Store the newly dimensioned dataspaces.
         //
         fileSpace.getSimpleExtentDims(fileArraySize, fileArrayMaxSize);			
-        int extendedSize = extendedSpace.getSimpleExtentNpoints();
+        //int extendedSize = extendedSpace.getSimpleExtentNpoints(); // FIXME(yli): should this be used??
         //
         // Configure the proper addressing to append to the array.
         //

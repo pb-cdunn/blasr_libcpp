@@ -71,7 +71,7 @@ public:
 
     bool StoreHoleNumber(int holeNumberP);
 
-    bool StoreHoleStatus(unsigned int s); 
+    bool StoreHoleStatus(unsigned char s); 
 
     bool StoreZMWData(ZMWGroupEntry &data); 
 

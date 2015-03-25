@@ -40,10 +40,9 @@ int HDFGroup::Initialize(HDFGroup & parentGroup, string groupName) {
 
 bool HDFGroup::ContainsObject(string queryObjectName) {
     hsize_t objIdx;
-    int numGroupObjs = group.getNumObjs();
+    hsize_t numGroupObjs = group.getNumObjs();
     for (objIdx = 0; objIdx < numGroupObjs; objIdx++) {
         H5std_string groupObjectName;
-        size_t objNameSize;
         groupObjectName = group.getObjnameByIdx(objIdx);
         if (groupObjectName == queryObjectName) {
             return true;
