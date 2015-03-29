@@ -27,6 +27,7 @@ public:
     int titleLength;
 
     FASTASequence();
+    inline ~FASTASequence();
 
     void PrintSeq(std::ostream &out, int lineLength = 50, char delim='>');
 
@@ -73,5 +74,9 @@ public:
     void Free(); 
 };
 
+
+inline FASTASequence::~FASTASequence(){
+    FASTASequence::Free();
+}
 
 #endif

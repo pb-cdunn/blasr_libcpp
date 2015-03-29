@@ -69,7 +69,7 @@ void SMRTSequence::MakeSubreadAsMasked(SMRTSequence &subread,
     // This creates the entire subread, but masks out the portions
     // that do not correspond to this insert.
     //
-    ((SMRTSequence&)subread).Copy(*this);
+    static_cast<SMRTSequence*>(&subread)->Copy(*this);
     SetSubreadBoundaries(subread, subreadStart, subreadEnd);
     DNALength pos;
     for (pos = 0; pos < subreadStart; pos++) { subread.seq[pos] = 'N'; }
@@ -84,7 +84,7 @@ void SMRTSequence::MakeSubreadAsReference(SMRTSequence &subread,
     //
     // Just create a reference to a substring of this read.  
     //
-    ((FASTQSequence)subread).ReferenceSubstring(*this, subreadStart, subreadEnd - subreadStart);
+    static_cast<FASTQSequence*>(&subread)->ReferenceSubstring(*this, subreadStart, subreadEnd - subreadStart);
     SetSubreadBoundaries(subread, subreadStart, subreadEnd);
     // The subread references this read, protect the memory.
     assert(not subread.deleteOnExit);
@@ -104,11 +104,11 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
     FASTQSequence subseq; 
     // subseq.seq is referenced, while seq.title is not, we need to call 
     // subseq.Free() to prevent memory leak.
-    ((FASTQSequence&)subseq).ReferenceSubstring((FASTQSequence&)rhs, rhsPos, rhsLength);
-    ((FASTQSequence&)subseq).CopyTitle(rhs.title, rhs.titleLength); 
+    static_cast<FASTQSequence*>(&subseq)->ReferenceSubstring(rhs, rhsPos, rhsLength);
+    static_cast<FASTQSequence*>(&subseq)->CopyTitle(rhs.title, rhs.titleLength); 
 
     if (rhs.length == 0) {
-        ((FASTQSequence*)this)->Copy(subseq);
+        static_cast<FASTQSequence*>(this)->Copy(subseq);
         //
         // Make sure that no values of length 0 are allocated by returning here.
         //
@@ -119,7 +119,7 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
         assert(rhsPos < rhs.length);
 
         // Copy seq, title and FASTQ QVs from subseq
-        ((FASTQSequence*)this)->Copy(subseq); 
+        static_cast<FASTQSequence*>(this)->Copy(subseq); 
 
         // Copy SMRT QVs
         if (rhs.preBaseFrames != NULL) {

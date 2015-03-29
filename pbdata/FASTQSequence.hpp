@@ -36,6 +36,7 @@ public:
     int GetStorageSize(); 
 
     FASTQSequence();
+    inline ~FASTQSequence();
 
     QualityValue GetDeletionQV(DNALength pos); 
 
@@ -93,25 +94,25 @@ public:
 
     void PrintFastqQuality(std::ostream &out, int lineLength=50); 
 
-    QVIndex GetQVIndex(const std::string qvName);
+    QVIndex GetQVIndex(const std::string & qvName);
 
     /// Get QVs in vector<uint8_t> associated with the given QVIndex.
     /// \returns true if qvs are available, false otherwise
     /// \param [in] qvIndex - enum QVIndex
     /// \param [out] qvs - obtained QVs.
-    bool GetQVs(const QVIndex qvIndex, std::vector<uint8_t> & qvs);
+    bool GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs);
 
     /// Get QVs in vector<uint8_t>, given with QV Name.
     /// \returns true if qvs are available, false, otherwise
     /// \param [in] qvName - InsertionQV, DeletionQV, SubstitionQV, MergeQV, SubstitutionTag, DeletionTag
     /// \param [out] qvs - obtians QVs.
-    bool GetQVs(const std::string qvName, std::vector<uint8_t> & qvs);
+    bool GetQVs(const std::string & qvName, std::vector<uint8_t> & qvs);
 
     /// Get QVs in string, given with QV Name.
     /// \returns true if qvs are available, false, otherwise
     /// \param [in] qvName - InsertionQV, DeletionQV, SubstitionQV, MergeQV, SubstitutionTag, DeletionTag
     /// \param [out] qvs - obtians QVs.
-    bool GetQVs(const std::string qvName, std::string & qvs);
+    bool GetQVs(const std::string & qvName, std::string & qvs);
 
     void PrintAsciiRichQuality(std::ostream &out, int whichQuality, int lineLength=50);
 
@@ -130,5 +131,8 @@ public:
     float GetAverageQuality(); 
 };
 
+inline FASTQSequence::~FASTQSequence() {
+    FASTQSequence::Free();
+}
 
 #endif // _BLASR_FASTQ_SEQUENCE_HPP_

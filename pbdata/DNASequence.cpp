@@ -20,6 +20,7 @@ void DNASequence::TakeOwnership(DNASequence &rhs) {
 }
 
 void DNASequence::Append(const DNASequence &rhs, DNALength appendPos) {
+    assert(deleteOnExit); // must have control over seq.
     //
     // Simply append rhs to this seuqence, unless appendPos is nonzero
     // in which case rhs is inserted at attendPos, overwriting this
@@ -41,7 +42,6 @@ void DNASequence::Append(const DNASequence &rhs, DNALength appendPos) {
         }
         seq = newSeq;
         length = newSeqLength;
-        deleteOnExit = true;
     }
     else {
         if (appendPos + rhs.length < length) {
@@ -61,12 +61,12 @@ void DNASequence::Append(const DNASequence &rhs, DNALength appendPos) {
             }
             seq = newSeq;
             length = newSeqLength;
-            deleteOnExit = true;
         }
     }
+    deleteOnExit = true;
 }
 
-// Copie FROM rhs to this DNASequence. 
+// Copy FROM rhs to this DNASequence. 
 DNASequence& DNASequence::Copy(const DNASequence &rhs, DNALength rhsPos, DNALength rhsLength) {
     CheckBeforeCopyOrReference(rhs);
     // Free this DNASequence before copying from rhs
@@ -176,7 +176,7 @@ void DNASequence::Allocate(DNALength plength) {
     deleteOnExit = true;
 }
 
-void DNASequence::ReferenceSubstring(const DNASequence &rhs, DNALength pos, int substrLength) {
+void DNASequence::ReferenceSubstring(const DNASequence &rhs, DNALength pos, DNALength substrLength) {
     CheckBeforeCopyOrReference(rhs); 
 
     // Free this DNASequence before referencing rhs.
@@ -355,12 +355,6 @@ DNALength DNASequence::GetRepeatContent() {
 
 void DNASequence::CleanupOnFree() {
     deleteOnExit = true;
-}
-
-void DNASequence::FreeIfControlled() {
-    if (deleteOnExit) {
-        DNASequence::Free();
-    }
 }
 
 void DNASequence::Free() {

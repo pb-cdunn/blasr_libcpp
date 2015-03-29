@@ -19,6 +19,7 @@ public:
     bool deleteOnExit;
 
     inline DNASequence();
+    inline ~DNASequence();
 
     //--- functions ---//
     
@@ -44,7 +45,7 @@ public:
 
     void Allocate(DNALength plength);
 
-    void ReferenceSubstring(const DNASequence &rhs, DNALength pos=0, int substrLength=0); 
+    void ReferenceSubstring(const DNASequence &rhs, DNALength pos=0, DNALength substrLength=0); 
 
     DNALength MakeRCCoordinate(DNALength forPos );
 
@@ -96,8 +97,6 @@ public:
 
     void CleanupOnFree();
 
-    void FreeIfControlled(); 
-
     virtual void Free(); 
 
     void Resize(DNALength newLength);
@@ -110,6 +109,10 @@ inline DNASequence::DNASequence() {
     length = 0;
     bitsPerNuc = 8;
     deleteOnExit = false;
+}
+
+inline DNASequence::~DNASequence() {
+    DNASequence::Free();
 }
 
 

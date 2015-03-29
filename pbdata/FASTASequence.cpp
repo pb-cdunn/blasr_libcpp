@@ -16,7 +16,7 @@ void FASTASequence::PrintSeq(ostream &out, int lineLength, char delim) {
     out << delim;
     if (title) out << title;
     out << endl;
-    ((DNASequence*)this)->PrintSeq(out, lineLength); 
+    static_cast<DNASequence*>(this)->PrintSeq(out, lineLength); 
 }
 
 int FASTASequence::GetStorageSize() {
@@ -76,7 +76,7 @@ void FASTASequence::ShallowCopy(const FASTASequence &rhs) {
     CheckBeforeCopyOrReference(rhs, "FASTASequence");
     FASTASequence::Free();
 
-    ((DNASequence*)this)->ShallowCopy(rhs);
+    static_cast<DNASequence*>(this)->ShallowCopy(rhs);
 
     title = rhs.title;
     titleLength = rhs.titleLength;
@@ -182,9 +182,10 @@ void FASTASequence::Assign(FASTASequence &rhs) {
 
 // Create a reverse complement FASTASequence of *this and assign to rhs.
 void FASTASequence::MakeRC(FASTASequence &rhs, DNALength rhsPos, DNALength rhsLength) {
+    rhs.Free();
     DNASequence::MakeRC((DNASequence&) rhs, rhsPos, rhsLength);
     if (title != NULL) {
-        ((FASTASequence&)rhs).CopyTitle(title);
+        (static_cast<FASTASequence*>(&rhs))->CopyTitle(title);
     }
 }
 
@@ -193,7 +194,7 @@ void FASTASequence::ReverseComplementSelf() {
     for (i = 0; i < length/2 + length % 2; i++) {
         char c = seq[i];
         seq[i] = ReverseComplementNuc[seq[length - i - 1]];
-        seq[length - i - 1] = ReverseComplementNuc[c];
+        seq[length - i - 1] = ReverseComplementNuc[static_cast<int>(c)];
     }
 }
 

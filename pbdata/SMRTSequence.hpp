@@ -40,6 +40,7 @@ public:
     void SetNull(); 
 
     SMRTSequence();
+    inline ~SMRTSequence();
 
     void Allocate(DNALength length); 
 
@@ -80,4 +81,7 @@ public:
     bool GetHoleNumber(int& holeNumberP); 
 };
 
+inline SMRTSequence::~SMRTSequence(){
+    SMRTSequence::Free();
+}
 #endif  // _BLASR_SMRT_SEQUENCE_HPP_

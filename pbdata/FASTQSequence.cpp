@@ -351,7 +351,7 @@ void FASTQSequence::PrintFastqQuality(ostream &out, int lineLength) {
     PrintAsciiQual(out, lineLength);
 }
 
-bool FASTQSequence::GetQVs(const QVIndex qvIndex, std::vector<uint8_t> & qvs) {
+bool FASTQSequence::GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs) {
     qvs.clear();
     uint8_t *  qualPtr;
     int charOffset = charToQuality;
@@ -377,14 +377,14 @@ bool FASTQSequence::GetQVs(const QVIndex qvIndex, std::vector<uint8_t> & qvs) {
     }
 
     qvs.resize(length);
-    for (int i =0; i < length; i++) {
+    for (DNALength i = 0; i < length; i++) {
         qvs[i] = static_cast<uint8_t>(qualPtr[i] + charOffset);
         assert(qvs[i] > 32 and qvs[i] < 127);
     }
     return true;
 }
 
-QVIndex FASTQSequence::GetQVIndex(const std::string qvName) {
+QVIndex FASTQSequence::GetQVIndex(const std::string & qvName) {
     if (qvName == "QualityValue") {
         return I_QualityValue;
     } else if (qvName == "InsertionQV") {
@@ -405,11 +405,11 @@ QVIndex FASTQSequence::GetQVIndex(const std::string qvName) {
     }
 }
 
-bool FASTQSequence::GetQVs(const std::string qvName, std::vector<uint8_t> & qvs){
+bool FASTQSequence::GetQVs(const std::string & qvName, std::vector<uint8_t> & qvs){
     return GetQVs(GetQVIndex(qvName), qvs);
 }
 
-bool FASTQSequence::GetQVs(const std::string qvName, std::string & qvsStr) {
+bool FASTQSequence::GetQVs(const std::string & qvName, std::string & qvsStr) {
     std::vector<uint8_t> qvs;
     bool OK = GetQVs(qvName, qvs);
     qvsStr = string(qvs.begin(), qvs.end());
@@ -421,7 +421,7 @@ void FASTQSequence::PrintAsciiRichQuality(ostream &out,
     vector<uint8_t> qvs;
     bool OK = GetQVs(static_cast<QVIndex>(whichQuality), qvs);
     
-    int i;
+    DNALength i;
     if (lineLength == 0) {
         for (i = 0; i < length; i++) {
             if (OK) {
@@ -474,7 +474,6 @@ void FASTQSequence::PrintQual(ostream &out, int lineLength) {
 
 void FASTQSequence::PrintQualSeq(ostream &out, int lineLength) {
     FASTASequence::PrintSeq(out, lineLength);
-    int i;
     lineLength /= 4;
     PrintQual(out, lineLength);
 }
@@ -484,67 +483,63 @@ void FASTQSequence::MakeRC(FASTQSequence &rc) {
     rc.Free();
     FASTASequence::MakeRC(rc);
     rc.SetQVScale(qvScale);
-    if (qual.Empty() == true) {
-        // there is no quality values, don't make an rc.
-        return;
-    }
 
-    if (rc.qual.Empty() == false) {
-        rc.qual.Free();
-    }
-    ((FASTQSequence&)rc).AllocateQualitySpace(length);
-    int i;
-    for (i = 0; i < length; i++ ){
-        rc.qual.data[length - i - 1] = qual[i];
+    if (not qual.Empty()) {
+        // QVs are independent of one another. A FASTQSequence can have
+        // insertionQV without having QualityValue.
+        (static_cast<FASTQSequence*>(&rc))->AllocateQualitySpace(length);
+        for (DNALength pos = 0; pos < length; pos++ ){
+            rc.qual.data[length - pos - 1] = qual[pos];
+        }
     }
 
     //
     // The read contains rich quality values. Reverse them here.
     //
     if (deletionQV.Empty() == false) {
-        ((FASTQSequence&)rc).AllocateDeletionQVSpace(length);
+        (static_cast<FASTQSequence*>(&rc))->AllocateDeletionQVSpace(length);
         for (DNALength pos = 0; pos < length; pos++) {
             rc.deletionQV[length - pos - 1] = deletionQV[pos];
         }
     }
 
     if (insertionQV.Empty() == false) {
-        ((FASTQSequence&)rc).AllocateInsertionQVSpace(length);
+        (static_cast<FASTQSequence*>(&rc))->AllocateInsertionQVSpace(length);
         for (DNALength pos = 0; pos < length; pos++) {
             rc.insertionQV[length - pos - 1] = insertionQV[pos];
         }
     }
 
     if (substitutionQV.Empty() == false) {
-        ((FASTQSequence&)rc).AllocateSubstitutionQVSpace(length);
+        (static_cast<FASTQSequence*>(&rc))->AllocateSubstitutionQVSpace(length);
         for (DNALength pos = 0; pos < length; pos++) {
             rc.substitutionQV[length - pos - 1] = substitutionQV[pos];
         }
     }
 
     if (mergeQV.Empty() == false) {
-        ((FASTQSequence&)rc).AllocateMergeQVSpace(length);
+        (static_cast<FASTQSequence*>(&rc))->AllocateMergeQVSpace(length);
         for (DNALength pos = 0; pos < length; pos++) {
             rc.mergeQV[length - pos - 1] = mergeQV[pos];
         }
     }
 
     if (substitutionTag != NULL) {
-        ((FASTQSequence&)rc).AllocateSubstitutionTagSpace(length);
+        (static_cast<FASTQSequence*>(&rc))->AllocateSubstitutionTagSpace(length);
         for (DNALength pos = 0; pos < length; pos++) {
             rc.substitutionTag[length - pos - 1] = ReverseComplementNuc[substitutionTag[pos]];
         }
     }
 
     if (deletionTag != NULL) {
-        ((FASTQSequence&)rc).AllocateDeletionTagSpace(length);
+        (static_cast<FASTQSequence*>(&rc))->AllocateDeletionTagSpace(length);
         for (DNALength pos = 0; pos < length; pos++) {
             rc.deletionTag[length - pos - 1] = ReverseComplementNuc[deletionTag[pos]];
         }
     }
 
     if (preBaseDeletionQV.Empty() == false) {
-        ((FASTQSequence&)rc).AllocatePreBaseDeletionQVSpace(length);
+        (static_cast<FASTQSequence*>(&rc))->AllocatePreBaseDeletionQVSpace(length);
         for (DNALength pos = 0; pos < length; pos++) {
             rc.preBaseDeletionQV[length - pos - 1] = preBaseDeletionQV[pos];
         }
