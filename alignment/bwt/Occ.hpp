@@ -202,6 +202,7 @@ public:
         if (hasDebugInformation) {
             DNALength bwtSeqLength;
             in.read((char*)&bwtSeqLength, sizeof(bwtSeqLength));
+            if (full.matrix) {delete [] full.matrix;}
             full.matrix = new DNALength[bwtSeqLength *AlphabetSize];
             full.nRows = bwtSeqLength;
             full.nCols = AlphabetSize;

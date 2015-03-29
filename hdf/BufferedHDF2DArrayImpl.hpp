@@ -101,6 +101,9 @@ int BufferedHDF2DArray<T>::Initialize(HDFGroup &group, std::string datasetName,
             /*
              * Load in the size of this dataset, and make a map to the whole thing.
              */
+            if (dimSize) {
+                delete [] dimSize;
+            }
             dimSize = new hsize_t[nDims];
             dataspace.getSimpleExtentDims(dimSize);
             rowLength = dimSize[0];

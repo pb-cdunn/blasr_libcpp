@@ -1,6 +1,6 @@
-#include "SAMPrinter.hpp"
 #include <algorithm> //max
 #include <utility> //swap
+#include <assert.h> //assert
 
 using namespace SAMOutput; 
 
@@ -45,7 +45,7 @@ void SAMOutput::SetAlignedSequence(T_AlignmentCandidate &alignment, T_Sequence &
         T_Sequence subSeq;
         subSeq.ReferenceSubstring(read, clippedStartPos, clippedReadLength);
         subSeq.MakeRC(alignedSeq);
-        alignedSeq.deleteOnExit = true;
+        assert(alignedSeq.deleteOnExit);
     }
 }
 
@@ -229,13 +229,12 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
       }*/
     samFile << nextSubreadPos << "\t"; // RNEXT, add 1 for 1 based
                                            // indexing
-
-
+    
     DNALength tLen = alignment.GenomicTEnd() - alignment.GenomicTBegin();
     samFile << tLen << "\t"; // TLEN
     // Print the sequence on one line, and suppress printing the
     // newline (by setting the line length to alignedSequence.length
-    ((DNASequence)alignedSequence).PrintSeq(samFile, 0);  // SEQ
+    static_cast<DNASequence*>(&alignedSequence)->PrintSeq(samFile, 0);  // SEQ
     samFile << "\t";
     if (alignedSequence.qual.data != NULL && qvList.useqv == 0) {
       alignedSequence.PrintAsciiQual(samFile, 0);  // QUAL

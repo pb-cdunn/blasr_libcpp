@@ -57,11 +57,12 @@ unsigned int FlatMatrix2D<T>::Size() {
 }
 
 template<typename T>
-void FlatMatrix2D<T>::Resize(unsigned int totalSize) {
+void FlatMatrix2D<T>::Resize(unsigned int _totalSize) {
     if (matrix != NULL) {
         delete[] matrix;
     }
-    matrix = new T[totalSize];
+    matrix = new T[_totalSize];
+    totalSize = _totalSize;
 }
 
 template<typename T>
@@ -83,7 +84,7 @@ void FlatMatrix2D<T>::Grow(int _nRows, int _nCols) {
     nRows = _nRows;
     nCols = _nCols;
     if (nRows * nCols > totalSize) {
-        if (totalSize != 0)
+        if (totalSize != 0 && matrix)
             delete[] matrix;
         totalSize = nRows * nCols;
         matrix = new T[totalSize];

@@ -89,7 +89,7 @@ public:
     HDFArray<uint16_t> preBaseFramesArray;
     HDFArray<int> pulseIndexArray;
     HDFArray<int> holeIndexArray;
-
+ 
     // useful ZMWMetrics data
     HDF2DArray<float> hqRegionSNRMatrix;
     HDFArray<float> readScoreArray;
@@ -198,16 +198,18 @@ public:
 
     void InitializeDefaultRawBasIncludeFields() {
         IncludeField("Basecall");
-        IncludeField("DeletionQV");
-        IncludeField("DeletionTag");
-        IncludeField("InsertionQV");
-        IncludeField("SubstitutionTag");
-        IncludeField("SubstitutionQV");
         IncludeField("QualityValue");
+        IncludeField("InsertionQV");
+        IncludeField("DeletionQV");
+        IncludeField("MergeQV");
+        IncludeField("SubstitutionQV");
+        IncludeField("DeletionTag");
+        IncludeField("SubstitutionTag"); // used in IDSScoreFunction
+        // FIXME: The following QVs are not really used by downstream
+        // analysis such as Quiver, make them optional to include.
         IncludeField("WidthInFrames");
         IncludeField("PulseIndex");
         IncludeField("PreBaseFrames");
-        IncludeField("MergeQV");
         IncludeField("HQRegionSNR");
         IncludeField("ReadScore");
     }
@@ -408,7 +410,6 @@ public:
         } else {
             includedFields["PreBaseFrames"] = false;
         }
-
 
         //
         // These fields are not always present in bas.h5 files.
@@ -679,7 +680,6 @@ public:
         // Getting next advances the curBasPos to the end of 
         // the current sequence. 
         //
-
         try {
             // must check before looking at HQRegionSNR/ReadScore!!
             if (curRead == nReads) {
@@ -695,12 +695,12 @@ public:
                 GetNextReadScore(seq);
             }
 
-            //
-            // Bail now if the file is already done
-            //
-            if ((retVal = this->GetNext((FASTQSequence&)seq)) == 0) {
-                return 0;
-            }
+        //
+        // Bail now if the file is already done
+        //
+        if ((retVal = this->GetNext((FASTQSequence&)seq)) == 0) {
+            return 0;
+        }
 
             DNALength nextBasePos = curBasePos;
             curBasePos = curBasPosCopy;
@@ -857,6 +857,10 @@ public:
 
     int GetNextWidthInFrames(SMRTSequence &seq) {
         if (seq.length == 0) return 0;
+        if (seq.widthInFrames) {
+            delete [] seq.widthInFrames;
+            seq.widthInFrames = NULL;
+        }
         seq.widthInFrames = new HalfWord[seq.length];
         basWidthInFramesArray.Read((int)curBasePos, (int) curBasePos + seq.length, (HalfWord*) seq.widthInFrames);
         return seq.length;
@@ -864,21 +868,35 @@ public:
 
     int GetNextPreBaseFrames(SMRTSequence &seq) {
         if (seq.length == 0) return 0;
+        if (seq.preBaseFrames) {
+            delete [] seq.preBaseFrames;
+            seq.preBaseFrames = NULL;
+        }
         seq.preBaseFrames = new HalfWord[seq.length];
         preBaseFramesArray.Read((int)curBasePos, (int) curBasePos + seq.length, (HalfWord*) seq.preBaseFrames);
         return seq.length;
     }
     int GetNextPulseIndex(SMRTSequence &seq) {
         if (seq.length == 0) return 0;
+        if (seq.pulseIndex) {
+            delete [] seq.pulseIndex;
+            seq.pulseIndex = NULL;
+        }
         seq.pulseIndex = new int[seq.length];
         pulseIndexArray.Read((int)curBasePos, (int) curBasePos + seq.length, (int*) seq.pulseIndex);
         return seq.length;
     }
     int GetNextHQRegionSNR(SMRTSequence &seq) {
+        if (seq.length == 0) return 0;
+        if (seq.hqRegionSnr) {
+            delete [] seq.hqRegionSnr;
+            seq.hqRegionSnr = NULL;
+        }
         hqRegionSNRMatrix.Read(curRead, curRead + 1, seq.hqRegionSnr);
         return 4;
     }
     int GetNextReadScore(SMRTSequence &seq) {
+        if (seq.length == 0) return 0;
         readScoreArray.Read(curRead, curRead + 1, &seq.readScore);
         return 1;
     }

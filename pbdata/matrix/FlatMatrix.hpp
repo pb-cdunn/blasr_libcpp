@@ -43,7 +43,7 @@ class FlatMatrix2D {
 	FlatMatrix2D(int _nRows, int _nCols); 
 
     void Clear() {
-        delete[] matrix;
+        if (matrix) {delete[] matrix;}
         matrix = NULL;
         nRows = nCols = 0;
         totalSize = 0;

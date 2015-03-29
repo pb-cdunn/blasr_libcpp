@@ -154,9 +154,9 @@ int AffineGuidedAlign(QSequence &origQSeq, TSequence &origTSeq,  Alignment &guid
         indicesAreValid = GetBufferIndex(guide, qStart-1, t, curIndex);
         if (indicesAreValid == 0 ) {
             cout << "QSeq" << endl;
-            ((DNASequence)origQSeq).PrintSeq(cout);
+            (static_cast<DNASequence*>(&origQSeq))->PrintSeq(cout);
             cout << "TSeq" << endl;
-            ((DNASequence)origTSeq).PrintSeq(cout);
+            (static_cast<DNASequence*>(&origTSeq))->PrintSeq(cout);
             assert(0);
         }
         delIndex = -1;
@@ -375,9 +375,9 @@ int AffineGuidedAlign(QSequence &origQSeq, TSequence &origTSeq,  Alignment &guid
                 }
 
                 cout << "qseq: "<< endl;
-                ((DNASequence)qSeq).PrintSeq(cout);
+                (static_cast<DNASequence*>(&qSeq))->PrintSeq(cout);
                 cout << "tseq: "<< endl;
-                ((DNASequence)tSeq).PrintSeq(cout);
+                (static_cast<DNASequence*>(&tSeq))->PrintSeq(cout);
                 cout << "ERROR, this path has gone awry at " << q << " " << t << " !" << endl;
                 exit(1);
             }

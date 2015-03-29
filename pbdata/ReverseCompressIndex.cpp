@@ -7,6 +7,15 @@ ReverseCompressIndex::ReverseCompressIndex() {
     indexLength = binSize = maxRun = 0;
 }
 
+ReverseCompressIndex::~ReverseCompressIndex() {
+    ReverseCompressIndex::Free();
+}
+
+void ReverseCompressIndex::Free() {
+    if (index) {delete [] index; index = NULL;}
+    indexLength = binSize = maxRun = 0;
+}
+
 void ReverseCompressIndex::Write(std::ofstream &out) {
     out.write((char*) &indexLength, sizeof(int));
     out.write((char*) &binSize, sizeof(int));
@@ -23,6 +32,7 @@ void ReverseCompressIndex::Read(std::ifstream &in) {
 } 
 
 void ReverseCompressIndex::ShallowCopy(ReverseCompressIndex &rhs) {
+    ReverseCompressIndex::Free(); // Free before shallow copy.
     index = rhs.index;
     indexLength = rhs.indexLength;
     binSize = rhs.binSize;

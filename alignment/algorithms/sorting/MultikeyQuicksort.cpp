@@ -107,6 +107,7 @@ void MediankeyBoundedQuicksort(unsigned char text[], UInt index[], UInt length,
     if (depth > bound)
         return;
 
+    bool deleteFreq = false;
     if (freq == NULL) {
         UInt ci;
         maxChar = 0;
@@ -117,6 +118,7 @@ void MediankeyBoundedQuicksort(unsigned char text[], UInt index[], UInt length,
             }
         }
         freq = new UInt[maxChar+1];
+        deleteFreq = true;
     }
 
     Nucleotide medianChar = ComputeMedianValue(text, index, length, low, high, depth, maxChar, freq );
@@ -191,5 +193,5 @@ void MediankeyBoundedQuicksort(unsigned char text[], UInt index[], UInt length,
             high,
             depth, bound, maxChar, freq);
 
-
+    if (deleteFreq) {delete [] freq; freq = NULL;}
 }

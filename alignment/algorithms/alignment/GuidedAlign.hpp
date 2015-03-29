@@ -201,9 +201,9 @@ int GuidedAlign(QSequence &origQSeq, TSequence &origTSeq,  blasr::Alignment &gui
         indicesAreValid = GetBufferIndex(guide, qStart-1, t, curIndex);
         if (indicesAreValid == 0 ) {
             std::cout << "QSeq" << std::endl;
-            ((DNASequence)origQSeq).PrintSeq(std::cout);
+            (static_cast<DNASequence*>(&origQSeq))->PrintSeq(std::cout);
             std::cout << "TSeq" << std::endl;
-            ((DNASequence)origTSeq).PrintSeq(std::cout);
+            (static_cast<DNASequence*>(&origTSeq))->PrintSeq(std::cout);
             assert(0);
         }
         delIndex = -1;
@@ -428,9 +428,9 @@ int GuidedAlign(QSequence &origQSeq, TSequence &origTSeq,  blasr::Alignment &gui
             }
 
             std::cout << "qseq: "<< std::endl;
-            ((DNASequence)qSeq).PrintSeq(std::cout);
+            (static_cast<DNASequence*>(&qSeq))->PrintSeq(std::cout);
             std::cout << "tseq: "<< std::endl;
-            ((DNASequence)tSeq).PrintSeq(std::cout);
+            (static_cast<DNASequence*>(&tSeq))->PrintSeq(std::cout);
             std::cout << "ERROR, this path has gone awry at " << q << " " << t << " !" << std::endl;
             exit(1);
         }

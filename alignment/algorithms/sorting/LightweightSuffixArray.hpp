@@ -51,6 +51,8 @@ public:
     void Initialize(UInt diffCoverP[], UInt diffCoverLengthP, UInt diffCoverSizeP); 
 
     UInt operator()(UInt i, UInt j); 
+
+    ~DiffCoverDelta();
 };
 
 

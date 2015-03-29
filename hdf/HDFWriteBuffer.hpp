@@ -17,6 +17,7 @@ public:
     }
 
     void InitializeBuffer(int pBufferSize) {
+        Free(); // Free before reusing the buffer.
         bufferSize = pBufferSize;
         if (bufferSize > 0) {
             writeBuffer = new T[bufferSize];

@@ -50,7 +50,6 @@ UInt DiffCoverMu::operator()(const UInt k) {
 }
 
 DiffCoverMu::DiffCoverMu() {
-    diffCoverReverseLookup = NULL;
     diffCoverLength = diffCoverSize = textSize = h = 0;
     diffCoverReverseLookup = diffCover = NULL;
 }
@@ -108,6 +107,13 @@ void DiffCoverDelta::Initialize(UInt diffCoverP[], UInt diffCoverLengthP, UInt d
 
 UInt DiffCoverDelta::operator()(UInt i, UInt j) {
     return DiffMod(diffCoverLookup[DiffMod(j,i,diffCoverSize)],i,diffCoverSize);
+}
+
+DiffCoverDelta::~DiffCoverDelta() {
+    if (diffCoverLookup) {
+        delete [] diffCoverLookup; 
+        diffCoverLookup = NULL;
+    }
 }
 
 
@@ -389,6 +395,10 @@ bool LightweightSuffixSort(unsigned char text[], UInt textLength, UInt *index, i
         setBegin = setEnd;
     }
 
+    // diffCover was allocated in DifferenceCovers.cpp -> 
+    // InitializeDifferenceCover(...). Deallocate it. 
+    if (diffCover) {delete [] diffCover; diffCover = NULL;}
+    if (lexVNaming) {delete [] lexVNaming; lexVNaming = NULL;}
     return true;
     // DONE!!!!!
 

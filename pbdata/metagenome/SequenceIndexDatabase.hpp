@@ -36,6 +36,7 @@ public:
     std::vector<std::string> md5;
 
     SequenceIndexDatabase(int final=0);
+    ~SequenceIndexDatabase();
 
     DNALength GetLengthOfSeq(int seqIndex);
 
