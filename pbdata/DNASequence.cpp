@@ -122,6 +122,17 @@ DNASequence& DNASequence::Copy(const DNASequence &rhs, DNALength rhsPos, DNALeng
     return *this;
 }
 
+DNASequence& DNASequence::Copy(const std::string &rhsSeq) {
+    // Free this DNASequence before copying from rhs
+    DNASequence::Allocate(static_cast<DNALength>(rhsSeq.size()));
+    memcpy(seq, rhsSeq.c_str(), length);
+    return *this;
+}
+
+DNASequence & DNASequence::operator=(const std::string & rhsSeq) {
+    return DNASequence::Copy(rhsSeq);
+}
+
 void DNASequence::ShallowCopy(const DNASequence &rhs) {
     seq = rhs.seq;
     length = rhs.length;

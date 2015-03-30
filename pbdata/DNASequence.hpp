@@ -33,9 +33,13 @@ public:
 
     void ShallowCopy(const DNASequence &rhs);
 
+    DNASequence & Copy(const std::string & rhs);
+
     int GetStorageSize();
 
     DNASequence &operator=(const DNASequence &rhs);
+
+    DNASequence &operator=(const std::string &rhs);
 
     void Print(std::ostream &out, int lineLength = 50);
 
