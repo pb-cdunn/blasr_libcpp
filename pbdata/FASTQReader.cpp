@@ -67,7 +67,7 @@ int FASTQReader::GetNext(FASTQSequence &seq) {
         p2 = p;
         long seqPos = 0;
         while(p2 < fileSize and filePtr[p2] != '\n') { 
-            seq.qual[seqPos] = filePtr[p2] - CHAR_TO_QUALITY; //phredQVtoPacbioQV(filePtr[p2] - charToQuality); 
+            seq.qual[seqPos] = filePtr[p2] - FASTQSequence::charToQuality;
             p2++; seqPos++;
         }
     }

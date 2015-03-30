@@ -300,6 +300,4 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
 	qvList.PrintQVOptionalFields(alignedSequence, samFile);
 
     samFile << std::endl;
-
-    alignedSequence.FreeIfControlled();
 }
