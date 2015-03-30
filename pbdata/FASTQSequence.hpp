@@ -132,6 +132,11 @@ public:
     void LowerCaseMask(int qThreshold); 
 
     float GetAverageQuality(); 
+
+#ifdef USE_PBBAM
+    /// Copy name, sequence, and QVs from BamRecord.
+    void Copy(const PacBio::BAM::BamRecord & record);
+#endif 
 };
 
 inline FASTQSequence::~FASTQSequence() {

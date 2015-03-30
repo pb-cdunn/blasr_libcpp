@@ -604,3 +604,48 @@ float FASTQSequence::GetAverageQuality() {
     }
     return totalQ / length;
 }
+
+#ifdef USE_PBBAM
+void FASTQSequence::Copy(const PacBio::BAM::BamRecord & record) {
+    FASTQSequence::Free();
+
+    // Copy title and sequence.
+    static_cast<FASTASequence*>(this)->Copy(record);
+
+    // Copy QVs.
+    qual.Copy(record.Qualities().Fastq());
+
+    // iq
+    if (record.HasInsertionQV()) {
+        insertionQV.Copy(record.InsertionQV().Fastq());
+    }
+    // dq
+    if (record.HasDeletionQV()) {
+        deletionQV.Copy(record.DeletionQV().Fastq());
+    }
+    // sq
+    if (record.HasSubstitutionQV()) {
+        substitutionQV.Copy(record.SubstitutionQV().Fastq());
+    }
+    // mq
+    if (record.HasMergeQV()) {
+        mergeQV.Copy(record.MergeQV().Fastq());
+    }
+    // st
+    if (record.HasSubstitutionTag()) {
+        std::string qvs = record.SubstitutionTag();
+        AllocateSubstitutionTagSpace(static_cast<DNALength>(qvs.size()));
+        std::memcpy(substitutionTag, qvs.c_str(), qvs.size() * sizeof(char));
+    }
+    // dt
+    if (record.HasDeletionTag()) {
+        std::string qvs = record.DeletionTag();
+        AllocateDeletionTagSpace(static_cast<DNALength>(qvs.size()));
+        std::memcpy(deletionTag, qvs.c_str(), qvs.size() * sizeof(char));
+    }
+    // preBaseQVs are not included in BamRecord, and will not be copied.
+    
+    subreadStart = static_cast<int>(record.QueryStart());
+    subreadEnd = static_cast<int>(record.QueryEnd());
+}
+#endif
