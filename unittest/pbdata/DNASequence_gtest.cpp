@@ -259,7 +259,7 @@ TEST_F(DNASequenceTest, ReferenceSubstring) {
 //    EXPECT_DEATH_IF_SUPPORTED(dnaTwo.ReferenceSubstring(dnaOne, 100), "");
     delete dnaOne.seq;
 }
-
+/*
 TEST_F(DNASequenceTest, CopyFromString) {
     // Test Copy(const std::string &)
     string str = "ATGCGGGCCTCGCCG";
@@ -276,4 +276,4 @@ TEST_F(DNASequenceTest, CopyFromString) {
        EXPECT_EQ(dnaOne.seq[i], str[i]);
     }
 }
-
+*/
