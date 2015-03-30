@@ -111,3 +111,19 @@ TEST_F(ReaderAgglomerateTest, GetChemistryTriple) {
 
     GET_CHEMISTRY_TRIPLE(baxFile3, "100356300", "100356200", "2.3")
 } 
+
+TEST_F(ReaderAgglomerateTest, ReadFromBam) {
+    string fn (bamFile1);
+    reader->SetReadFileName(fn);
+    EXPECT_EQ(reader->Initialize(), 1);
+
+    SMRTSequence seq;
+    int ret, count=0;
+    while (ret = reader->GetNext(seq) and ret != 0) { 
+        count++;
+    }
+
+    EXPECT_EQ(count, 116);
+
+    reader->Close();
+}

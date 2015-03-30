@@ -16,6 +16,12 @@
 #include "HDFBasReader.hpp"
 #include "HDFCCSReader.hpp"
 
+#ifdef USE_PBBAM
+#include "pbbam/BamFile.h"
+#include "pbbam/EntireFileQuery.h"
+#include "pbbam/BamRecord.h"
+#endif
+
 class ReaderAgglomerate : public BaseSequenceIO {
   FASTAReader fastaReader;
   FASTQReader fastqReader;
@@ -108,6 +114,14 @@ public:
   int Advance(int nSteps);
 
   void Close();
+
+#ifdef USE_PBBAM
+public:
+  // Define reader to fetch sequences from bam.
+  PacBio::BAM::BamFile * bamFilePtr;
+  PacBio::BAM::EntireFileQuery * entireFileQueryPtr;
+  PacBio::BAM::EntireFileQuery::iterator bamIterator;
+#endif
 };
 
 

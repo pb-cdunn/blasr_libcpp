@@ -62,3 +62,10 @@ const string scanDataFile1 =
     ("/mnt/secondary-siv/testdata/BlasrTestData/utest/"
      "data/scandata.h5");
 
+const string bamFile1 = 
+    ("/mnt/secondary-siv/testdata/BlasrTestData/ctest/data/test_bam/"
+     "m140905_042212_sidney_c100564852550000001823085912221377_s1_X0.subreads.bam");
+
+const string bamFile2 =   
+    ("/mnt/secondary-siv/testdata/BlasrTestData/ctest/data/test_bam/"
+     "m150325_224749_42269_c100795290850000001823159309091522_s1_p0.subreads.bam");
