@@ -8,6 +8,12 @@
 #include <cassert>
 #include "Types.h"
 #include "NucConversion.hpp"
+#include "libconfig.h"
+
+#ifdef USE_PBBAM
+#include "pbbam/BamRecord.h"
+#endif
+
 
 class DNASequence {
 public:
@@ -104,6 +110,11 @@ public:
     void Resize(DNALength newLength);
 
     DNALength GetSeqStorage();
+
+#ifdef USE_PBBAM
+    /// Copies a BamRecord as a DNASequence.
+    DNASequence & Copy(const PacBio::BAM::BamRecord & record);
+#endif 
 };
 
 inline DNASequence::DNASequence() {

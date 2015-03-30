@@ -393,3 +393,10 @@ void DNASequence::Resize(DNALength newLength) {
 DNALength DNASequence::GetSeqStorage() {
     return length;
 }
+
+#ifdef USE_PBBAM
+DNASequence & DNASequence::Copy(const PacBio::BAM::BamRecord & record) {
+    return DNASequence::Copy(record.Sequence());
+}
+#endif
+
