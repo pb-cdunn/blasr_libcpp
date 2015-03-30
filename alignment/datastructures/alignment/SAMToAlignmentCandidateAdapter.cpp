@@ -1,5 +1,5 @@
 #include <algorithm>
-
+#include "utils/SMRTTitle.hpp"
 #include "SAMToAlignmentCandidateAdapter.hpp"
 
 void InitializeCandidateFromSAM(SAMAlignment &sam,
@@ -279,36 +279,13 @@ void SAMAlignmentsToCandidates(SAMAlignment &sam,
     // Two types of smrtTitle are supported:
     // movie/zmw/start_end
     // movie/zmw/start_end/start2_end2
-    std::vector<std::string> values;
-    ParseSeparatedList(sam.qName, values, '/');
-    DNALength qStart = 0, qEnd = 0;
-    bool worked = false;
+    SMRTTitle stitle = SMRTTitle(sam.qName);
 
-    if (values.size() >= 3) {
-      std::vector<std::string> offsets;
-      ParseSeparatedList(values[2], offsets, '_');
-      if (offsets.size() == 2) {
-        qStart = atoi(offsets[0].c_str());
-        qEnd   = atoi(offsets[1].c_str());
-        if (values.size() == 3) {
-          worked = true;
-        } else if (values.size() == 4) {
-          offsets.clear();
-          ParseSeparatedList(values[3], offsets, '_');
-          if (offsets.size() == 2) {
-            qEnd   = qStart + atoi(offsets[1].c_str());
-            qStart = qStart + atoi(offsets[0].c_str());
-            worked = true;
-          }
-        }
-      }
-    }
-    if (worked == false) {
-      std::cout << values.size() << std::endl;
+    if (not stitle.isSMRTTitle) {
       std::cout << "ERROR. Could not parse title " << sam.qName << std::endl;
       exit(1);
     }
-    queryPosOffset = qStart;
+    queryPosOffset = stitle.start;
   }
   else if (sam.xs) {
     queryPosOffset += sam.xs - 1;
