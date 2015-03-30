@@ -42,6 +42,9 @@ protected:
     std::string readGroupId; 
 
 public:
+    // Whether or not this is originally copied from a BamRecord.
+    bool copiedFromBam;
+
     void SetNull(); 
 
     SMRTSequence();
@@ -90,6 +93,20 @@ public:
 
     // Set readGroup Id for this sequence.
     void SetReadGroupId(const std::string & rid);
+    
+#ifdef USE_PBBAM
+public:
+    // Copy read sequence, title, holeNumber, readGroupId, and QVs
+    // (iq, dq, sq, mq, st, dt) from BamRecord to this SMRTSequence.
+    void Copy(const PacBio::BAM::BamRecord & record);
+
+    // Keep track of BamRecord from which this SMRTSequence is 
+    // originally copied. However, one should NOT assume
+    // that this SMRTSequence has the same sequence, title, QVs as 
+    // the BamRecord, because this SMRTSequence may be created by
+    // MakeSubreadAsMasked(...) or MakeRC(...).
+    PacBio::BAM::BamRecord bamRecord;
+#endif 
 };
 
 inline SMRTSequence::~SMRTSequence(){

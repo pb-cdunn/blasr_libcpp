@@ -23,6 +23,10 @@ void SMRTSequence::SetNull() {
     readScore = -1;
     holeNumber = static_cast<UInt>(-1);
     readGroupId = "";
+    copiedFromBam = false;
+#ifdef USE_PBBAM
+    bamRecord = PacBio::BAM::BamRecord();
+#endif
 }
 
 SMRTSequence::SMRTSequence() : FASTQSequence() {
@@ -148,6 +152,10 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
     assert(deleteOnExit); // should have control over seq and all QVs
 
     subseq.Free();
+    copiedFromBam = rhs.copiedFromBam;
+#ifdef USE_PBBAM
+    bamRecord = rhs.bamRecord;
+#endif
 }
 
 void SMRTSequence::Print(ostream &out) {
@@ -191,6 +199,10 @@ void SMRTSequence::Free() {
     highQualityRegionScore = 0;
     holeNumber = static_cast<UInt>(-1);
     readGroupId = "";
+    copiedFromBam = false;
+#ifdef USE_PBBAM
+    bamRecord = PacBio::BAM::BamRecord();
+#endif 
 
     // Free seq, title and FASTQ QVs, also reset deleteOnExit.
     // Don't call FASTQSequence::Free() before freeing SMRT QVs.
@@ -241,3 +253,26 @@ std::string SMRTSequence::GetReadGroupId() {
 void SMRTSequence::SetReadGroupId(const std::string & rid) {
     readGroupId = rid;
 }
+
+#ifdef USE_PBBAM
+void SMRTSequence::Copy(const PacBio::BAM::BamRecord & record) {
+    Free();
+
+    copiedFromBam = true;
+
+    bamRecord = PacBio::BAM::BamRecord(record);
+    
+    // Only copy insertionQV, deletionQV, substitutionQV, mergeQV, 
+    // deletionTag and substitutionTag from BamRecord to SMRTSequence.
+    // Do NOT copy other SMRTQVs such as startFrame, meanSignal...
+    (static_cast<FASTQSequence*>(this))->Copy(record);
+
+    // Copy read group id from BamRecord.
+    SetReadGroupId(record.ReadGroupId());
+
+    // PacBio bam for secondary analysis does NOT carry zmw
+    // info other than holeNumber, including holeStatus, holeX,
+    // holeY, numEvents. 
+    zmwData.holeNumber = static_cast<UInt> (record.HoleNumber()); 
+}
+#endif
