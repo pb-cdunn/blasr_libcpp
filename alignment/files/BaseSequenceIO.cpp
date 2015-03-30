@@ -59,10 +59,14 @@ int BaseSequenceIO::DetermineFileTypeByExtension(string &fileName,
             assert("Four bit reading is not yet implemented for the reader agglomerate!" == 0);
             return 1;
         }
+        else if (extension == "bam") {
+            type = PBBAM;
+            return 1;
+        }
         else {
             type = None;
             if (exitOnFailure) {
-                cout << "ERROR, file type '." << extension << "' is not understood to be one of pls.h5, fasta, nor fastq. " << endl;
+                cout << "ERROR, file type '." << extension << "' is not understood to be one of pls.h5, fasta, fastq, nor bam. " << endl;
                 exit(1);
             }
             return 0;
