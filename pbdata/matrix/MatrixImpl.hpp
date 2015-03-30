@@ -1,10 +1,11 @@
+#ifndef _BLASR_MATRIX_IMPL_HPP
+#define _BLASR_MATRIX_IMPL_HPP
 #include <cassert>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <stdint.h>
 #include "Types.h"
-#include "Matrix.hpp"
 
 template<typename T>
 void CreateMatrix(int rows, int cols, std::vector<T*> matrix) {
@@ -113,3 +114,4 @@ void Matrix<T>::Print(std::ofstream &out) {
         out << std::endl;
     }
 }
+#endif
