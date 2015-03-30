@@ -21,10 +21,10 @@ void SMRTSequence::SetNull() {
         hqRegionSnr[i] = -1;
     }
     readScore = -1;
+    holeNumber = static_cast<UInt>(-1);
 }
 
 SMRTSequence::SMRTSequence() : FASTQSequence() {
-    holeNumber = -1;
     SetNull();
 }
 
@@ -188,7 +188,7 @@ void SMRTSequence::Free() {
     xy[0] = 0; xy[1] = 0;
     lowQualityPrefix = lowQualitySuffix = 0;
     highQualityRegionScore = 0;
-    holeNumber = -1;
+    holeNumber = static_cast<UInt>(-1);
 
     // Free seq, title and FASTQ QVs, also reset deleteOnExit.
     // Don't call FASTQSequence::Free() before freeing SMRT QVs.
@@ -206,7 +206,7 @@ bool SMRTSequence::StorePlatformId(PlatformId pid) {
     return true;
 }
 
-bool SMRTSequence::StoreHoleNumber(int holeNumberP){ 
+bool SMRTSequence::StoreHoleNumber(UInt holeNumberP){ 
     zmwData.holeNumber = holeNumber = holeNumberP;
     return true;
 }
@@ -227,7 +227,7 @@ bool SMRTSequence::GetXY(int xyP[]) {
     return true;
 }
 
-bool SMRTSequence::GetHoleNumber(int& holeNumberP) {
+bool SMRTSequence::GetHoleNumber(UInt & holeNumberP) {
     holeNumberP = holeNumber;
     return true;
 }

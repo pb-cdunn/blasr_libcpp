@@ -15,7 +15,7 @@
 class SMRTSequence : public FASTQSequence {
 public:
     int16_t xy[2];
-    int holeNumber;
+    UInt holeNumber;
     float hqRegionSnr[4];
     float readScore;
     ZMWGroupEntry zmwData;
@@ -70,7 +70,7 @@ public:
 
     bool StorePlatformId(PlatformId pid); 
 
-    bool StoreHoleNumber(int holeNumberP);
+    bool StoreHoleNumber(UInt holeNumberP);
 
     bool StoreHoleStatus(unsigned char s); 
 
@@ -78,7 +78,7 @@ public:
 
     bool GetXY(int xyP[]); 
 
-    bool GetHoleNumber(int& holeNumberP); 
+    bool GetHoleNumber(UInt & holeNumberP);   
 };
 
 inline SMRTSequence::~SMRTSequence(){
