@@ -24,6 +24,8 @@ public:
 
     void Copy(const QualityValueVector<T_QV> &rhs, const DNALength length); 
 
+    void Copy(const std::string & rhs);
+
     void Free(); 
 
     void Allocate(unsigned int length); 
@@ -31,6 +33,8 @@ public:
     bool Empty() const; 
 
     void ShallowCopy(const QualityValueVector<T_QV> &ref, int pos, const DNALength & length); 
+
+    std::string ToString(void);
 
     // Returns data length 
     DNALength Length(void);

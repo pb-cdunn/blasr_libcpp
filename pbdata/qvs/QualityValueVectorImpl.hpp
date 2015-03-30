@@ -41,6 +41,17 @@ void QualityValueVector<T_QV>::Copy(const QualityValueVector<T_QV> &rhs, const D
 }
 
 template<typename T_QV>
+void QualityValueVector<T_QV>::Copy(const std::string & rhs) {
+// Char to QualityValue
+    Free();
+    if (rhs.size() == 0) return;
+    Allocate(static_cast<DNALength>(rhs.size()));
+    for (size_t i = 0; i < rhs.size(); i++) {
+        data[i] = static_cast<T_QV>(rhs[i] - FASTQ_CHAR_TO_QUALITY);
+    }
+}
+
+template<typename T_QV>
 void QualityValueVector<T_QV>::Free() {
     if (data != NULL) {
         delete[] data;
@@ -65,6 +76,17 @@ void QualityValueVector<T_QV>::ShallowCopy(const QualityValueVector<T_QV> &ref, 
     data = &ref.data[pos];
     qvScale = ref.qvScale;
     _length = static_cast<DNALength>(length);
+}
+
+template<typename T_QV>
+std::string QualityValueVector<T_QV>::ToString(void) {
+    if (data == NULL) { return "";}
+
+    std::string str(static_cast<size_t>(_length), '0');
+    for (DNALength i = 0; i < _length; i++) {
+        str[i] = static_cast<char>(data[i] + FASTQ_CHAR_TO_QUALITY);
+    }
+    return str;
 }
 
 template<typename T_QV>
