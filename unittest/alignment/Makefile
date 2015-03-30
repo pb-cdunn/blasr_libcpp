@@ -38,7 +38,7 @@ SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard format/*.cpp) 
 
 ifneq ($(origin nopbbam), undefined)
-	SOURCES := $(filter-out format/SAMHeaderPrinter_gtest.cpp $(SOURCES))
+	SOURCES := $(filter-out format/SAMHeaderPrinter_gtest.cpp, $(SOURCES))
 endif
 
 OBJECTS    = $(SOURCES:.cpp=.o)
