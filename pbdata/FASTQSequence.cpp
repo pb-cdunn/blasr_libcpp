@@ -351,7 +351,7 @@ void FASTQSequence::PrintFastqQuality(ostream &out, int lineLength) {
     PrintAsciiQual(out, lineLength);
 }
 
-bool FASTQSequence::GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs) {
+bool FASTQSequence::GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs, bool reverse) {
     qvs.clear();
     uint8_t *  qualPtr;
     int charOffset = charToQuality;
@@ -378,8 +378,15 @@ bool FASTQSequence::GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs) 
 
     qvs.resize(length);
     for (DNALength i = 0; i < length; i++) {
-        qvs[i] = static_cast<uint8_t>(qualPtr[i] + charOffset);
-        assert(qvs[i] > 32 and qvs[i] < 127);
+        if (not reverse) { // The same orientation
+            qvs[i] = static_cast<uint8_t>(qualPtr[i] + charOffset);
+        } else if (qvIndex != I_SubstitutionTag and qvIndex != I_DeletionTag) {
+            // Reverse orientation, reverse QVs, except SubstitutionTag and DeletionTag
+            qvs[i] = static_cast<uint8_t>(qualPtr[length - i - 1] + charOffset);
+        } else { // Reverse and complement SubstitutionTag and DeletionTag
+            qvs[i] = static_cast<uint8_t>(ReverseComplementNuc[qualPtr[length - i - 1] + charOffset]);
+        }
+        //assert(qvs[i] > 32 and qvs[i] < 127);
     }
     return true;
 }
@@ -405,13 +412,13 @@ QVIndex FASTQSequence::GetQVIndex(const std::string & qvName) {
     }
 }
 
-bool FASTQSequence::GetQVs(const std::string & qvName, std::vector<uint8_t> & qvs){
-    return GetQVs(GetQVIndex(qvName), qvs);
+bool FASTQSequence::GetQVs(const std::string & qvName, std::vector<uint8_t> & qvs, bool reverse){
+    return GetQVs(GetQVIndex(qvName), qvs, reverse);
 }
 
-bool FASTQSequence::GetQVs(const std::string & qvName, std::string & qvsStr) {
+bool FASTQSequence::GetQVs(const std::string & qvName, std::string & qvsStr, bool reverse) {
     std::vector<uint8_t> qvs;
-    bool OK = GetQVs(qvName, qvs);
+    bool OK = GetQVs(qvName, qvs, reverse);
     qvsStr = string(qvs.begin(), qvs.end());
     return OK;
 }

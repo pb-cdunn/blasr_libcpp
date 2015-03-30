@@ -100,19 +100,22 @@ public:
     /// \returns true if qvs are available, false otherwise
     /// \param [in] qvIndex - enum QVIndex
     /// \param [out] qvs - obtained QVs.
-    bool GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs);
+    /// \param [in] reverse - reverse orders of QVs or not
+    bool GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs, bool reverse=false);
 
     /// Get QVs in vector<uint8_t>, given with QV Name.
     /// \returns true if qvs are available, false, otherwise
     /// \param [in] qvName - InsertionQV, DeletionQV, SubstitionQV, MergeQV, SubstitutionTag, DeletionTag
     /// \param [out] qvs - obtians QVs.
-    bool GetQVs(const std::string & qvName, std::vector<uint8_t> & qvs);
+    /// \param [in] reverse - reverse orders of QVs or not.
+    bool GetQVs(const std::string & qvName, std::vector<uint8_t> & qvs, bool reverse=false);
 
     /// Get QVs in string, given with QV Name.
     /// \returns true if qvs are available, false, otherwise
     /// \param [in] qvName - InsertionQV, DeletionQV, SubstitionQV, MergeQV, SubstitutionTag, DeletionTag
     /// \param [out] qvs - obtians QVs.
-    bool GetQVs(const std::string & qvName, std::string & qvs);
+    /// \param [in] reverse - reverse order of QVs or not
+    bool GetQVs(const std::string & qvName, std::string & qvs, bool reverse=false);
 
     void PrintAsciiRichQuality(std::ostream &out, int whichQuality, int lineLength=50);
 
