@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include "Types.h"
 #include "NucConversion.hpp"
 
 class DNASequence {
