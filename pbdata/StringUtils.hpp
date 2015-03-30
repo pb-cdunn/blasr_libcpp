@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "MD5Utils.hpp"
 #include "Types.h"
+#include "MD5Utils.hpp"
+#include "reads/ReadType.hpp"
 
 using namespace std;
 
@@ -64,4 +65,7 @@ void ParseSeparatedList(const string &csl, vector<T_Value> &values, char delim='
 }
 
 string RStrip(string & fileName);
+
+/// \returns Read Group Id, given movieName and readType.
+string MakeReadGroupId(const string & movieName, const ReadType::ReadTypeEnum & readType);
 #endif

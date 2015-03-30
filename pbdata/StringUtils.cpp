@@ -144,3 +144,14 @@ string RStrip(string & fileName) {
     }
     return fileName.substr(0, i + 1);
 }
+
+string MakeReadGroupId(const string & movieName, const ReadType::ReadTypeEnum & readType) {
+    // PBBAM spec 3.0b5:
+    // Read Group Id is computed as MD5(${movieName}${readType})[0:8], where
+    // movieName is PacBio platform unit id, e.g., (m140905_042...77_s1_X0),
+    // readtype is SUBREAD, CCS or UNKNOWN 
+    string seed = movieName + ReadType::ToString(readType);
+    string readGroupId;
+    MakeMD5(seed, readGroupId, 8);
+    return readGroupId;
+}
