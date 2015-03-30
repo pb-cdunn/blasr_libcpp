@@ -4,6 +4,10 @@ include ../common.mk
 INCLUDES = -I$(HDF5_ROOT)/include \
 	   -I../pbdata
 
+ifeq ($(origin nopbbam), undefined)
+    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib 
+endif
+
 ifneq ($(ZLIB_ROOT), notfound)
 	INCLUDES += -I$(ZLIB_ROOT)/include
 endif

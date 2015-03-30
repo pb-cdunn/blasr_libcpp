@@ -10,6 +10,10 @@ ifneq ($(ZLIB_ROOT), notfound)
 	INCLUDES += -I$(ZLIB_ROOT)/include
 endif
 
+ifeq ($(origin nopbbam), undefined)
+    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib 
+endif
+
 CXXOPTS := -std=c++11 -pedantic -Wno-long-long -MMD -MP
 
 sources := $(wildcard algorithms/alignment/*.cpp) \

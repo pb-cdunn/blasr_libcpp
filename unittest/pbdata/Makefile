@@ -2,23 +2,33 @@ include ../common.mk
 
 INCDIRS    = -I.. \
              -I$(PBINCROOT)/pbdata \
-             -I$(GTEST_ROOT) \
-             -I$(HDF5_ROOT)/include
+             -I$(GTEST_ROOT) 
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata \
              -L$(HDF5_ROOT)/lib
+
+LDFLAGS1 := -lpbdata 
+
+ifeq ($(origin nopbbam), undefined)
+	INCDIRS += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib
+	LIBDIRS += -L$(PBBAM)/lib -L$(PBBAM)/third-party/htslib
+	LDFLAGS1 += -lpbbam -lhts
+endif
+
 
 ifneq ($(ZLIB_ROOT), notfound)
 	INCDIRS += -I$(ZLIB_ROOT)/include
 	LIBDIRS += -L$(ZLIB_ROOT)/lib
 endif
 
-LDFLAGS   := -lpbdata -lpthread -lz -ldl
+LDFLAGS   := $(LDFLAGS1) -lpthread -lz -ldl
 
 SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard utils/*.cpp) \
 		     $(wildcard metagenome/*.cpp) \
-		     $(wildcard saf/*.cpp)
+		     $(wildcard saf/*.cpp) \
+		     $(wildcard reads/*.cpp) \
+		     $(wildcard qvs/*.cpp) 
 OBJECTS    = $(SOURCES:.cpp=.o)
 
 EXE := test-runner

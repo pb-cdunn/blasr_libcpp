@@ -5,12 +5,20 @@ INCDIRS    = -I.. \
              -I$(PBINCROOT)/pbdata \
              -I$(PBINCROOT)/hdf \
              -I$(GTEST_ROOT) \
-             -I$(HDF5_ROOT)/include
+             -I$(HDF5_ROOT)/include 
 
 LIBDIRS    = -L$(PBINCROOT)/alignment \
              -L$(PBINCROOT)/pbdata \
              -L$(PBINCROOT)/hdf \
-             -L$(HDF5_ROOT)/lib
+             -L$(HDF5_ROOT)/lib 
+
+LDFLAGS1 := -lblasr -lpbihdf -lpbdata 
+
+ifeq ($(origin nopbbam), undefined)
+	INCDIRS += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib
+	LIBDIRS += -L$(PBBAM)/lib -L$(PBBAM)/third-party/htslib
+	LDFLAGS1 += -lpbbam -lhts
+endif
 
 ifneq ($(ZLIB_ROOT), notfound)
 	INCDIRS += -I$(ZLIB_ROOT)/include
@@ -18,15 +26,21 @@ ifneq ($(ZLIB_ROOT), notfound)
 endif
 
 ifneq ($(wildcard "$(HDF5_ROOT)/lib/libhdf5_cpp.a"),"")
-    LDFLAGS   := -lblasr -lpbihdf -lpbdata $(HDF5_ROOT)/lib/libhdf5_cpp.a $(HDF5_ROOT)/lib/libhdf5.a -lpthread -lz -ldl
+    LDFLAGS   := $(LDFLAGS1) $(HDF5_ROOT)/lib/libhdf5_cpp.a $(HDF5_ROOT)/lib/libhdf5.a -lpthread -lz -ldl
 else
-    LDFLAGS   := -lblasr -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
+    LDFLAGS   := $(LDFLAGS1) -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
 endif
 
 SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard utils/*.cpp) \
 		     $(wildcard datastructures/alignment/*.cpp) \
-		     $(wildcard files/*.cpp) 
+		     $(wildcard files/*.cpp) \
+		     $(wildcard format/*.cpp) 
+
+ifneq ($(origin nopbbam), undefined)
+	SOURCES := $(filter-out format/SAMHeaderPrinter_gtest.cpp $(SOURCES))
+endif
+
 OBJECTS    = $(SOURCES:.cpp=.o)
 
 EXE := test-runner

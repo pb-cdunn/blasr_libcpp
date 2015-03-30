@@ -10,15 +10,24 @@ LIBDIRS    = -L$(PBINCROOT)/pbdata \
              -L$(PBINCROOT)/hdf \
              -L$(HDF5_ROOT)/lib
 
+LDFLAGS1 := -lpbihdf -lpbdata 
+
+ifeq ($(origin nopbbam), undefined)
+	INCDIRS += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib
+	LIBDIRS += -L$(PBBAM)/lib -L$(PBBAM)/third-party/htslib
+	LDFLAGS1 += -lpbbam -lhts
+endif
+
+
 ifneq ($(ZLIB_ROOT), notfound)
 	INCDIRS += -I$(ZLIB_ROOT)/include
 	LIBDIRS += -L$(ZLIB_ROOT)/lib
 endif
 
 ifneq ($(wildcard "$(HDF5_ROOT)/lib/libhdf5_cpp.a"),"")
-    LDFLAGS   := -lpbihdf -lpbdata $(HDF5_ROOT)/lib/libhdf5_cpp.a $(HDF5_ROOT)/lib/libhdf5.a -lpthread -lz -ldl
+    LDFLAGS   := $(LDFLAGS1) $(HDF5_ROOT)/lib/libhdf5_cpp.a $(HDF5_ROOT)/lib/libhdf5.a -lpthread -lz -ldl
 else
-    LDFLAGS   := -lpbihdf -lpbdata -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
+    LDFLAGS   := $(LDFLAGS1) -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
 endif
 # The order of -l{lib} matters
 

@@ -45,6 +45,9 @@ ifeq ($(ZLIB_ROOT), notfound)
 	# we don't need a backup ZLIB_ROOT here, because almost everybody has one in their paths
 endif
 
+# handle PBBAM
+PBBAM := $(shell cd $(PREBUILT)/../bioinformatics/staging/PostPrimary/pbbam 2>/dev/null && pwd || echo -n notfound)
+
 # magic for non-verbose builds
 V ?= 0
 

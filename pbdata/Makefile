@@ -1,4 +1,3 @@
-
 include ../common.mk
 
 CXXOPTS := -std=c++11 -pedantic -MMD -MP
@@ -27,7 +26,16 @@ profile : CXXFLAGS ?= -Os -pg
 
 g: CXXFLAGS = -g -ggdb -fno-inline -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer 
 
-all debug profile g: libpbdata.a
+all debug profile g: mklibconfig libpbdata.a
+
+mklibconfig:
+ifeq ($(origin nopbbam), undefined)
+	ls $(PBBAM)/lib/libpbbam.a 2>/dev/null || (rm -rf $(PBBAM)/build && mkdir $(PBBAM)/build && cd $(PBBAM)/build && cmake ../ && make)
+	@grep "USE_PBBAM" libconfig.h > /dev/null || echo "#define USE_PBBAM" > libconfig.h
+    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib 
+else
+	@rm -f libconfig.h && echo "" > libconfig.h && echo "no use libpbbam"
+endif
 
 libpbdata.a: $(objects)
 	$(AR_pp) $(ARFLAGS) $@ $^
