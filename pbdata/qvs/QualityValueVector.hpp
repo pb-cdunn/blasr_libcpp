@@ -30,8 +30,13 @@ public:
 
     bool Empty() const; 
 
-    void ShallowCopy(const QualityValueVector<T_QV> &ref, int pos = 0);
+    void ShallowCopy(const QualityValueVector<T_QV> &ref, int pos, const DNALength & length); 
 
+    // Returns data length 
+    DNALength Length(void);
+
+private:
+    DNALength _length;
 };
 
 #include "QualityValueVectorImpl.hpp"

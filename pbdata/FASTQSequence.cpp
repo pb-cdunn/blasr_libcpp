@@ -16,7 +16,7 @@ using namespace std;
 //
 // Initialize a read with quality probabilities from one with quality values.
 //
-int FASTQSequence::charToQuality = 33;
+int FASTQSequence::charToQuality = FASTQ_CHAR_TO_QUALITY;
 
 QVScale FASTQSequence::GetQVScale() {
     return qvScale;
@@ -164,7 +164,7 @@ void FASTQSequence::ShallowCopy(const FASTQSequence &rhs) {
     CheckBeforeCopyOrReference(rhs, "FASTQSequence");
     FASTQSequence::Free();
 
-    qual.ShallowCopy(rhs.qual);
+    qual.ShallowCopy(rhs.qual, 0, length);
     FASTASequence::ShallowCopy(rhs);
 }
 
@@ -189,19 +189,19 @@ void FASTQSequence::ReferenceSubstring(const FASTQSequence &rhs, DNALength pos, 
     }
     FASTASequence::ReferenceSubstring(rhs,pos,substrLength);
     if (rhs.qual.Empty() == false) {
-        qual.ShallowCopy(rhs.qual, pos);
+        qual.ShallowCopy(rhs.qual, pos, substrLength);
     }
     if (rhs.deletionQV.Empty() == false) {
-        deletionQV.ShallowCopy(rhs.deletionQV, pos);
+        deletionQV.ShallowCopy(rhs.deletionQV, pos, substrLength);
     }
     if (rhs.mergeQV.Empty() == false) {
-        mergeQV.ShallowCopy(rhs.mergeQV, pos);
+        mergeQV.ShallowCopy(rhs.mergeQV, pos, substrLength);
     }
     if (rhs.insertionQV.Empty() == false) {
-        insertionQV.ShallowCopy(rhs.insertionQV, pos);
+        insertionQV.ShallowCopy(rhs.insertionQV, pos, substrLength);
     }
     if (rhs.preBaseDeletionQV.Empty() == false ){
-        preBaseDeletionQV.ShallowCopy(rhs.preBaseDeletionQV, pos);
+        preBaseDeletionQV.ShallowCopy(rhs.preBaseDeletionQV, pos, substrLength);
     }
     if (rhs.deletionTag != NULL) {
         deletionTag = &rhs.deletionTag[pos];
@@ -210,7 +210,7 @@ void FASTQSequence::ReferenceSubstring(const FASTQSequence &rhs, DNALength pos, 
         substitutionTag = &rhs.substitutionTag[pos];
     }
     if (rhs.substitutionQV.Empty() == false) {
-        substitutionQV.ShallowCopy(rhs.substitutionQV, pos);
+        substitutionQV.ShallowCopy(rhs.substitutionQV, pos, substrLength);
     }
     deletionQVPrior = rhs.deletionQVPrior;
     insertionQVPrior = rhs.insertionQVPrior;

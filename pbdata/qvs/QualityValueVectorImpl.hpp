@@ -12,6 +12,7 @@ QualityValueVector<T_QV>::QualityValueVector() {
     data = NULL;
     // Default to phred.
     qvScale = PHRED;
+    _length = 0;
 }
 
 template<typename T_QV>
@@ -45,11 +46,13 @@ void QualityValueVector<T_QV>::Free() {
         delete[] data;
         data = NULL;
     }
+    _length = 0;
 }
 
 template<typename T_QV>
 void QualityValueVector<T_QV>::Allocate(unsigned int length) {
     data = ProtectedNew<T_QV>(length);
+    _length = static_cast<DNALength>(length);
 }
 
 template<typename T_QV>
@@ -58,9 +61,15 @@ bool QualityValueVector<T_QV>::Empty() const {
 }
 
 template<typename T_QV>
-void QualityValueVector<T_QV>::ShallowCopy(const QualityValueVector<T_QV> &ref, int pos) {
+void QualityValueVector<T_QV>::ShallowCopy(const QualityValueVector<T_QV> &ref, int pos, const DNALength & length) {
     data = &ref.data[pos];
     qvScale = ref.qvScale;
+    _length = static_cast<DNALength>(length);
+}
+
+template<typename T_QV>
+DNALength QualityValueVector<T_QV>::Length(void) {
+    return _length;
 }
 
 template class QualityValueVector<QualityValue>;
