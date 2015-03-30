@@ -102,6 +102,7 @@ TEST_F(DNASequenceTest, Append) {
     DNASequence dnaTwo;
     dnaOne.seq = one; 
     dnaOne.length = oneLen;
+    dnaOne.deleteOnExit = true;
     dnaTwo.seq = two;
     dnaTwo.length = twoLen;
 
@@ -259,7 +260,20 @@ TEST_F(DNASequenceTest, ReferenceSubstring) {
     delete dnaOne.seq;
 }
 
-TEST_F(DNASequenceTest, TheNext) {
-    EXPECT_TRUE(true);
+TEST_F(DNASequenceTest, CopyFromString) {
+    // Test Copy(const std::string &)
+    string str = "ATGCGGGCCTCGCCG";
+    dnaOne.Copy(str);
+
+    for (int i = 0; i < str.size(); i++) {
+       EXPECT_EQ(dnaOne.seq[i], str[i]);
+    }
+
+    // Test operator = (const std::string)
+    DNASequence dnaTwo;
+    dnaTwo = str;
+    for (int i = 0; i < str.size(); i++) {
+       EXPECT_EQ(dnaOne.seq[i], str[i]);
+    }
 }
 
