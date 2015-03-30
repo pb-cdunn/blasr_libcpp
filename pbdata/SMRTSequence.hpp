@@ -37,6 +37,11 @@ public:
     DNALength lowQualityPrefix, lowQualitySuffix;
     int highQualityRegionScore; // High quality region score in region table.
 
+protected:
+    // read group id associated with each SMRTSequence
+    std::string readGroupId; 
+
+public:
     void SetNull(); 
 
     SMRTSequence();
@@ -79,6 +84,12 @@ public:
     bool GetXY(int xyP[]); 
 
     bool GetHoleNumber(UInt & holeNumberP);   
+
+    // Get read group id for this sequence.
+    std::string GetReadGroupId();
+
+    // Set readGroup Id for this sequence.
+    void SetReadGroupId(const std::string & rid);
 };
 
 inline SMRTSequence::~SMRTSequence(){

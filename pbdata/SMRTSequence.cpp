@@ -22,6 +22,7 @@ void SMRTSequence::SetNull() {
     }
     readScore = -1;
     holeNumber = static_cast<UInt>(-1);
+    readGroupId = "";
 }
 
 SMRTSequence::SMRTSequence() : FASTQSequence() {
@@ -189,6 +190,7 @@ void SMRTSequence::Free() {
     lowQualityPrefix = lowQualitySuffix = 0;
     highQualityRegionScore = 0;
     holeNumber = static_cast<UInt>(-1);
+    readGroupId = "";
 
     // Free seq, title and FASTQ QVs, also reset deleteOnExit.
     // Don't call FASTQSequence::Free() before freeing SMRT QVs.
@@ -230,4 +232,12 @@ bool SMRTSequence::GetXY(int xyP[]) {
 bool SMRTSequence::GetHoleNumber(UInt & holeNumberP) {
     holeNumberP = holeNumber;
     return true;
+}
+
+std::string SMRTSequence::GetReadGroupId() {
+    return readGroupId;
+}
+
+void SMRTSequence::SetReadGroupId(const std::string & rid) {
+    readGroupId = rid;
 }
