@@ -6,7 +6,6 @@
 #include <cstring>
 #include "Types.h"
 #include "utils.hpp"
-#include "DNASequence.hpp"
 #include "QualityValue.hpp"
 
 template<typename T_QV>
@@ -31,10 +30,9 @@ public:
 
     bool Empty() const; 
 
-    void ShallowCopy(const QualityValueVector<T_QV> &ref, int pos = 0); 
+    void ShallowCopy(const QualityValueVector<T_QV> &ref, int pos = 0);
 
 };
 
-
-
+#include "QualityValueVectorImpl.hpp"
 #endif // _BLASR_QUALITY_VALUE_VECTOR_HPP_
