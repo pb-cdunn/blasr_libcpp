@@ -3,7 +3,6 @@ SHELL=/bin/bash
 .PHONY: all debug profile gtest clean cleanall
 
 # $Change: 140182 $ 
-export nopbbam=true
 
 all:
 	make -C pbdata all
