@@ -8,9 +8,6 @@
 #include <cassert>
 #include "NucConversion.hpp"
 
-typedef uint32_t DNALength;
-typedef unsigned char Nucleotide;
-
 class DNASequence {
 public:
     DNALength length;
