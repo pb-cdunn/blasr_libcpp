@@ -11,7 +11,7 @@ ifneq ($(ZLIB_ROOT), notfound)
 endif
 
 ifeq ($(origin nopbbam), undefined)
-    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib 
+    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib -I../../../../prebuilt.out/boost/boost_1_55_0
 endif
 
 CXXOPTS := -std=c++11 -pedantic -Wno-long-long -MMD -MP

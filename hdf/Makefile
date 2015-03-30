@@ -5,7 +5,7 @@ INCLUDES = -I$(HDF5_ROOT)/include \
 	   -I../pbdata
 
 ifeq ($(origin nopbbam), undefined)
-    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib 
+    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib -I../../../../prebuilt.out/boost/boost_1_55_0
 endif
 
 ifneq ($(ZLIB_ROOT), notfound)

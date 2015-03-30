@@ -30,9 +30,8 @@ all debug profile g: mklibconfig libpbdata.a
 
 mklibconfig:
 ifeq ($(origin nopbbam), undefined)
-	ls $(PBBAM)/lib/libpbbam.a 2>/dev/null || (rm -rf $(PBBAM)/build && mkdir $(PBBAM)/build && cd $(PBBAM)/build && cmake ../ && make)
 	@grep "USE_PBBAM" libconfig.h > /dev/null || echo "#define USE_PBBAM" > libconfig.h
-    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib 
+    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib -I../../../../prebuilt.out/boost/boost_1_55_0
 else
 	@rm -f libconfig.h && echo "" > libconfig.h && echo "no use libpbbam"
 endif
