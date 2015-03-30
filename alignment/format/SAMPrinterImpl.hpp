@@ -229,15 +229,16 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
       }*/
     samFile << nextSubreadPos << "\t"; // RNEXT, add 1 for 1 based
                                            // indexing
-    
-    DNALength tLen = alignment.GenomicTEnd() - alignment.GenomicTBegin();
-    samFile << tLen << "\t"; // TLEN
+
+    //DNALength tLen = alignment.GenomicTEnd() - alignment.GenomicTBegin();
+    //SAM v1.5, tLen is set as 0 for single-segment template
+    samFile << 0 << "\t"; // TLEN
     // Print the sequence on one line, and suppress printing the
     // newline (by setting the line length to alignedSequence.length
-    static_cast<DNASequence*>(&alignedSequence)->PrintSeq(samFile, 0);  // SEQ
+    (static_cast<DNASequence*>(&alignedSequence))->PrintSeq(samFile, 0);  // SEQ
     samFile << "\t";
     if (alignedSequence.qual.data != NULL && qvList.useqv == 0) {
-      alignedSequence.PrintAsciiQual(samFile, 0);  // QUAL
+        alignedSequence.PrintAsciiQual(samFile, 0);  // QUAL
     }
     else {
       samFile <<"*";
