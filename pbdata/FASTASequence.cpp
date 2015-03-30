@@ -215,9 +215,24 @@ void FASTASequence::operator=(const FASTASequence &rhs) {
     assert(deleteOnExit);
 }
 
+void FASTASequence::Copy(const std::string & rhsTitle, const std::string & rhsSeq) {
+    this->Copy(rhsSeq);
+    this->CopyTitle(rhsTitle);
+}
+
+void FASTASequence::Copy(const std::string & rhsSeq) {
+    (static_cast<DNASequence*>(this))->Copy(rhsSeq);
+}
+
 void FASTASequence::Copy(const FASTASequence &rhs) {
     *this = (FASTASequence&)rhs;
 }
+
+#ifdef USE_PBBAM
+void FASTASequence::Copy(const PacBio::BAM::BamRecord & record) {
+    FASTASequence::Copy(record.Impl().Name(), record.Sequence());
+}
+#endif
 
 void FASTASequence::Free() {
     // Delete title if title is under control, reset deleteTitleOnExit.

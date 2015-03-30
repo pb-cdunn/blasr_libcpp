@@ -71,6 +71,15 @@ public:
 
     void Copy(const FASTASequence &rhs); 
 
+    void Copy(const std::string & rhsTitle, const std::string & rhsSeq);
+
+    void Copy(const std::string & rhsSeq);
+
+#ifdef USE_PBBAM
+    /// Copies a BamRecord as a FASTASequence.
+    void Copy(const PacBio::BAM::BamRecord & record);
+#endif
+
     void Free(); 
 };
 
