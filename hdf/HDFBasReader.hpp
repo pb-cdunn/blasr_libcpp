@@ -888,10 +888,6 @@ public:
     }
     int GetNextHQRegionSNR(SMRTSequence &seq) {
         if (seq.length == 0) return 0;
-        if (seq.hqRegionSnr) {
-            delete [] seq.hqRegionSnr;
-            seq.hqRegionSnr = NULL;
-        }
         hqRegionSNRMatrix.Read(curRead, curRead + 1, seq.hqRegionSnr);
         return 4;
     }
