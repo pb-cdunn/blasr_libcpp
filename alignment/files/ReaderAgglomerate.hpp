@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include "Enumerations.h"
+#include "reads/ReadType.hpp"
 #include "files/BaseSequenceIO.hpp"
 
 #include "FASTAReader.hpp"
@@ -24,6 +25,8 @@ class ReaderAgglomerate : public BaseSequenceIO {
   float subsample;
   bool useRegionTable;
   bool ignoreCCS;
+  ReadType::ReadTypeEnum readType;
+
 public:
   //
   // Create interfaces for reading hdf 
@@ -34,6 +37,7 @@ public:
   vector<CCSSequence>           ccsBuffer;
   string readGroupId;
 
+public:
   void SetToUpper();
 
   void InitializeParameters();
@@ -84,6 +88,13 @@ public:
 
   bool Subsample(float rate);
 
+  // Set read type to SUBREAD, CCS, or UNKNOWN.
+  void SetReadType(const ReadType::ReadTypeEnum & readType_);
+  
+  // returns read type, SUBREAD, CCS, or UNKNOWN
+  ReadType::ReadTypeEnum GetReadType();
+
+public:
   int GetNext(FASTASequence &seq);
   int GetNext(FASTQSequence &seq);
   int GetNext(SMRTSequence &seq);

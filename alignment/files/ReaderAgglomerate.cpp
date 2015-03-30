@@ -11,6 +11,7 @@ void ReaderAgglomerate::InitializeParameters() {
     readQuality = 1;
     useRegionTable = true;
     ignoreCCS = true;
+    readType = ReadType::SUBREAD;
 }
 
 ReaderAgglomerate::ReaderAgglomerate() {
@@ -51,6 +52,14 @@ void ReaderAgglomerate::GetChemistryTriple(string & bindingKit,
     } else {
         sequencingKit = bindingKit = baseCallerVersion = "";
     }
+}
+
+void ReaderAgglomerate::SetReadType(const ReadType::ReadTypeEnum & readType_) {
+    readType = readType_;
+}
+
+ReadType::ReadTypeEnum ReaderAgglomerate::GetReadType() {
+    return readType;
 }
 
 bool ReaderAgglomerate::FileHasZMWInformation() {
@@ -167,15 +176,14 @@ int ReaderAgglomerate::Initialize() {
     if (init == 0 || (start > 0 && Advance(start) == 0) ){
         return 0;
     };
-
-    // Movies from the same SMRTCell (e.g., *.1.bax.h5 and *.2.bax.h5)
-    // should have the same movieName, and the same MD5 according to
-    // PBBAM specification 3.0b3.
-    // moviePlusFileName = movieName + params.readsFileNames[readsFileIndex];
-    string movieName;
-    GetMovieName(movieName);
-    MakeMD5(movieName, readGroupId, 10);
-
+    if (fileType != PBBAM) {
+        // All reads from a non-PBBAM file must have the same read group id. 
+        // Reads from a PABBAM file may come from different read groups.
+        // We have sync reader.readGroupId and SMRTSequence.readGroupId everytime
+        // GetNext() is called.
+        string movieName; GetMovieName(movieName);
+        readGroupId = MakeReadGroupId(movieName, readType);
+    }
     return 1;
 }
 
@@ -283,6 +291,13 @@ int ReaderAgglomerate::GetNext(SMRTSequence &seq) {
             UNREACHABLE();
             break;
     }
+    // A sequence read from a Non-BAM files does not have read group id 
+    // and should be empty, use this->readGroupId instead. Otherwise, 
+    // read group id should be loaded from BamRecord to SMRTSequence, 
+    // update this->readGroupId accordingly.
+    if (fileType != PBBAM) seq.SetReadGroupId(readGroupId);
+    else readGroupId = seq.GetReadGroupId();
+
     if (stride > 1)
         Advance(stride-1);
     return numRecords;
@@ -296,11 +311,11 @@ int ReaderAgglomerate::GetNextBases(SMRTSequence &seq, bool readQVs) {
     }
     switch(fileType) {
         case Fasta:
-            cout << "ERROR! Can only GetNextBases from a Pulse or Base File." << endl;
+            cout << "ERROR! Can not GetNextBases from a Fasta File." << endl;
             assert(0);
             break;
         case Fastq:
-            cout << "ERROR! Can only GetNextBases from a Pulse or Base File." << endl;
+            cout << "ERROR! Can not GetNextBases from a Fastq File." << endl;
             assert(0);
             break;
         case HDFPulse:
@@ -312,14 +327,22 @@ int ReaderAgglomerate::GetNextBases(SMRTSequence &seq, bool readQVs) {
             assert(0);
             break;
         case HDFCCS:
-            cout << "ERROR! Can only GetNextBases from a Pulse or Base File." << endl;
+            cout << "ERROR! Can not GetNextBases from a CCS File." << endl;
             assert(0);
             break;
+#ifdef USE_PBBAM
+        case PBBAM:
+            cout << "ERROR! Can not GetNextBases from a BAM File." << endl;
+#endif
         case Fourbit:
         case None:
             UNREACHABLE();
             break;
     }
+
+    if (fileType != PBBAM) seq.SetReadGroupId(readGroupId);
+    else readGroupId = seq.GetReadGroupId();
+
     if (stride > 1)
         Advance(stride-1);
     return numRecords;
@@ -395,7 +418,6 @@ void ReaderAgglomerate::Close() {
         case HDFPulse:
         case HDFBase:
             hdfBasReader.Close();
-            // zmwReader.Close();
             break;
         case HDFCCSONLY:
         case HDFCCS:
