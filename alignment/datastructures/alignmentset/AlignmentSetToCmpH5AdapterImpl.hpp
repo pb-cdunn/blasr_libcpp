@@ -104,8 +104,8 @@ void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidate(
     AlignmentCandidate<> &alignment, 
     int alnSegment,
     T_CmpFile &cmpFile,
-    int moleculeNumber=-1,
-    bool copyQVs=false) {
+    int moleculeNumber,
+    bool copyQVs) {
   //
   // Find out where the movie is going to get stored.
   //
@@ -244,8 +244,8 @@ template<typename T_CmpFile>
 void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidateList(
     std::vector<AlignmentCandidate<> > &alignments,
     T_CmpFile &cmpFile,
-    int moleculeNumber=-1,
-    bool copyQVs=false) {
+    int moleculeNumber,
+    bool copyQVs) {
   
   int a;
   for (a = 0; a < alignments.size(); a++) {
