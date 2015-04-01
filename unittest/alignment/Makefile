@@ -5,12 +5,12 @@ INCDIRS    = -I.. \
              -I$(PBINCROOT)/pbdata \
              -I$(PBINCROOT)/hdf \
              -I$(GTEST_ROOT) \
-             -I$(HDF5_ROOT)/include 
+             -I$(HDF5_INC) 
 
 LIBDIRS    = -L$(PBINCROOT)/alignment \
              -L$(PBINCROOT)/pbdata \
              -L$(PBINCROOT)/hdf \
-             -L$(HDF5_ROOT)/lib 
+             -L$(HDF5_LIB) 
 
 LDFLAGS1 := -lblasr -lpbihdf -lpbdata 
 
@@ -25,8 +25,8 @@ ifneq ($(ZLIB_ROOT), notfound)
 	LIBDIRS += -L$(ZLIB_ROOT)/lib
 endif
 
-ifneq ($(wildcard "$(HDF5_ROOT)/lib/libhdf5_cpp.a"),"")
-    LDFLAGS   := $(LDFLAGS1) $(HDF5_ROOT)/lib/libhdf5_cpp.a $(HDF5_ROOT)/lib/libhdf5.a -lpthread -lz -ldl
+ifneq ($(wildcard "$(HDF5_LIB)/libhdf5_cpp.a"),"")
+    LDFLAGS   := $(LDFLAGS1) $(HDF5_LIB)/libhdf5_cpp.a $(HDF5_LIB)/libhdf5.a -lpthread -lz -ldl
 else
     LDFLAGS   := $(LDFLAGS1) -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
 endif

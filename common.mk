@@ -20,17 +20,27 @@ endif
 
 PREBUILT ?= ../../../../prebuilt.out
 
-# handle HDF5_ROOT
-ifeq ($(origin HDF5_ROOT), undefined)
-	HDF5_ROOT := $(shell cd $(PREBUILT)/hdf5/hdf5-1.8.12/$(OS_STRING) 2>/dev/null && pwd || echo -n notfound)
+# handle HDF5_INC HDF5_LIB
+ifeq ($(origin HDF5_INC), undefined)
+	HDF5_INC := $(shell cd $(PREBUILT)/hdf5/hdf5-1.8.12/$(OS_STRING)/include 2>/dev/null && pwd || echo -n notfound)
 else
-	HDF5_ROOT := $(shell cd $(HDF5_ROOT) 2>/dev/null && pwd || echo -n notfound)
+	HDF5_INC := $(shell cd $(HDF5_INC) 2>/dev/null && pwd || echo -n notfound)
 endif
-
-ifeq ($(HDF5_ROOT), notfound)
-	HDF5_ROOT := $(shell cd $(THIRD_PARTY)/hdf5 2>/dev/null && pwd || echo -n notfound)
-	ifeq ($(HDF5_ROOT), notfound)
-		$(error please set HDF5_ROOT to a built source tree of hdf5.)
+ifeq ($(HDF5_INC), notfound)
+	HDF5_INC := $(shell cd $(THIRD_PARTY)/hdf5/include 2>/dev/null && pwd || echo -n notfound)
+	ifeq ($(HDF5_INC), notfound)
+		$(error please set HDF5_INC to a built source tree of hdf5.)
+	endif
+endif
+ifeq ($(origin HDF5_LIB), undefined)
+	HDF5_LIB := $(shell cd $(PREBUILT)/hdf5/hdf5-1.8.12/$(OS_STRING)/lib 2>/dev/null && pwd || echo -n notfound)
+else
+	HDF5_LIB := $(shell cd $(HDF5_LIB) 2>/dev/null && pwd || echo -n notfound)
+endif
+ifeq ($(HDF5_LIB), notfound)
+	HDF5_LIB := $(shell cd $(THIRD_PARTY)/hdf5/lib 2>/dev/null && pwd || echo -n notfound)
+	ifeq ($(HDF5_LIB), notfound)
+		$(error please set HDF5_LIB to a built source tree of hdf5.)
 	endif
 endif
 

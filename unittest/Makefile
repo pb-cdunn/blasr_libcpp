@@ -10,7 +10,7 @@ include ./common.mk
 LIBDIRS := -L$(PBINCROOT)/alignment \
            -L$(PBINCROOT)/pbdata \
            -L$(PBINCROOT)/hdf \
-           -L$(HDF5_ROOT)/lib
+           -L$(HDF5_LIB)
 
 LDFLAGS1 := -lblasr -lpbihdf -lpbdata 
 ifeq ($(origin nopbbam), undefined)
@@ -23,9 +23,9 @@ ifneq ($(ZLIB_ROOT), notfound)
 endif
 
 
-ifneq ($(wildcard "$(HDF5_ROOT)/lib/libhdf5_cpp.a"),"")
+ifneq ($(wildcard "$(HDF5_LIB)/libhdf5_cpp.a"),"")
     LDFLAGS := $(LDFLAGS1) \
-               $(HDF5_ROOT)/lib/libhdf5_cpp.a $(HDF5_ROOT)/lib/libhdf5.a \
+               $(HDF5_LIB)/libhdf5_cpp.a $(HDF5_LIB)/libhdf5.a \
                -lpthread -lz -ldl
 else
     LDFLAGS := $(LDFLAGS1) -lhdf5_cpp -lhdf5 -lpthread -lz -ldl

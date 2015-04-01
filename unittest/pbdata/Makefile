@@ -5,7 +5,7 @@ INCDIRS    = -I.. \
              -I$(GTEST_ROOT) 
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata \
-             -L$(HDF5_ROOT)/lib
+             -L$(HDF5_LIB)
 
 LDFLAGS1 := -lpbdata 
 

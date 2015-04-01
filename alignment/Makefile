@@ -1,7 +1,7 @@
 
 include ../common.mk
 
-INCLUDES = -I$(HDF5_ROOT)/include \
+INCLUDES = -I$(HDF5_INC) \
            -I../pbdata \
            -I../hdf \
 	   -I.
