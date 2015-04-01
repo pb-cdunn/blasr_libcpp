@@ -28,9 +28,6 @@ else
 endif
 ifeq ($(HDF5_INC), notfound)
 	HDF5_INC := $(shell cd $(THIRD_PARTY)/hdf5/include 2>/dev/null && pwd || echo -n notfound)
-	ifeq ($(HDF5_INC), notfound)
-		$(error please set HDF5_INC to a built source tree of hdf5.)
-	endif
 endif
 ifeq ($(origin HDF5_LIB), undefined)
 	HDF5_LIB := $(shell cd $(PREBUILT)/hdf5/hdf5-1.8.12/$(OS_STRING)/lib 2>/dev/null && pwd || echo -n notfound)
@@ -39,9 +36,6 @@ else
 endif
 ifeq ($(HDF5_LIB), notfound)
 	HDF5_LIB := $(shell cd $(THIRD_PARTY)/hdf5/lib 2>/dev/null && pwd || echo -n notfound)
-	ifeq ($(HDF5_LIB), notfound)
-		$(error please set HDF5_LIB to a built source tree of hdf5.)
-	endif
 endif
 
 # handle ZLIB_ROOT
