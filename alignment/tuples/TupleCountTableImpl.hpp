@@ -37,7 +37,7 @@ TupleCountTable<TSequence, TTuple>::~TupleCountTable() {
 }
 
 template<typename TSequence, typename TTuple>
-TupleCountTable<TSequence, TTuple>::Free() {
+void TupleCountTable<TSequence, TTuple>::Free() {
     if (deleteStructures == false) {
         //
         // Do not delete this if it is referencing another structure
