@@ -13,7 +13,7 @@ LIBDIRS    = -L$(PBINCROOT)/pbdata \
 LDFLAGS1 := -lpbihdf -lpbdata 
 
 ifeq ($(origin nopbbam), undefined)
-	INCDIRS += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib/htslib
+	INCDIRS += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib
 	LIBDIRS += -L$(PBBAM)/lib -L$(PBBAM)/third-party/htslib
 	LDFLAGS1 += -lpbbam -lhts
 endif
