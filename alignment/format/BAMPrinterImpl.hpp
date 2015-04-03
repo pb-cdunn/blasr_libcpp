@@ -71,7 +71,6 @@ void AlignmentToBamRecord(T_AlignmentCandidate & alignment,
         bamRecord.Impl().SetSequenceAndQualities(seqString, alignedSequence.qual.ToString());
         bamRecord.Impl().CigarData(cigar);
         bamRecord.Impl().Bin(0);
-        bamRecord.Impl().Flag(static_cast<uint32_t>(flag));
         bamRecord.Impl().InsertSize(0);
         bamRecord.Impl().MapQuality(static_cast<uint8_t>(alignment.mapQV));
         bamRecord.Impl().MatePosition(static_cast<PacBio::BAM::Position>(-1));
@@ -144,9 +143,11 @@ void AlignmentToBamRecord(T_AlignmentCandidate & alignment,
                         static_cast<PacBio::BAM::Position>(pos),
                         strand, cigar, 
                         static_cast<uint8_t>(alignment.mapQV));
-        // Overwrite Flag.
-        bamRecord.Impl().Flag(static_cast<uint32_t>(flag));
     }
+
+    // Set Flag and Accuracy (float between [0, 100.0] to integer between [0, 1000]).
+    bamRecord.Impl().Flag(static_cast<uint32_t>(flag));
+    bamRecord.ReadAccuracy(PacBio::BAM::Accuracy(static_cast<int>(10 * alignment.pctSimilarity)));
 }
 
 template<typename T_Sequence>
