@@ -2,6 +2,7 @@ include ../common.mk
 
 INCDIRS    = -I.. \
              -I$(PBINCROOT)/pbdata \
+             -I$(PREBUILT)/boost/boost_1_55_0 \
              -I$(GTEST_ROOT) 
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata \

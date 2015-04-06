@@ -18,7 +18,7 @@ ifeq ($(THIRD_PARTY), notfound)
 	endif
 endif
 
-PREBUILT ?= ../../../../prebuilt.out
+PREBUILT ?= $(realpath ../../../../prebuilt.out)
 
 # handle HDF5_INC HDF5_LIB
 ifeq ($(origin HDF5_INC), undefined)

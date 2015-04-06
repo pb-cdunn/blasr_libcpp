@@ -7,8 +7,8 @@ SHELL=bash
 # All paths are relative from inside the subdirectories, not this file
 #
 
-PBINCROOT 		   ?= ../..
-PREBUILT    	   ?= ../../../../../prebuilt.out
+PBINCROOT 	   ?= ../..
+PREBUILT    	   ?= $(realpath ../../../../../prebuilt.out)
 THIRD_PARTY_PREFIX ?= ../../..
 
 include $(PBINCROOT)/common.mk

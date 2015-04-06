@@ -4,6 +4,7 @@ INCDIRS    = -I.. \
              -I$(PBINCROOT)/pbdata \
              -I$(PBINCROOT)/hdf \
              -I$(GTEST_ROOT) \
+             -I$(PREBUILT)/boost/boost_1_55_0 \
              -I$(HDF5_INC)
 
 LIBDIRS    = -L$(PBINCROOT)/pbdata \
