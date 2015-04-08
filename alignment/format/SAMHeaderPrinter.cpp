@@ -325,7 +325,7 @@ SAMHeaderRGs SAMHeaderPrinter::MakeRGs(const std::vector<std::string> & readsFil
             reader->Close();
 
             std::vector<SAMHeaderItem> dsItems;
-            dsItems.push_back(SAMHeaderItem("BINDKINGKIT", bindingKit));
+            dsItems.push_back(SAMHeaderItem("BINDINGKIT", bindingKit));
             dsItems.push_back(SAMHeaderItem("SEQUENCINGKIT", sequencingKit));
             dsItems.push_back(SAMHeaderItem("BASECALLERVERSION", baseCallerVersion));
 
