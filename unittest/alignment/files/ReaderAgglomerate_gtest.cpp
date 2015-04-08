@@ -109,7 +109,7 @@ TEST_F(ReaderAgglomerateTest, GetChemistryTriple) {
     string fn;
     string bindingKit, sequencingKit, version;
 
-    GET_CHEMISTRY_TRIPLE(baxFile3, "100356300", "100356200", "2.3")
+    GET_CHEMISTRY_TRIPLE(baxFile3, "100356300", "100356200", "2.3.0.0.140018")
 } 
 
 TEST_F(ReaderAgglomerateTest, ReadFromBam) {
