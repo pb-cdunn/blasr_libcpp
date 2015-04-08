@@ -1,11 +1,16 @@
 
 include ../common.mk
 
+PBDATA_INCLUDE := ../pbdata
+PBBAM_INCLUDE := $(PBBAM)/include
+HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
+BOOST_INCLUDE := ../../../../prebuilt.out/boost/boost_1_55_0
+
 INCLUDES = -I$(HDF5_INC) \
-	   -I../pbdata
+	   -I$(PBDATA_INCLUDE)
 
 ifeq ($(origin nopbbam), undefined)
-    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib -I../../../../prebuilt.out/boost/boost_1_55_0
+    INCLUDES += -I$(PBBAM_INCLUDE) -I$(HTSLIB_INCLUDE) -I$(BOOST_INCLUDE)
 endif
 
 ifneq ($(ZLIB_ROOT), notfound)

@@ -1,9 +1,15 @@
 
 include ../common.mk
 
+LIBPBDATA_INCLUDE := ../pbdata
+LIBPBIHDF_INCLUDE := ../hdf
+PBBAM_INCLUDE := $(PBBAM)/include
+HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
+BOOST_INCLUDE := ../../../../prebuilt.out/boost/boost_1_55_0
+
 INCLUDES = -I$(HDF5_INC) \
-           -I../pbdata \
-           -I../hdf \
+           -I$(LIBPBDATA_INCLUDE) \
+           -I$(LIBPBIHDF_INCLUDE) \
 	   -I.
 
 ifneq ($(ZLIB_ROOT), notfound)
@@ -11,7 +17,7 @@ ifneq ($(ZLIB_ROOT), notfound)
 endif
 
 ifeq ($(origin nopbbam), undefined)
-    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib -I../../../../prebuilt.out/boost/boost_1_55_0
+    INCLUDES += -I$(PBBAM_INCLUDE) -I$(HTSLIB_INCLUDE) -I$(BOOST_INCLUDE)
 endif
 
 CXXOPTS := -std=c++11 -pedantic -Wno-long-long -MMD -MP

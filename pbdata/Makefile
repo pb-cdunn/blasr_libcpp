@@ -1,7 +1,14 @@
+# Let common.mk know that that the third party checks should be ignored
+COMMON_NO_THIRD_PARTY_REQD := true
+
 include ../common.mk
 
 CXXOPTS := -std=c++11 -pedantic -MMD -MP
 INCLUDES := -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils -Ialignment
+
+PBBAM_INCLUDE := $(PBBAM)/include
+HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
+BOOST_INCLUDE := ../../../../prebuilt.out/boost/boost_1_55_0
 
 sources := $(wildcard *.cpp) \
 	       $(wildcard matrix/*.cpp) \
@@ -31,7 +38,7 @@ all debug profile g: mklibconfig libpbdata.a
 mklibconfig:
 ifeq ($(origin nopbbam), undefined)
 	@grep "USE_PBBAM" libconfig.h > /dev/null || echo "#define USE_PBBAM" > libconfig.h
-    INCLUDES += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib -I../../../../prebuilt.out/boost/boost_1_55_0
+    INCLUDES += -I$(PBBAM_INCLUDE) -I$(HTSLIB_INCLUDE) -I$(BOOST_INCLUDE)
 else
 	@rm -f libconfig.h && echo "" > libconfig.h && echo "no use libpbbam"
 endif
