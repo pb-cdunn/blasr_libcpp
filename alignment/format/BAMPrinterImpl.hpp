@@ -145,9 +145,8 @@ void AlignmentToBamRecord(T_AlignmentCandidate & alignment,
                         static_cast<uint8_t>(alignment.mapQV));
     }
 
-    // Set Flag and Accuracy (float between [0, 100.0] to integer between [0, 1000]).
+    // Set Flag 
     bamRecord.Impl().Flag(static_cast<uint32_t>(flag));
-    bamRecord.ReadAccuracy(PacBio::BAM::Accuracy(static_cast<int>(10 * alignment.pctSimilarity)));
 }
 
 template<typename T_Sequence>
