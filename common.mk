@@ -2,6 +2,8 @@ SHELL          = bash
 G_BUILDOS_CMD := bash -c 'set -e; set -o pipefail; id=$$(lsb_release -si | tr "[:upper:]" "[:lower:]"); rel=$$(lsb_release -sr); case $$id in ubuntu) printf "$$id-%04d\n" $${rel/./};; centos) echo "$$id-$${rel%%.*}";; *) echo "$$id-$$rel";; esac' 2>/dev/null
 OS_STRING     ?= $(shell $(G_BUILDOS_CMD))
 
+PREBUILT ?= $(realpath ../../../../prebuilt.out)
+
 ifneq ($(COMMON_NO_THIRD_PARTY_REQD),true)
     #
     # Definitions common to all make files for library code.
@@ -15,8 +17,6 @@ ifneq ($(COMMON_NO_THIRD_PARTY_REQD),true)
     ifeq ($(THIRD_PARTY), notfound)
 	THIRD_PARTY := $(shell cd $(abspath $(THIRD_PARTY_PREFIX)/../third-party/cpp) 2>/dev/null && pwd || echo -n notfound)
     endif
-
-    PREBUILT ?= $(realpath ../../../../prebuilt.out)
 
     # handle HDF5_INC HDF5_LIB
     ifeq ($(origin HDF5_INC), undefined)
