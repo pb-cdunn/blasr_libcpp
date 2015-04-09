@@ -25,9 +25,14 @@ TEST(StringUtilTest, MakeReadGroupId) {
 
     string movieName = "m140905_042212_sidney_c100564852550000001823085912221377_s1_X0";
     ReadType::ReadTypeEnum readType = ReadType::SUBREAD;
-    string expectedReadGroupId = "05aecfc9";
-
+    string expectedReadGroupId = "b89a4406";
     EXPECT_EQ(MakeReadGroupId(movieName, readType), expectedReadGroupId);
+
+    movieName = "movie32";
+    readType = ReadType::CCS;
+    expectedReadGroupId = "f5b4ffb6";
+    EXPECT_EQ(MakeReadGroupId(movieName, readType), expectedReadGroupId);
+
 }
 
 
