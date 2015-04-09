@@ -149,8 +149,8 @@ SAMHeaderRG::SAMHeaderRG(const std::string & id, const std::string & pl,
     _groupName = "RG";
     _id = id;
     _tags.push_back(SAMHeaderTag("ID", id));
-    _tags.push_back(SAMHeaderTag("PU", pl));
-    _tags.push_back(SAMHeaderTag("PL", pu));
+    _tags.push_back(SAMHeaderTag("PU", pu));
+    _tags.push_back(SAMHeaderTag("PL", pl));
     _tags.push_back(SAMHeaderTag("DS", dsItems));
 }
 
