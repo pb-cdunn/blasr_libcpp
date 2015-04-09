@@ -52,5 +52,5 @@ TEST_F(HDFBasReaderTEST, GetChemistryTriple) {
     reader.GetChemistryTriple(bindingKit, sequencingKit, version);
     EXPECT_EQ(bindingKit, "100356300");
     EXPECT_EQ(sequencingKit, "100356200");
-    EXPECT_EQ(version, "2.3.0.0.140018");
+    EXPECT_EQ(version, "2.3");
 }

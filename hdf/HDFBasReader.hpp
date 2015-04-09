@@ -261,7 +261,7 @@ public:
                             std::string & baseCallerVersion) {
         scanDataReader.ReadBindingKit(bindingKit);
         scanDataReader.ReadSequencingKit(sequencingKit);
-        baseCallerVersion = changeList.idString;
+        baseCallerVersion = changeList.GetVersion();
     }
 
     int InitializeForReadingBases() {
