@@ -5,7 +5,6 @@ LIBPBDATA_INCLUDE := ../pbdata
 LIBPBIHDF_INCLUDE := ../hdf
 PBBAM_INCLUDE := $(PBBAM)/include
 HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
-BOOST_INCLUDE := ../../../../prebuilt.out/boost/boost_1_55_0
 
 INCLUDES = -I$(HDF5_INC) \
            -I$(LIBPBDATA_INCLUDE) \

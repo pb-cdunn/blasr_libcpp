@@ -2,15 +2,17 @@ SHELL          = bash
 G_BUILDOS_CMD := bash -c 'set -e; set -o pipefail; id=$$(lsb_release -si | tr "[:upper:]" "[:lower:]"); rel=$$(lsb_release -sr); case $$id in ubuntu) printf "$$id-%04d\n" $${rel/./};; centos) echo "$$id-$${rel%%.*}";; *) echo "$$id-$$rel";; esac' 2>/dev/null
 OS_STRING     ?= $(shell $(G_BUILDOS_CMD))
 
-PREBUILT ?= $(realpath ../../../../prebuilt.out)
+ifeq ($(origin PREBUILT), undefined)
+PREBUILT := $(shell cd ../../../../prebuilt.out 2>/dev/null && pwd || echo -n notfound)
+endif
+
+THIRD_PARTY_PREFIX ?= ../..
 
 ifneq ($(COMMON_NO_THIRD_PARTY_REQD),true)
     #
     # Definitions common to all make files for library code.
     # All paths are relative from inside the subdirectories, not this file
     #
-
-    THIRD_PARTY_PREFIX ?= ../..
 
     # git layout vs p4 layout automagic
     THIRD_PARTY ?= $(shell cd $(abspath $(THIRD_PARTY_PREFIX)/third-party) 2>/dev/null && pwd || echo -n notfound)
@@ -54,9 +56,18 @@ ifneq ($(COMMON_NO_THIRD_PARTY_REQD),true)
     endif
 endif
 
+# handle BOOST
+ifeq ($(origin BOOST_INCLUDE), undefined)
+ifeq ($(origin BOOST_ROOT), undefined)
+BOOST_INCLUDE := $(PREBUILT)/boost/boost_1_55_0
+else
+BOOST_INCLUDE := $(BOOST_ROOT)
+endif
+endif
+
 # handle PBBAM
 ifeq ($(origin PBBAM), undefined)
-	PBBAM := $(shell cd $(PREBUILT)/../bioinformatics/staging/PostPrimary/pbbam 2>/dev/null && pwd || echo -n notfound)
+PBBAM := $(shell cd $(THIRD_PARTY_PREFIX)/../staging/PostPrimary/pbbam 2>/dev/null && pwd || echo -n notfound)
 endif
 
 # magic for non-verbose builds

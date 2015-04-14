@@ -8,7 +8,6 @@ INCLUDES := -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils -Ialignment
 
 PBBAM_INCLUDE := $(PBBAM)/include
 HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
-BOOST_INCLUDE := ../../../../prebuilt.out/boost/boost_1_55_0
 
 sources := $(wildcard *.cpp) \
 	       $(wildcard matrix/*.cpp) \
