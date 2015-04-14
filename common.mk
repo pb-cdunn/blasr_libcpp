@@ -55,7 +55,9 @@ ifneq ($(COMMON_NO_THIRD_PARTY_REQD),true)
 endif
 
 # handle PBBAM
-PBBAM := $(shell cd $(PREBUILT)/../bioinformatics/staging/PostPrimary/pbbam 2>/dev/null && pwd || echo -n notfound)
+ifeq ($(origin PBBAM), undefined)
+	PBBAM := $(shell cd $(PREBUILT)/../bioinformatics/staging/PostPrimary/pbbam 2>/dev/null && pwd || echo -n notfound)
+endif
 
 # magic for non-verbose builds
 V ?= 0
