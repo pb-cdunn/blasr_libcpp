@@ -82,10 +82,9 @@ void AlignmentToBamRecord(T_AlignmentCandidate & alignment,
             bamRecord.Impl().SetReverseStrand(true);
         }
 
-        // build QV tags
+        // Add tags required for bax->bam.
         PacBio::BAM::TagCollection tags;
         tags["RG"] = context.readGroupId;
-        tags["AS"] = alignment.score;
         if (dynamic_cast<CCSSequence*>(&read) == NULL) { // subread
             tags["qs"] = read.subreadStart;
             tags["qe"] = read.subreadEnd;
@@ -96,8 +95,8 @@ void AlignmentToBamRecord(T_AlignmentCandidate & alignment,
             tags["np"] = (static_cast<CCSSequence*>(&read))->numPasses;
         }
         tags["zm"] = read.zmwData.holeNumber;
-        tags["NM"] = context.editDist;
 
+        // Build QV tags.
         // Skip tags not define in BAM specification 3.0. 
         // including XL, XT, XQ, XS, XE, YS, YE.
         //
@@ -145,8 +144,13 @@ void AlignmentToBamRecord(T_AlignmentCandidate & alignment,
                         static_cast<uint8_t>(alignment.mapQV));
     }
 
+    // Add tags common for bax->bam and bam->bam.
+    bamRecord.Impl().AddTag("AS", alignment.score);
+    bamRecord.Impl().AddTag("NM", context.editDist);
+
     // Set Flag 
     bamRecord.Impl().Flag(static_cast<uint32_t>(flag));
+
 }
 
 template<typename T_Sequence>
