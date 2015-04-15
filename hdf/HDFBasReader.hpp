@@ -887,12 +887,10 @@ public:
         return seq.length;
     }
     int GetNextHQRegionSNR(SMRTSequence &seq) {
-        if (seq.length == 0) return 0;
         hqRegionSNRMatrix.Read(curRead, curRead + 1, seq.hqRegionSnr);
         return 4;
     }
     int GetNextReadScore(SMRTSequence &seq) {
-        if (seq.length == 0) return 0;
         readScoreArray.Read(curRead, curRead + 1, &seq.readScore);
         return 1;
     }
