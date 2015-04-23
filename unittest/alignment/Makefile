@@ -1,37 +1,5 @@
 include ../common.mk
 
-INCDIRS    = -I.. \
-             -I$(PBINCROOT)/alignment \
-             -I$(PBINCROOT)/pbdata \
-             -I$(PBINCROOT)/hdf \
-             -I$(GTEST_ROOT) \
-             -I$(PREBUILT)/boost/boost_1_55_0 \
-             -I$(HDF5_INC) 
-
-LIBDIRS    = -L$(PBINCROOT)/alignment \
-             -L$(PBINCROOT)/pbdata \
-             -L$(PBINCROOT)/hdf \
-             -L$(HDF5_LIB) 
-
-LDFLAGS1 := -lblasr -lpbihdf -lpbdata 
-
-ifeq ($(origin nopbbam), undefined)
-	INCDIRS += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib
-	LIBDIRS += -L$(PBBAM)/lib -L$(PBBAM)/third-party/htslib
-	LDFLAGS1 += -lpbbam -lhts
-endif
-
-ifneq ($(ZLIB_ROOT), notfound)
-	INCDIRS += -I$(ZLIB_ROOT)/include
-	LIBDIRS += -L$(ZLIB_ROOT)/lib
-endif
-
-ifneq ($(wildcard "$(HDF5_LIB)/libhdf5_cpp.a"),"")
-    LDFLAGS   := $(LDFLAGS1) $(HDF5_LIB)/libhdf5_cpp.a $(HDF5_LIB)/libhdf5.a -lpthread -lz -ldl
-else
-    LDFLAGS   := $(LDFLAGS1) -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
-endif
-
 SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard utils/*.cpp) \
 		     $(wildcard datastructures/alignment/*.cpp) \

@@ -1,35 +1,10 @@
 SHELL=bash
 
-PBINCROOT   := ..
-
-PREBUILT           ?= ../../../../prebuilt.out
-THIRD_PARTY_PREFIX ?= ../..
+PBINCROOT   := $(realpath ..)
+PREBUILT           ?= $(realpath ../../../../prebuilt.out)
+THIRD_PARTY_PREFIX ?= $(realpath ../..)
 
 include ./common.mk
-
-LIBDIRS := -L$(PBINCROOT)/alignment \
-           -L$(PBINCROOT)/pbdata \
-           -L$(PBINCROOT)/hdf \
-           -L$(HDF5_LIB)
-
-LDFLAGS1 := -lblasr -lpbihdf -lpbdata 
-ifeq ($(origin nopbbam), undefined)
-	LIBDIRS += -L$(PBBAM)/lib -L$(PBBAM)/third-party/htslib
-	LDFLAGS1 += -lpbbam -lhts
-endif
-
-ifneq ($(ZLIB_ROOT), notfound)
-	LIBDIRS += -L$(ZLIB_ROOT)/lib
-endif
-
-
-ifneq ($(wildcard "$(HDF5_LIB)/libhdf5_cpp.a"),"")
-    LDFLAGS := $(LDFLAGS1) \
-               $(HDF5_LIB)/libhdf5_cpp.a $(HDF5_LIB)/libhdf5.a \
-               -lpthread -lz -ldl
-else
-    LDFLAGS := $(LDFLAGS1) -lhdf5_cpp -lhdf5 -lpthread -lz -ldl
-endif
 
 OS := $(shell uname)
 

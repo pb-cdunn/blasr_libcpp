@@ -1,29 +1,5 @@
 include ../common.mk
 
-INCDIRS    = -I.. \
-             -I$(PBINCROOT)/pbdata \
-             -I$(PREBUILT)/boost/boost_1_55_0 \
-             -I$(GTEST_ROOT) 
-
-LIBDIRS    = -L$(PBINCROOT)/pbdata \
-             -L$(HDF5_LIB)
-
-LDFLAGS1 := -lpbdata 
-
-ifeq ($(origin nopbbam), undefined)
-	INCDIRS += -I$(PBBAM)/include -I$(PBBAM)/third-party/htslib
-	LIBDIRS += -L$(PBBAM)/lib -L$(PBBAM)/third-party/htslib
-	LDFLAGS1 += -lpbbam -lhts
-endif
-
-
-ifneq ($(ZLIB_ROOT), notfound)
-	INCDIRS += -I$(ZLIB_ROOT)/include
-	LIBDIRS += -L$(ZLIB_ROOT)/lib
-endif
-
-LDFLAGS   := $(LDFLAGS1) -lpthread -lz -ldl
-
 SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard utils/*.cpp) \
 		     $(wildcard metagenome/*.cpp) \
