@@ -206,8 +206,8 @@ public:
 public:
 #ifdef USE_PBBAM
     /// Converts this SAMHeader to PacBio::BAM::BamHeader, must be compiled with pbbam
-    /// \returns a shared pointer to PacBio::BAM::BamHeader. 
-    std::shared_ptr<PacBio::BAM::BamHeader> ToBamHeader();
+    /// \returns a PacBio::BAM::BamHeader. 
+    PacBio::BAM::BamHeader ToBamHeader();
 #endif
 
     /// Add a SAM Header @RG entry, including the following tags:

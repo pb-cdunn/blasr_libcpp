@@ -196,9 +196,11 @@ int ReaderAgglomerate::Initialize() {
 #ifdef USE_PBBAM
         case PBBAM: {
             RESET_PBBAM_PTRS();
-            bamFilePtr = new PacBio::BAM::BamFile(fileName);
-            if (not *bamFilePtr) {
-                cout << "ERROR! Failed to open " << fileName << endl;
+            try {
+                bamFilePtr = new PacBio::BAM::BamFile(fileName);
+            } catch (std::exception e) {
+                cout << "ERROR! Failed to open " << fileName 
+                     << ": " << e.what() << endl;
                 return 0;
             }
             entireFileQueryPtr = new PacBio::BAM::EntireFileQuery(*bamFilePtr);

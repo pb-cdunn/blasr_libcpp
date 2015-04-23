@@ -347,17 +347,18 @@ SAMHeaderRGs SAMHeaderPrinter::MakeRGs(const std::vector<std::string> & readsFil
         // it is in place. Use the following code for now. 
         std::vector<std::string>::const_iterator rfit;
         for(rfit = readsFiles.begin(); rfit != readsFiles.end(); rfit++) {
-            PacBio::BAM::BamFile bamFile(*rfit);
-            if (not bamFile) {
+            try {
+                PacBio::BAM::BamFile bamFile(*rfit);
+                PacBio::BAM::BamHeader header = bamFile.Header();
+                // Get read groups from bam header.
+                std::vector<PacBio::BAM::ReadGroupInfo> vrgs = header.ReadGroups();
+                std::vector<PacBio::BAM::ReadGroupInfo>::iterator rgit;
+                for (rgit = vrgs.begin(); rgit != vrgs.end(); rgit++) {
+                    rgs.Add(SAMHeaderRG((*rgit).ToSam()));
+                }
+            } catch (std::exception e) {
                 cout << "ERROR, unable to open bam file " << (*rfit) << endl;
                 exit(1);
-            }
-            std::shared_ptr<PacBio::BAM::BamHeader> header = bamFile.Header();
-            // Get read groups from bam header.
-            std::vector<PacBio::BAM::ReadGroupInfo> vrgs = header->ReadGroups();
-            std::vector<PacBio::BAM::ReadGroupInfo>::iterator rgit;
-            for (rgit = vrgs.begin(); rgit != vrgs.end(); rgit++) {
-                rgs.Add(SAMHeaderRG((*rgit).ToSam()));
             }
         }
 #else
@@ -386,8 +387,8 @@ SAMHeaderPGs SAMHeaderPrinter::MakePGs(const std::vector<std::string> & readsFil
         std::vector<std::string>::const_iterator rfit;
         for(rfit = readsFiles.begin(); rfit != readsFiles.end(); rfit++) {
             PacBio::BAM::BamFile bamFile(*rfit);
-            std::shared_ptr<PacBio::BAM::BamHeader> bamHeader = bamFile.Header();
-            std::vector<PacBio::BAM::ProgramInfo> progs = bamHeader->Programs();
+            PacBio::BAM::BamHeader bamHeader = bamFile.Header();
+            std::vector<PacBio::BAM::ProgramInfo> progs = bamHeader.Programs();
             std::vector<PacBio::BAM::ProgramInfo>::iterator it;
             for (it = progs.begin(); it != progs.end(); it++) {
                 pgs.Add(SAMHeaderPG((*it).ToSam()));
@@ -412,8 +413,8 @@ SAMHeaderCOs SAMHeaderPrinter::MakeCOs(const std::vector<std::string> & readsFil
         std::vector<std::string>::const_iterator rfit;
         for(rfit = readsFiles.begin(); rfit != readsFiles.end(); rfit++) {
             PacBio::BAM::BamFile bamFile(*rfit);
-            std::shared_ptr<PacBio::BAM::BamHeader> bamHeader = bamFile.Header();
-            cos.Append(bamHeader->Comments());
+            PacBio::BAM::BamHeader bamHeader = bamFile.Header();
+            cos.Append(bamHeader.Comments());
         }
 #else
         REQUEST_PBBAM_ERROR();
@@ -423,9 +424,9 @@ SAMHeaderCOs SAMHeaderPrinter::MakeCOs(const std::vector<std::string> & readsFil
 }
 
 #ifdef USE_PBBAM
-std::shared_ptr<PacBio::BAM::BamHeader> SAMHeaderPrinter::ToBamHeader() {
+PacBio::BAM::BamHeader SAMHeaderPrinter::ToBamHeader() {
     std::string headerStr = ToString();
-    return PacBio::BAM::BamHeader::FromSam(headerStr);
+    return PacBio::BAM::BamHeader(headerStr);
 }
 #endif
 
