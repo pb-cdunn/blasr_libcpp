@@ -61,11 +61,4 @@ endif
 
 CXX := g++
 CXXOPTS := -std=c++11 -Wno-div-by-zero 
-
-all : CXXFLAGS ?= -O3
-
-debug : CXXFLAGS ?= -g -ggdb -fno-inline
-
-profile : CXXFLAGS ?= -Os -pg
-
-
+CXXFLAGS := -O3
