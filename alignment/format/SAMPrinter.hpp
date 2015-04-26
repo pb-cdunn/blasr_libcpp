@@ -39,6 +39,10 @@ void CreateDNAString(DNASequence &seq, DNASequence &clippedSeq,
 void AddGaps(T_AlignmentCandidate &alignment, int gapIndex,
         std::vector<int> &opSize, std::vector<char> &opChar); 
 
+// Add sequence match/mismatch CIGAR string Ops for block b.
+void AddMatchBlockCigarOps(DNASequence & qSeq, DNASequence & tSeq, blasr::Block & b,
+        std::vector<int> & opSize, std::vector<char> & opChar);
+
 void CreateNoClippingCigarOps(T_AlignmentCandidate &alignment, 
         std::vector<int> &opSize, std::vector<char> &opChar); 
 //

@@ -77,6 +77,27 @@ void SAMOutput::AddGaps(T_AlignmentCandidate &alignment, int gapIndex,
     }
 }
 
+void SAMOutput::AddMatchBlockCigarOps(DNASequence & qSeq, DNASequence & tSeq, blasr::Block & b,
+        std::vector<int> & opSize, std::vector<char> & opChar) {
+    DNALength qPos = b.qPos, tPos = b.tPos, n = 0;
+    bool started = false, prevSeqMatch = false;
+    for(DNALength i = 0; i < b.length; i++) {
+        bool curSeqMatch = (qSeq[qPos + i] == tSeq[tPos + i]);
+        if (started) {
+            if (curSeqMatch == prevSeqMatch) opSize[opSize.size()-1]++;
+            else {
+                opSize.push_back(1);
+                opChar.push_back(curSeqMatch?'=':'X');
+            }
+        } else {
+            started = true;
+            opSize.push_back(1);
+            opChar.push_back(curSeqMatch?'=':'X');
+        }
+        prevSeqMatch = curSeqMatch;
+    }
+}
+
 void SAMOutput::CreateNoClippingCigarOps(T_AlignmentCandidate &alignment, 
         std::vector<int> &opSize, std::vector<char> &opChar) {
     //
@@ -112,8 +133,9 @@ void SAMOutput::CreateNoClippingCigarOps(T_AlignmentCandidate &alignment,
                 qGap -= commonGap;
                 tGap -= commonGap;
                 matchLength += commonGap;
-                opSize.push_back(matchLength);
-                opChar.push_back('M');
+                AddMatchBlockCigarOps(alignment.qAlignedSeq, alignment.tAlignedSeq, alignment.blocks[b], opSize, opChar);
+                //opSize.push_back(matchLength);
+                //opChar.push_back('M');
                 assert((qGap > 0 and tGap == 0) or (qGap == 0 and tGap > 0));
                 if (qGap > 0) {
                     opSize.push_back(qGap);
@@ -126,8 +148,9 @@ void SAMOutput::CreateNoClippingCigarOps(T_AlignmentCandidate &alignment,
             }
         }
         else {
-            opSize.push_back(matchLength);
-            opChar.push_back('M');
+            AddMatchBlockCigarOps(alignment.qAlignedSeq, alignment.tAlignedSeq, alignment.blocks[b], opSize, opChar);
+            // opSize.push_back(matchLength);
+            // opChar.push_back('M');
             int g;
             int gapIndex = b+1;
             AddGaps(alignment, gapIndex, opSize, opChar);
