@@ -43,8 +43,11 @@ void AddGaps(T_AlignmentCandidate &alignment, int gapIndex,
 void AddMatchBlockCigarOps(DNASequence & qSeq, DNASequence & tSeq, blasr::Block & b,
         std::vector<int> & opSize, std::vector<char> & opChar);
 
+// If cigarUseSeqMatch is true, cigar string uses '=' and 'X' 
+// instead of 'M' to represent sequence match and mismatch;
 void CreateNoClippingCigarOps(T_AlignmentCandidate &alignment, 
-        std::vector<int> &opSize, std::vector<char> &opChar); 
+        std::vector<int> &opSize, std::vector<char> &opChar,
+        bool cigarUseSeqMatch = false); 
 //
 // 
 // The aligned sequence is either the sequence from the first
@@ -65,7 +68,7 @@ void SetHardClip(T_AlignmentCandidate &alignment, T_Sequence &read,
     DNALength &prefixClip, DNALength &suffixClip); 
 
 void CigarOpsToString(std::vector<int> &opSize, std::vector<char> &opChar, 
-        std::string &cigarString); 
+        std::string &cigarString);
 
 //
 // Straight forward: create the cigar string allowing some clipping
@@ -75,13 +78,14 @@ template<typename T_Sequence>
 void CreateCIGARString(T_AlignmentCandidate &alignment, T_Sequence &read,
         std::string &cigarString, Clipping clipping, 
         DNALength &prefixSoftClip, DNALength &suffixSoftClip,
-        DNALength &prefixHardClip, DNALength &suffixHardClip); 
+        DNALength &prefixHardClip, DNALength &suffixHardClip,
+        bool cigarUseSeqMatch = false); 
 
 template<typename T_Sequence>
 void PrintAlignment(T_AlignmentCandidate &alignment, T_Sequence &read,
         std::ostream &samFile, AlignmentContext &context, 
         SupplementalQVList & qvList, Clipping clipping = none,
-        int subreadIndex = 0, int nSubreads = 0); 
+        bool cigarUseSeqMatch = false); 
 }
 
 #include "SAMPrinterImpl.hpp"

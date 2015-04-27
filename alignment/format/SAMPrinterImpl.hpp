@@ -96,13 +96,14 @@ void SAMOutput::CreateCIGARString(T_AlignmentCandidate &alignment,
         std::string &cigarString,
         Clipping clipping,
         DNALength & prefixSoftClip, DNALength & suffixSoftClip, 
-        DNALength & prefixHardClip, DNALength & suffixHardClip) {
+        DNALength & prefixHardClip, DNALength & suffixHardClip,
+        bool cigarUseSeqMatch) {
 
     cigarString = "";
     // All cigarString use the no clipping core
     std::vector<int> opSize;
     std::vector<char> opChar;
-    CreateNoClippingCigarOps(alignment, opSize, opChar);
+    CreateNoClippingCigarOps(alignment, opSize, opChar, cigarUseSeqMatch);
 
     // Clipping needs to be added
 
@@ -177,8 +178,7 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
         AlignmentContext &context,
         SupplementalQVList & qvList,
         Clipping clipping,
-        int subreadIndex,
-        int nSubreads) {
+        bool cigarUseSeqMatch) {
 
     std::string cigarString;
     uint16_t flag;
@@ -186,7 +186,7 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
     DNALength prefixSoftClip = 0, suffixSoftClip = 0;
     DNALength prefixHardClip = 0, suffixHardClip = 0;
 
-    CreateCIGARString(alignment, read, cigarString, clipping, prefixSoftClip, suffixSoftClip, prefixHardClip, suffixHardClip);
+    CreateCIGARString(alignment, read, cigarString, clipping, prefixSoftClip, suffixSoftClip, prefixHardClip, suffixHardClip, cigarUseSeqMatch);
     SetAlignedSequence(alignment, read, alignedSequence, clipping);
     BuildFlag(alignment, context, flag);
     samFile << alignment.qName << "\t" 
