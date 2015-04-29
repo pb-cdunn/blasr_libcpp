@@ -274,5 +274,10 @@ void SMRTSequence::Copy(const PacBio::BAM::BamRecord & record) {
     // info other than holeNumber, including holeStatus, holeX,
     // holeY, numEvents. 
     zmwData.holeNumber = static_cast<UInt> (record.HoleNumber()); 
+
+    // Set hq region read score
+    if (record.Impl().HasTag("rq"))
+        highQualityRegionScore = record.Impl().TagValue("rq").ToInt32();
+
 }
 #endif
