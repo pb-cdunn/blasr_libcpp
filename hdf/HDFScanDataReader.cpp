@@ -176,12 +176,16 @@ int HDFScanDataReader::ReadSequencingKit(std::string &sequencingKit)
 int HDFScanDataReader::LoadMovieName(string &movieNameP) {
     // Groups for building read names
     if (ReadStringAttribute(movieNameP, "MovieName", runInfoGroup, movieNameAtom) == 0) {
+        // Internal analysis may manually edit the movie name and set STRSIZE to a value
+        // which != movie name length. Handle this case. 
+        movieNameP = string(movieNameP.c_str()); 
         return 0;
     } else {
         useMovieName = true;
         int e = movieNameP.size() - 1;
         while (e > 0 and movieNameP[e] == ' ') e--;
         movieNameP = movieNameP.substr(0, e+1);
+        movieNameP = string(movieNameP.c_str());
         return 1;
     }
 }
