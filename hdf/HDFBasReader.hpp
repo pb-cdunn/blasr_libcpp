@@ -122,12 +122,7 @@ public:
     }
 
     std::string GetMovieName() {
-        if (scanDataReader.useMovieName) {
-            return scanDataReader.GetMovieName();
-        }
-        else {
-            return "";
-        }
+        return scanDataReader.GetMovieName();
     }
 
     int GetReadAt(int index, SMRTSequence &read) {

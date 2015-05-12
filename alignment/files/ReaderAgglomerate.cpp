@@ -42,10 +42,13 @@ void ReaderAgglomerate::GetMovieName(string &movieName) {
     if (fileType == Fasta || fileType == Fastq) {
         movieName = fileName;
     }
-    else if (fileType == HDFPulse || fileType == HDFBase ||
-            fileType == HDFCCS || fileType == HDFCCSONLY) {
+    else if (fileType == HDFPulse || fileType == HDFBase) {
         movieName = hdfBasReader.GetMovieName();
-    } else if (fileType == PBBAM) {
+    } 
+    else if (fileType == HDFCCS || fileType == HDFCCSONLY) {
+        movieName = hdfCcsReader.GetMovieName();
+    }
+    else if (fileType == PBBAM) {
 #ifdef USE_PBBAM
         assert("Reading movie name from BAM using ReaderAgglomerate is not supported." == 0);
 #endif 
@@ -54,10 +57,13 @@ void ReaderAgglomerate::GetMovieName(string &movieName) {
 
 void ReaderAgglomerate::GetChemistryTriple(string & bindingKit, 
         string & sequencingKit, string & baseCallerVersion) {
-    if (fileType == HDFPulse || fileType == HDFBase ||
-        fileType == HDFCCS || fileType == HDFCCSONLY) {
-         hdfBasReader.GetChemistryTriple(bindingKit, sequencingKit, baseCallerVersion);
-    } else if (fileType == PBBAM) {
+    if (fileType == HDFPulse || fileType == HDFBase) {
+        hdfBasReader.GetChemistryTriple(bindingKit, sequencingKit, baseCallerVersion);
+    }
+    else if (fileType == HDFCCS || fileType == HDFCCSONLY) {
+        hdfCcsReader.GetChemistryTriple(bindingKit, sequencingKit, baseCallerVersion);
+    }
+    else if (fileType == PBBAM) {
 #ifdef USE_PBBAM
         assert("Reading chemistry triple from BAM using ReaderAgglomerate is not supported." == 0);
 #endif
@@ -443,6 +449,9 @@ int ReaderAgglomerate::GetNext(CCSSequence &seq) {
             UNREACHABLE();
             break;
     }
+
+    if (fileType != PBBAM) seq.SetReadGroupId(readGroupId);
+    else readGroupId = seq.GetReadGroupId();
 
     if (stride > 1)
         Advance(stride-1);
