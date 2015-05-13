@@ -55,8 +55,8 @@ public:
     void SetSubreadTitle(SMRTSequence &subread, DNALength subreadStart, 
         DNALength subreadEnd); 
 
-    void SetSubreadBoundaries(SMRTSequence &subread, DNALength &subreadStart, 
-        int &subreadEnd); 
+    void SetSubreadBoundaries(SMRTSequence &subread, DNALength subreadStart, 
+        DNALength subreadEnd); 
 
     void MakeSubreadAsMasked(SMRTSequence &subread, DNALength subreadStart = 0, 
         int subreadEnd = -1); 

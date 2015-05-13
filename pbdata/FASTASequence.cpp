@@ -25,7 +25,7 @@ int FASTASequence::GetStorageSize() {
     return strlen(title) + DNASequence::GetStorageSize();
 }
 
-string FASTASequence::GetName() {
+string FASTASequence::GetName() const {
     string name;
     int i;
     for (i = 0; i < titleLength; i++) {

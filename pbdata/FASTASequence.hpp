@@ -33,7 +33,7 @@ public:
 
     int GetStorageSize();
 
-    std::string GetName();
+    std::string GetName() const;
 
     virtual bool StoreHoleNumber(int holeNumber);
     virtual bool StoreHoleStatus(unsigned char holeStatus);

@@ -51,13 +51,13 @@ void SMRTSequence::Allocate(DNALength length) {
     deleteOnExit  = true;
 }
 
-void SMRTSequence::SetSubreadTitle(SMRTSequence &subread, DNALength subreadStart, DNALength  subreadEnd) {
+void SMRTSequence::SetSubreadTitle(SMRTSequence &subread, DNALength subreadStart, DNALength subreadEnd) {
     stringstream titleStream;
     titleStream << title << "/"<< subreadStart << "_" << subreadEnd;
     subread.CopyTitle(titleStream.str());
 }    
 
-void SMRTSequence::SetSubreadBoundaries(SMRTSequence &subread, DNALength &subreadStart, int &subreadEnd) {
+void SMRTSequence::SetSubreadBoundaries(SMRTSequence &subread, DNALength subreadStart, DNALength subreadEnd) {
     if (subreadEnd == -1) {
         subreadEnd = length;
     }
