@@ -128,7 +128,7 @@ void RegionTable::SetScore(int regionIndex, int score) {
 }
 
 void RegionTable::SortTableByHoleNumber() {
-    std::sort(table.begin(), table.end());
+    std::stable_sort(table.begin(), table.end());
 }
 
 void RegionTable::Reset() {
