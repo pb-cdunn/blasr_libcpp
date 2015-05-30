@@ -13,9 +13,14 @@ public:
         RegionEnd, RegionScore} AnnotationRow;
     static const int NCOLS=5;
     int row[NCOLS];
-    int operator<(const RegionAnnotation &rhs) const; 
 
-    int operator<(int holeNumber) const; 
+    inline
+    bool operator<(const RegionAnnotation &rhs) const
+    { return row[HoleNumber] < rhs.row[HoleNumber]; }
+
+    inline
+    bool operator<(int holeNumber) const
+    { return row[HoleNumber] < holeNumber; }
 
     RegionAnnotation& operator=(const RegionAnnotation &rhs); 
 

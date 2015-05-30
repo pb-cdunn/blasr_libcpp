@@ -3,14 +3,6 @@
 
 using namespace std;
 
-int RegionAnnotation::operator<(const RegionAnnotation &rhs) const {
-    return row[0] < rhs.row[0];
-}
-
-int RegionAnnotation::operator<(int holeNumber) const {
-    return row[0] < holeNumber;
-}
-
 RegionAnnotation& RegionAnnotation::operator=(const RegionAnnotation &rhs) {
     memcpy(row, rhs.row, sizeof(int)*NCOLS);
     return *this;
