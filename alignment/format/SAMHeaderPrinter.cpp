@@ -279,10 +279,7 @@ SAMHeaderPrinter::SAMHeaderPrinter(const std::string & sortingOrder,
     if (readsFiles.size() == 0) {
         assert("Must specify input reads files" == 0);
     }
-
-    assert(readType == ReadType::ReadTypeEnum::SUBREAD or 
-            readType == ReadType::ReadTypeEnum::CCS or 
-            readType == ReadType::ReadTypeEnum::UNKNOWN);
+    // all read types supported, no check needed.
 
     // Determine fileType based on extension of the first read file.
     std::string rf = readsFiles[0];
