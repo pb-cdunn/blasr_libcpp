@@ -420,7 +420,7 @@ int FindMaxIncreasingInterval(
     VarianceAccumulator<float> &accumPValue, 
     VarianceAccumulator<float> &accumWeight,
     VarianceAccumulator<float> &accumNumAnchorBases,
-    const char *titlePtr=NULL) {
+    const char *titlePtr) {
 
     int maxLISSize = 0;
     if (params.fastMaxInterval) {

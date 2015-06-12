@@ -13,8 +13,10 @@ FASTASequence::FASTASequence() : DNASequence() {
 }
 
 void FASTASequence::PrintSeq(ostream &out, int lineLength, char delim) {
-    out << delim << title <<endl;
-    ((DNASequence*)this)->PrintSeq(out, lineLength); 
+    out << delim;
+    if (title) out << title;
+    out << endl;
+    static_cast<DNASequence*>(this)->PrintSeq(out, lineLength); 
 }
 
 int FASTASequence::GetStorageSize() {
@@ -23,7 +25,7 @@ int FASTASequence::GetStorageSize() {
     return strlen(title) + DNASequence::GetStorageSize();
 }
 
-string FASTASequence::GetName() {
+string FASTASequence::GetName() const {
     string name;
     int i;
     for (i = 0; i < titleLength; i++) {
@@ -74,7 +76,7 @@ void FASTASequence::ShallowCopy(const FASTASequence &rhs) {
     CheckBeforeCopyOrReference(rhs, "FASTASequence");
     FASTASequence::Free();
 
-    ((DNASequence*)this)->ShallowCopy(rhs);
+    static_cast<DNASequence*>(this)->ShallowCopy(rhs);
 
     title = rhs.title;
     titleLength = rhs.titleLength;
@@ -180,9 +182,10 @@ void FASTASequence::Assign(FASTASequence &rhs) {
 
 // Create a reverse complement FASTASequence of *this and assign to rhs.
 void FASTASequence::MakeRC(FASTASequence &rhs, DNALength rhsPos, DNALength rhsLength) {
+    rhs.Free();
     DNASequence::MakeRC((DNASequence&) rhs, rhsPos, rhsLength);
     if (title != NULL) {
-        ((FASTASequence&)rhs).CopyTitle(title);
+        (static_cast<FASTASequence*>(&rhs))->CopyTitle(title);
     }
 }
 
@@ -191,7 +194,7 @@ void FASTASequence::ReverseComplementSelf() {
     for (i = 0; i < length/2 + length % 2; i++) {
         char c = seq[i];
         seq[i] = ReverseComplementNuc[seq[length - i - 1]];
-        seq[length - i - 1] = ReverseComplementNuc[c];
+        seq[length - i - 1] = ReverseComplementNuc[static_cast<int>(c)];
     }
 }
 
@@ -212,9 +215,24 @@ void FASTASequence::operator=(const FASTASequence &rhs) {
     assert(deleteOnExit);
 }
 
+void FASTASequence::Copy(const std::string & rhsTitle, const std::string & rhsSeq) {
+    this->Copy(rhsSeq);
+    this->CopyTitle(rhsTitle);
+}
+
+void FASTASequence::Copy(const std::string & rhsSeq) {
+    (static_cast<DNASequence*>(this))->Copy(rhsSeq);
+}
+
 void FASTASequence::Copy(const FASTASequence &rhs) {
     *this = (FASTASequence&)rhs;
 }
+
+#ifdef USE_PBBAM
+void FASTASequence::Copy(const PacBio::BAM::BamRecord & record) {
+    FASTASequence::Copy(record.Impl().Name(), record.Sequence());
+}
+#endif
 
 void FASTASequence::Free() {
     // Delete title if title is under control, reset deleteTitleOnExit.

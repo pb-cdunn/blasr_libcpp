@@ -1,3 +1,6 @@
+
+#include <stdexcept>
+
 #include "RangeUtils.hpp"
 
 using namespace std;
@@ -56,7 +59,10 @@ bool ParseRanges(string & rangesStr, vector<Range> & ranges) {
     return parseSucceed;
 }
 
-Ranges::Ranges(string rangesStr) { }
+Ranges::Ranges(string rangesStr) {
+    if (!ParseRanges(rangesStr, ranges))
+        throw std::invalid_argument("bad range");
+}
 
 bool Ranges::setRanges(string rangesStr) {
     return ParseRanges(rangesStr, ranges);
@@ -76,6 +82,7 @@ UInt Ranges::max() {
 }
 
 bool Ranges::contains(const UInt & query) {
+    if (ranges.size() == 0) return false;
     vector<Range> searchRanges;
     searchRanges.push_back(Range(0, ranges.size()-1));
     while (searchRanges.size() > 0) {

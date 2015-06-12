@@ -6,7 +6,6 @@
 #include <cstring>
 #include "Types.h"
 #include "utils.hpp"
-#include "DNASequence.hpp"
 #include "QualityValue.hpp"
 
 template<typename T_QV>
@@ -15,7 +14,7 @@ public:
     T_QV   *data;
     QVScale qvScale;
 
-    T_QV &operator[](unsigned int pos); 
+    T_QV &operator[](unsigned int pos) const; 
 
     QualityValueVector(); 
 
@@ -25,16 +24,24 @@ public:
 
     void Copy(const QualityValueVector<T_QV> &rhs, const DNALength length); 
 
+    void Copy(const std::string & rhs);
+
     void Free(); 
 
     void Allocate(unsigned int length); 
 
     bool Empty() const; 
 
-    void ShallowCopy(const QualityValueVector<T_QV> &ref, int pos = 0); 
+    void ShallowCopy(const QualityValueVector<T_QV> &ref, int pos, const DNALength & length); 
 
+    std::string ToString(void);
+
+    // Returns data length 
+    DNALength Length(void);
+
+private:
+    DNALength _length;
 };
 
-
-
+#include "QualityValueVectorImpl.hpp"
 #endif // _BLASR_QUALITY_VALUE_VECTOR_HPP_

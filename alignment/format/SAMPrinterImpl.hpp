@@ -1,5 +1,6 @@
-#include "SAMPrinter.hpp"
+#include <algorithm> //max
 #include <utility> //swap
+#include <assert.h> //assert
 
 using namespace SAMOutput; 
 
@@ -7,7 +8,7 @@ using namespace SAMOutput;
 template<typename T_Sequence>
 void SAMOutput::SetAlignedSequence(T_AlignmentCandidate &alignment, T_Sequence &read,
         T_Sequence &alignedSeq,
-        Clipping clipping = none) {
+        Clipping clipping) {
     //
     // In both no, and hard clipping, the dna sequence that is output
     // solely corresponds to the aligned sequence.
@@ -44,7 +45,7 @@ void SAMOutput::SetAlignedSequence(T_AlignmentCandidate &alignment, T_Sequence &
         T_Sequence subSeq;
         subSeq.ReferenceSubstring(read, clippedStartPos, clippedReadLength);
         subSeq.MakeRC(alignedSeq);
-        alignedSeq.deleteOnExit = true;
+        assert(alignedSeq.deleteOnExit);
     }
 }
 
@@ -95,13 +96,14 @@ void SAMOutput::CreateCIGARString(T_AlignmentCandidate &alignment,
         std::string &cigarString,
         Clipping clipping,
         DNALength & prefixSoftClip, DNALength & suffixSoftClip, 
-        DNALength & prefixHardClip, DNALength & suffixHardClip) {
+        DNALength & prefixHardClip, DNALength & suffixHardClip,
+        bool cigarUseSeqMatch) {
 
     cigarString = "";
     // All cigarString use the no clipping core
     std::vector<int> opSize;
     std::vector<char> opChar;
-    CreateNoClippingCigarOps(alignment, opSize, opChar);
+    CreateNoClippingCigarOps(alignment, opSize, opChar, cigarUseSeqMatch);
 
     // Clipping needs to be added
 
@@ -128,8 +130,8 @@ void SAMOutput::CreateCIGARString(T_AlignmentCandidate &alignment,
           suffixHardClip = read.lowQualitySuffix;
       }
       else if (clipping == subread) {
-          prefixHardClip = max((DNALength) read.subreadStart, read.lowQualityPrefix);
-          suffixHardClip = max((DNALength)(read.length - read.subreadEnd), read.lowQualitySuffix);
+          prefixHardClip = std::max((DNALength) read.subreadStart, read.lowQualityPrefix);
+          suffixHardClip = std::max((DNALength)(read.length - read.subreadEnd), read.lowQualitySuffix);
       }
 
       SetSoftClip(alignment, read, prefixHardClip, suffixHardClip, prefixSoftClip, suffixSoftClip);
@@ -175,9 +177,8 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
         std::ostream &samFile,
         AlignmentContext &context,
         SupplementalQVList & qvList,
-        Clipping clipping = none,
-        int subreadIndex = 0,
-        int nSubreads = 0) {
+        Clipping clipping,
+        bool cigarUseSeqMatch) {
 
     std::string cigarString;
     uint16_t flag;
@@ -185,7 +186,7 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
     DNALength prefixSoftClip = 0, suffixSoftClip = 0;
     DNALength prefixHardClip = 0, suffixHardClip = 0;
 
-    CreateCIGARString(alignment, read, cigarString, clipping, prefixSoftClip, suffixSoftClip, prefixHardClip, suffixHardClip);
+    CreateCIGARString(alignment, read, cigarString, clipping, prefixSoftClip, suffixSoftClip, prefixHardClip, suffixHardClip, cigarUseSeqMatch);
     SetAlignedSequence(alignment, read, alignedSequence, clipping);
     BuildFlag(alignment, context, flag);
     samFile << alignment.qName << "\t" 
@@ -229,15 +230,15 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
     samFile << nextSubreadPos << "\t"; // RNEXT, add 1 for 1 based
                                            // indexing
 
-
-    DNALength tLen = alignment.GenomicTEnd() - alignment.GenomicTBegin();
-    samFile << tLen << "\t"; // TLEN
+    //DNALength tLen = alignment.GenomicTEnd() - alignment.GenomicTBegin();
+    //SAM v1.5, tLen is set as 0 for single-segment template
+    samFile << 0 << "\t"; // TLEN
     // Print the sequence on one line, and suppress printing the
     // newline (by setting the line length to alignedSequence.length
-    ((DNASequence)alignedSequence).PrintSeq(samFile, 0);  // SEQ
+    (static_cast<DNASequence*>(&alignedSequence))->PrintSeq(samFile, 0);  // SEQ
     samFile << "\t";
     if (alignedSequence.qual.data != NULL && qvList.useqv == 0) {
-      alignedSequence.PrintAsciiQual(samFile, 0);  // QUAL
+        alignedSequence.PrintAsciiQual(samFile, 0);  // QUAL
     }
     else {
       samFile <<"*";
@@ -300,6 +301,4 @@ void SAMOutput::PrintAlignment(T_AlignmentCandidate &alignment,
 	qvList.PrintQVOptionalFields(alignedSequence, samFile);
 
     samFile << std::endl;
-
-    alignedSequence.FreeIfControlled();
 }

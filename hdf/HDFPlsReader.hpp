@@ -127,16 +127,6 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
         return startFrameArray.arrayLength;
     }
 
-  UInt  GetDatasetNDim(CommonFG &parentGroup, string datasetName) {
-    HDFData tmpDataset;
-    tmpDataset.InitializeDataset(parentGroup, datasetName);
-    DataSpace dataspace = tmpDataset.dataset.getSpace();
-    UInt nDims = dataspace.getSimpleExtentNdims();
-    dataspace.close();
-    tmpDataset.dataset.close();
-    return nDims;
-  }
-
 	void GetAllMeanSignal(vector<uint16_t> &meanSignal) {
     if (meanSignalNDims == 1) {
       CheckMemoryAllocation(meanSignalArray.arrayLength, maxAllocNElements, "MeanSignal");
@@ -432,7 +422,7 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
     curRead = holeNumber;
     curPos  = eventOffset[holeNumber];
     zmwReader.curZMW = holeNumber;
-    GetNextFlattenedToBase(read, basToPlsIndex);
+    return GetNextFlattenedToBase(read, basToPlsIndex);
   }
 
   template<typename T_FieldType>
@@ -488,6 +478,7 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
       vector<unsigned int> pulseStartFrame;
       pulseStartFrame.resize(seqLength);
       startFrameArray.Read(curPos, curPos + seqLength, &pulseStartFrame[0]);
+      if (read.startFrame) {delete [] read.startFrame; read.startFrame = NULL;}
       read.startFrame = new unsigned int[read.length];
       StoreField(pulseStartFrame, basToPlsIndex, read.startFrame, read.length);
     }
@@ -496,23 +487,27 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
       vector<HalfWord> pulseWidthInFrames;
       pulseWidthInFrames.resize(seqLength);
       plsWidthInFramesArray.Read(curPos, curPos + seqLength, &pulseWidthInFrames[0]);
+      if (read.widthInFrames) {delete [] read.widthInFrames; read.widthInFrames = NULL;}
       read.widthInFrames = new HalfWord[read.length];
       StoreField(pulseWidthInFrames, basToPlsIndex, read.widthInFrames, read.length);
     }
     
 		if (includedFields["MidSignal"]) {
+            if (read.midSignal) {delete [] read.midSignal; read.midSignal = NULL;}
       read.midSignal = new HalfWord[read.length];
       ReadSignal("MidSignal", midSignalArray, midSignalMatrix, seqLength, midSignalNDims, 
                  read.seq, read.length, basToPlsIndex, read.midSignal);
     }
     
 		if (includedFields["MaxSignal"]) {
+        if (read.maxSignal) {delete [] read.maxSignal; read.maxSignal = NULL;}
       read.maxSignal = new HalfWord[read.length];
       ReadSignal("MaxSignal", maxSignalArray, maxSignalMatrix, seqLength, maxSignalNDims, 
                  read.seq, read.length, basToPlsIndex, read.maxSignal);
 		}
 
 		if (includedFields["MeanSignal"]) {
+            if (read.meanSignal) {delete [] read.meanSignal; read.meanSignal = NULL;}
       read.meanSignal = new HalfWord[read.length];
       ReadSignal("MeanSignal", meanSignalArray, meanSignalMatrix, seqLength, meanSignalNDims, 
                  read.seq, read.length, basToPlsIndex, read.meanSignal);
@@ -522,6 +517,7 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
       vector<float> pulseClassifierQV;
       pulseClassifierQV.resize(seqLength);
       classifierQVArray.Read(curPos, curPos + seqLength, &pulseClassifierQV[0]);
+      if (read.classifierQV) {delete [] read.classifierQV; read.classifierQV = NULL;}
       read.classifierQV = new float[read.length];
       StoreField(pulseClassifierQV, basToPlsIndex, read.classifierQV, read.length);
 		}
@@ -533,6 +529,7 @@ class HDFPlsReader : public DatasetCollection, public HDFPulseDataFile  {
              << read.GetName() << endl;
         exit(1);
     }
+    return 1;
 	}
 	
 

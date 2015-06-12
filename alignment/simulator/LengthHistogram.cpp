@@ -19,6 +19,7 @@ int LengthHistogram::Read(std::ifstream &in) {
             lengthHistogram.cdf.push_back(lengthHistogram.cdf[lengthHistogram.cdf.size()-1] + count);
         }
     }
+    return 1;
 }
 
 void LengthHistogram::GetRandomLength(int &length) {

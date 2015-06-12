@@ -4,7 +4,7 @@
 template<typename T_Alignment, typename T_QuerySequence, typename T_TargetSequence>
 void CompareSequencesOutput::Print(T_Alignment &alignment, 
     T_QuerySequence &qseq, T_TargetSequence &tseq, 
-    std::ostream &out, bool refForward=true) {
+    std::ostream &out, bool refForward) {
 
 	std::string queryStr, alignStr, textStr;
 	CreateAlignmentStrings(alignment, qseq, tseq, textStr, alignStr, queryStr);

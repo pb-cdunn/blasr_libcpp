@@ -20,9 +20,9 @@ int SWAlign(T_QuerySequence &qSeq, T_TargetSequence &tSeq,
         std::vector<Arrow> &pathMat, 
         T_Alignment &alignment,
         T_ScoreFn &scoreFn,
-        AlignmentType alignType = Local,
-        bool trustSequences = false,
-        bool printMatrix = false
+        AlignmentType alignType,
+        bool trustSequences,
+        bool printMatrix
         ) {
     VectorIndex nRows = qSeq.length + 1;
     VectorIndex nCols = tSeq.length + 1;

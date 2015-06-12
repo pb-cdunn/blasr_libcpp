@@ -27,6 +27,9 @@ class RefGroupNameId {
   }
 };
 
+// number of zmws per SMRTCell for springfield: 163482
+const unsigned int numZMWsPerMovieSpringField = 163482; 
+
 template<typename T_CmpFile>
 class AlignmentSetToCmpH5Adapter {
 public:

@@ -31,7 +31,7 @@ BufferedHDFArray<T>::~BufferedHDFArray() {
         delete[] dimSize;
         dimSize = NULL;
     }
-    this->HDFWriteBuffer<T>::~HDFWriteBuffer();
+    this->Free();
 }
 
 template<typename T>
@@ -116,7 +116,7 @@ void BufferedHDFArray<T>::Flush(bool append, UInt writePos) {
     }
 
     H5::DataSpace extendedSpace = dataset.getSpace();
-    int extendedSize        = extendedSpace.getSimpleExtentNpoints();
+    //int extendedSize        = extendedSpace.getSimpleExtentNpoints(); // FIXME(yli): why isn't this used?
     //
     // Configure the proper addressing to append to the array.
     //

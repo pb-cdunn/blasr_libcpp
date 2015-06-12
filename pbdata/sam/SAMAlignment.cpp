@@ -118,7 +118,7 @@ bool SAMAlignment::StoreValues(std::string &line,  int lineNumber) {
   while (strm) {
     std::string kvName, kvType, kvValue;
     std::string typedKVPair;
-    if ((strm >> typedKVPair) == 0) {
+    if (!(strm >> typedKVPair)) {
       break;
     }
     if (TypedKeywordValuePair::Separate(typedKVPair, kvName, kvType, kvValue)) {

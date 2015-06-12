@@ -1,7 +1,9 @@
-#include "QualityValueVector.hpp"
+#ifndef _BLASR_QUALITY_VALUE_VECTOR_IMPL_HPP_
+#define _BLASR_QUALITY_VALUE_VECTOR_IMPL_HPP_
+#include "NucConversion.hpp"
 
 template<typename T_QV>
-T_QV& QualityValueVector<T_QV>::operator[](unsigned int pos) {
+T_QV& QualityValueVector<T_QV>::operator[](unsigned int pos) const {
     return data[pos];
 }
 
@@ -10,6 +12,7 @@ QualityValueVector<T_QV>::QualityValueVector() {
     data = NULL;
     // Default to phred.
     qvScale = PHRED;
+    _length = 0;
 }
 
 template<typename T_QV>
@@ -38,16 +41,29 @@ void QualityValueVector<T_QV>::Copy(const QualityValueVector<T_QV> &rhs, const D
 }
 
 template<typename T_QV>
+void QualityValueVector<T_QV>::Copy(const std::string & rhs) {
+// Char to QualityValue
+    Free();
+    if (rhs.size() == 0) return;
+    Allocate(static_cast<DNALength>(rhs.size()));
+    for (size_t i = 0; i < rhs.size(); i++) {
+        data[i] = static_cast<T_QV>(rhs[i] - FASTQ_CHAR_TO_QUALITY);
+    }
+}
+
+template<typename T_QV>
 void QualityValueVector<T_QV>::Free() {
     if (data != NULL) {
         delete[] data;
         data = NULL;
     }
+    _length = 0;
 }
 
 template<typename T_QV>
 void QualityValueVector<T_QV>::Allocate(unsigned int length) {
     data = ProtectedNew<T_QV>(length);
+    _length = static_cast<DNALength>(length);
 }
 
 template<typename T_QV>
@@ -56,9 +72,28 @@ bool QualityValueVector<T_QV>::Empty() const {
 }
 
 template<typename T_QV>
-void QualityValueVector<T_QV>::ShallowCopy(const QualityValueVector<T_QV> &ref, int pos) {
+void QualityValueVector<T_QV>::ShallowCopy(const QualityValueVector<T_QV> &ref, int pos, const DNALength & length) {
     data = &ref.data[pos];
     qvScale = ref.qvScale;
+    _length = static_cast<DNALength>(length);
+}
+
+template<typename T_QV>
+std::string QualityValueVector<T_QV>::ToString(void) {
+    if (data == NULL) { return "";}
+
+    std::string str(static_cast<size_t>(_length), '0');
+    for (DNALength i = 0; i < _length; i++) {
+        str[i] = static_cast<char>(data[i] + FASTQ_CHAR_TO_QUALITY);
+    }
+    return str;
+}
+
+template<typename T_QV>
+DNALength QualityValueVector<T_QV>::Length(void) {
+    return _length;
 }
 
 template class QualityValueVector<QualityValue>;
+
+#endif

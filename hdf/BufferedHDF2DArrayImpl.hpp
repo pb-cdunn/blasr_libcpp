@@ -46,6 +46,12 @@ BufferedHDF2DArray<T>::~BufferedHDF2DArray() {
     Close();
 }
 
+template<typename T>
+int BufferedHDF2DArray<T>::InitializeForReading(HDFGroup& group, std::string datasetName)
+{
+    return Initialize(group, datasetName, 0, 0, false);
+}
+
 /*
  * Initialize HDF2D for reading.  No write buffer initialization is
  * required.  The assumption is that the dataspace is in two
@@ -95,6 +101,9 @@ int BufferedHDF2DArray<T>::Initialize(HDFGroup &group, std::string datasetName,
             /*
              * Load in the size of this dataset, and make a map to the whole thing.
              */
+            if (dimSize) {
+                delete [] dimSize;
+            }
             dimSize = new hsize_t[nDims];
             dataspace.getSimpleExtentDims(dimSize);
             rowLength = dimSize[0];
@@ -273,7 +282,8 @@ void BufferedHDF2DArray<T>::Flush(int destRow) {
     //
     // A default writeRow of -1 implies append
     //
-    int numRowsToCreate, numDataRows;
+    int numRowsToCreate; // FIXME(yli): why is numRowsToCreate assigned but not used?
+    int numDataRows;
     //
     // this->bufferIndex points after the end of the last data in the
     // buffer (full rows), so this->bufferIndex / rowLength is the
@@ -330,7 +340,7 @@ void BufferedHDF2DArray<T>::Flush(int destRow) {
         // Store the newly dimensioned dataspaces.
         //
         fileSpace.getSimpleExtentDims(fileArraySize, fileArrayMaxSize);			
-        int extendedSize = extendedSpace.getSimpleExtentNpoints();
+        //int extendedSize = extendedSpace.getSimpleExtentNpoints(); // FIXME(yli): should this be used??
         //
         // Configure the proper addressing to append to the array.
         //

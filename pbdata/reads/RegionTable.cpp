@@ -3,14 +3,6 @@
 
 using namespace std;
 
-int RegionAnnotation::operator<(const RegionAnnotation &rhs) const {
-    return row[0] < rhs.row[0];
-}
-
-int RegionAnnotation::operator<(int holeNumber) {
-    return row[0] < holeNumber;
-}
-
 RegionAnnotation& RegionAnnotation::operator=(const RegionAnnotation &rhs) {
     memcpy(row, rhs.row, sizeof(int)*NCOLS);
     return *this;
@@ -23,7 +15,7 @@ void RegionAnnotation::SetHoleNumber(int holeNumber) {
     row[HoleNumber] = holeNumber;
 }
 
-int RegionAnnotation::GetType() {
+int RegionAnnotation::GetType() const {
     return row[RegionType];
 }
 
@@ -54,8 +46,8 @@ void RegionAnnotation::SetScore(int score) {
     row[RegionScore] = score;
 }
 
-int RegionTable::LookupRegionsByHoleNumber(int holeNumber, int &low, int &high) {
-    std::vector<RegionAnnotation>::iterator lowIt, highIt;
+int RegionTable::LookupRegionsByHoleNumber(int holeNumber, int &low, int &high) const {
+    std::vector<RegionAnnotation>::const_iterator lowIt, highIt;
     lowIt  = std::lower_bound(table.begin(), table.end(), holeNumber);
     highIt = std::lower_bound(table.begin(), table.end(), holeNumber+1);
     low =  lowIt - table.begin();
@@ -73,7 +65,7 @@ int RegionTable::LookupRegionsByHoleNumber(int holeNumber, int &low, int &high) 
 // standard encoding.
 //
 
-RegionType RegionTable::GetType(int regionIndex) {
+RegionType RegionTable::GetType(int regionIndex) const {
     assert(regionIndex < table.size());
     assert(regionIndex >= 0);
     return (RegionType) regionTypeEnums[table[regionIndex].GetType()];
@@ -128,7 +120,7 @@ void RegionTable::SetScore(int regionIndex, int score) {
 }
 
 void RegionTable::SortTableByHoleNumber() {
-    std::sort(table.begin(), table.end());
+    std::stable_sort(table.begin(), table.end());
 }
 
 void RegionTable::Reset() {

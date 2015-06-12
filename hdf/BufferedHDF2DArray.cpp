@@ -28,6 +28,16 @@
 
  */
 
+UInt GetDatasetNDim(H5::CommonFG &parentGroup, std::string datasetName) {
+    HDFData tmpDataset;
+    tmpDataset.InitializeDataset(parentGroup, datasetName);
+    H5::DataSpace dataspace = tmpDataset.dataset.getSpace();
+    UInt nDims = dataspace.getSimpleExtentNdims();
+    dataspace.close();
+    tmpDataset.dataset.close();
+    return nDims;
+}
+
 #define DEFINE_TYPED_WRITE_ROW(T, Pred) template<>\
 void BufferedHDF2DArray<T>::TypedWriteRow(const T *data, const H5::DataSpace &memorySpace, const H5::DataSpace &fileSpace) {\
 	dataset.write(data, Pred, memorySpace, fileSpace);\
@@ -38,6 +48,7 @@ DEFINE_TYPED_WRITE_ROW(unsigned int, H5::PredType::NATIVE_UINT)
 DEFINE_TYPED_WRITE_ROW(unsigned char, H5::PredType::NATIVE_UINT8)
 DEFINE_TYPED_WRITE_ROW(uint16_t, H5::PredType::NATIVE_UINT16)
 DEFINE_TYPED_WRITE_ROW(int16_t, H5::PredType::NATIVE_INT16)
+DEFINE_TYPED_WRITE_ROW(float, H5::PredType::NATIVE_FLOAT)
 
 
 #define DEFINE_TYPED_READ_ROW(T, Pred) template<>\
@@ -51,6 +62,7 @@ DEFINE_TYPED_READ_ROW(char, H5::PredType::NATIVE_INT8)
 DEFINE_TYPED_READ_ROW(unsigned char, H5::PredType::NATIVE_UINT8)
 DEFINE_TYPED_READ_ROW(uint16_t, H5::PredType::NATIVE_UINT16)
 DEFINE_TYPED_READ_ROW(int16_t, H5::PredType::NATIVE_INT16)
+DEFINE_TYPED_READ_ROW(float, H5::PredType::NATIVE_FLOAT)
 
 #define DEFINE_TYPED_CREATE_ROW(T, Pred) template<>\
 void BufferedHDF2DArray<T>::TypedCreate(H5::DataSpace &fileSpace, H5::DSetCreatPropList &cparms) {\
@@ -63,4 +75,5 @@ DEFINE_TYPED_CREATE_ROW(char, H5::PredType::NATIVE_INT8)
 DEFINE_TYPED_CREATE_ROW(unsigned char, H5::PredType::NATIVE_UINT8)
 DEFINE_TYPED_CREATE_ROW(uint16_t, H5::PredType::NATIVE_UINT16)
 DEFINE_TYPED_CREATE_ROW(int16_t, H5::PredType::NATIVE_INT16)
+DEFINE_TYPED_CREATE_ROW(float, H5::PredType::NATIVE_FLOAT)
 

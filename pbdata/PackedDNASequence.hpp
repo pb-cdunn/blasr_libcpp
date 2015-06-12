@@ -38,6 +38,7 @@ public:
     Nucleotide operator[](DNALength pos);
 
     PackedDNASequence(); 
+    ~PackedDNASequence(); 
 
     void Allocate(DNALength numberOfNucleotides); 
 

@@ -79,7 +79,7 @@ void AfgBasWriter::WriteClose() {
 
 void AfgBasWriter::WriteBases(SMRTSequence &seq) {
     afgOut << "seq:" << std::endl;
-    ((DNASequence)seq).PrintSeq( afgOut, lineLength );
+    (static_cast<DNASequence*>(&seq))->PrintSeq( afgOut, lineLength );
     afgOut << "." << std::endl;
 }
 

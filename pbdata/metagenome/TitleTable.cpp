@@ -5,7 +5,12 @@ TitleTable::TitleTable() {
     tableLength = 0;
 }
 
+TitleTable::~TitleTable() {
+    Free();
+}
+
 void TitleTable::Copy(char **src, int nSrc) {
+    Free(); //Free before copy
     table = new char*[nSrc];
     tableLength = nSrc;
     int i;
@@ -37,6 +42,7 @@ void TitleTable::Read(std::string &inFileName) {
 }
 
 void TitleTable::CopyFromVector(std::vector<std::string> &titles) {
+    Free(); //Free before copy.
     tableLength = titles.size();
     table = new char*[tableLength];
     int i;
@@ -67,9 +73,11 @@ void TitleTable::Read(std::ifstream &in) {
 void TitleTable::Free() {
     int i;
     for (i = 0; i < tableLength; i++) {
-        delete[] table[i];
+        if (table[i]) {delete[] table[i]; table[i] = NULL;}
     }
-    delete[] table;
+    if (table) {delete[] table;};
+    table = NULL;
+    tableLength = 0;
 }
 
 bool TitleTable::Lookup(std::string title, int &index) {

@@ -10,12 +10,15 @@ public:
     int size() { return indexLength;}
 
     ReverseCompressIndex(); 
+    ~ReverseCompressIndex(); 
 
     void Write(std::ofstream &out); 
 
     void Read(std::ifstream &in); 
 
     void ShallowCopy(ReverseCompressIndex &rhs);
+
+    void Free();
 };
 
 

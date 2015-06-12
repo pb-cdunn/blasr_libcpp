@@ -7,7 +7,6 @@
 #include <vector>
 //In order to use clock_gettime in LINUX, add -lrt 
 #ifdef __APPLE__
-#pragma weak clock_gettime
 #include <mach/mach.h>
 #include <mach/clock.h>
 #include <mach/mach_time.h>

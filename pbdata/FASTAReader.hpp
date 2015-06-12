@@ -21,6 +21,8 @@ protected:
     //
     void SetFileSize(); 
 
+    void ReadTitle(long &p, char *&title, int &titleLength); 
+
 public:
     bool computeMD5;
     std::string curReadMD5;
@@ -48,7 +50,7 @@ public:
 
     long ReadAllSequencesIntoOne(FASTASequence &seq, SequenceIndexDatabase<FASTASequence> *seqDBPtr=NULL); 
 
-    void ReadTitle(long &p, char *&title, int &titleLength); 
+    void ReadTitle(long &p, FASTASequence & seq);
 
     int GetNext(FASTASequence &seq); 
     /*

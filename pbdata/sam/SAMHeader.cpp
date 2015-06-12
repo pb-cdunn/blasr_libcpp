@@ -1,4 +1,5 @@
 #include "SAMHeader.hpp"
+#include <algorithm>
 
 void SAMHeader::StoreValues(std::vector<SAMKeywordValuePair> &kvPairs,
                             int lineNumber) {
@@ -8,17 +9,18 @@ void SAMHeader::StoreValues(std::vector<SAMKeywordValuePair> &kvPairs,
       formatVersion = kvPairs[i].value;
     }
     else if (kvPairs[i].key == "SO") {
-      if (kvPairs[i].value == "unknown" ||
-          kvPairs[i].value == "unsorted") {
+      string value = kvPairs[i].value;
+      std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+      if (value == "unknown" || value == "unsorted") {
         sortingOrder = unknown;
       }
-      else if (kvPairs[i].value == "sorted") {
+      else if (value == "sorted") {
         sortingOrder = sorted;
       }
-      else if (kvPairs[i].value == "queryname") {
+      else if (value == "queryname") {
         sortingOrder =queryname;
       }
-      else if (kvPairs[i].value == "coordinate") {
+      else if (value == "coordinate") {
         sortingOrder = coordinate;
       }
       else {

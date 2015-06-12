@@ -7,6 +7,10 @@ HDFScanDataReader::HDFScanDataReader() {
     // Assume the file is written without a movie name.  This is
     // flipped when a movie name is found.
     //
+    Reset();
+}
+
+void HDFScanDataReader::Reset() {
     useMovieName    = false;
     useRunCode      = false;
     useWhenStarted  = false;
@@ -97,7 +101,8 @@ int HDFScanDataReader::Initialize(HDFGroup *pulseDataGroup) {
 }
 
 string HDFScanDataReader::GetMovieName() {
-    LoadMovieName(movieName);
+    // If this object is correctly initialized, movieName
+    // is guaranteed to be loaded if it exists, no need to reload.
     return movieName;
 }
 
@@ -121,6 +126,7 @@ int HDFScanDataReader::Read(ScanData &scanData) {
         whenStartedAtom.Read(scanData.whenStarted);
     }
 
+    return 1;
 }
 
 void HDFScanDataReader::ReadWhenStarted(string &whenStarted) {
@@ -144,19 +150,43 @@ int HDFScanDataReader::ReadPlatformId(PlatformId &pid) {
     return 1;
 }
 
-int HDFScanDataReader::LoadMovieName(string &movieName) {
-    // Groups for building read names
-    if (runInfoGroup.ContainsAttribute("MovieName") and
-            movieNameAtom.Initialize(runInfoGroup, "MovieName")) {
-        useMovieName = true;
-        movieNameAtom.Read(movieName);
-        int e = movieName.size() - 1;
-        while (e > 0 and movieName[e] == ' ') e--;
-        movieName= movieName.substr(0,e+1);
+int HDFScanDataReader::ReadStringAttribute(std::string & attributeValue,
+        const std::string & attributeName, HDFGroup & group,
+        HDFAtom<std::string> & atom) {
+
+    if (group.ContainsAttribute(attributeName) and
+        (atom.isInitialized or atom.Initialize(group, attributeName))) {
+        atom.Read(attributeValue);
         return 1;
-    }
-    else {
+    } else {
         return 0;
+    }
+}
+
+int HDFScanDataReader::ReadBindingKit(std::string &bindingKit)
+{
+    return ReadStringAttribute(bindingKit, "BindingKit", runInfoGroup, bindingKitAtom);
+}
+
+int HDFScanDataReader::ReadSequencingKit(std::string &sequencingKit)
+{
+    return ReadStringAttribute(sequencingKit, "SequencingKit", runInfoGroup, sequencingKitAtom);
+}
+
+int HDFScanDataReader::LoadMovieName(string &movieNameP) {
+    // Groups for building read names
+    if (ReadStringAttribute(movieNameP, "MovieName", runInfoGroup, movieNameAtom) == 0) {
+        // Internal analysis may manually edit the movie name and set STRSIZE to a value
+        // which != movie name length. Handle this case. 
+        movieNameP = string(movieNameP.c_str()); 
+        return 0;
+    } else {
+        useMovieName = true;
+        int e = movieNameP.size() - 1;
+        while (e > 0 and movieNameP[e] == ' ') e--;
+        movieNameP = movieNameP.substr(0, e+1);
+        movieNameP = string(movieNameP.c_str());
+        return 1;
     }
 }
 
@@ -172,7 +202,7 @@ int HDFScanDataReader::LoadBaseMap(map<char, int> & baseMap) {
             exit(1);
         }
         baseMap.clear();
-        for(int i = 0; i < baseMapStr.size(); i++) {
+        for(size_t i = 0; i < baseMapStr.size(); i++) {
             baseMap[toupper(baseMapStr[i])] = i;
             baseMap[tolower(baseMapStr[i])] = i;
         }
@@ -195,18 +225,20 @@ void HDFScanDataReader::Close() {
     platformIdAtom.dataspace.close();
     frameRateAtom.dataspace.close();
     numFramesAtom.dataspace.close();
+    sequencingKitAtom.dataspace.close();
+    bindingKitAtom.dataspace.close();
 
     scanDataGroup.Close();
     dyeSetGroup.Close();
     acqParamsGroup.Close();
     runInfoGroup.Close();
+    Reset();
 }
 
 
 std::string HDFScanDataReader::GetMovieName_and_Close(std::string & fileName) {
     HDFFile file;
     file.Open(fileName, H5F_ACC_RDONLY);
-    int init = 0;
 
     fileHasScanData = false;
     if (file.rootGroup.ContainsObject("ScanData") == 0 or 

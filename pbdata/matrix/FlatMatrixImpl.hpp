@@ -11,12 +11,12 @@ void CreateFlatMatrix(int rows, int cols, std::vector<T> &matrix) {
 }
 
 template<typename T>
-void PrintFlatMatrix(std::vector<T> &matrix, int rows, int cols, std::ostream &out, int width=6) {
+void PrintFlatMatrix(std::vector<T> &matrix, int rows, int cols, std::ostream &out, int width) {
 	PrintFlatMatrix((const T*) &matrix[0], rows, cols, out, width);
 }
 
 template<typename T>
-void PrintFlatMatrix(const T* matrix, int rows, int cols, std::ostream &out, int width=6) { 
+void PrintFlatMatrix(const T* matrix, int rows, int cols, std::ostream &out, int width) { 
 	int r, c, i;
 	i = 0;
 	for (r = 0; r < rows; r++ ) {
@@ -57,11 +57,12 @@ unsigned int FlatMatrix2D<T>::Size() {
 }
 
 template<typename T>
-void FlatMatrix2D<T>::Resize(unsigned int totalSize) {
+void FlatMatrix2D<T>::Resize(unsigned int _totalSize) {
     if (matrix != NULL) {
         delete[] matrix;
     }
-    matrix = new T[totalSize];
+    matrix = new T[_totalSize];
+    totalSize = _totalSize;
 }
 
 template<typename T>
@@ -83,7 +84,7 @@ void FlatMatrix2D<T>::Grow(int _nRows, int _nCols) {
     nRows = _nRows;
     nCols = _nCols;
     if (nRows * nCols > totalSize) {
-        if (totalSize != 0)
+        if (totalSize != 0 && matrix)
             delete[] matrix;
         totalSize = nRows * nCols;
         matrix = new T[totalSize];

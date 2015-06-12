@@ -82,6 +82,7 @@ class OutputSampleListSet {
     for (i = 0; i < numLengths; i++) {
       in.read((char*) &lengths[i], sizeof(int));
     }
+    if (key) {delete [] key; key = NULL;}
   }
 
   void AppendOutputSample(string key, OutputSample &sample) {

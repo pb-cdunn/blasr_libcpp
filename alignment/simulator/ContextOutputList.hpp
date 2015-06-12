@@ -91,7 +91,7 @@ public:
     void Free() {
         std::map<std::string,OutputList*>::iterator mapIt;
         for (mapIt = outputMap.begin(); mapIt != outputMap.end(); ++mapIt) {
-            delete mapIt->second;
+            if (mapIt->second) {delete mapIt->second;}
         }
     }
 };

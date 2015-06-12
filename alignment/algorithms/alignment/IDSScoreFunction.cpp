@@ -64,13 +64,12 @@ int IDSScoreFunction<DNASequence, FASTQSequence>::Match(DNASequence &ref, DNALen
 
     if (query.seq[queryPos] == ref.seq[refPos]) {
         return 0;
+    } else if (query.substitutionTag != NULL) {
+        if (query.substitutionTag[queryPos] == ref.seq[refPos]) {
+            return query.substitutionQV[queryPos];
+        }
     }
-    else if (query.substitutionTag[queryPos] == ref.seq[refPos]) {
-        return query.substitutionQV[queryPos];
-    }
-    else {
-        return substitutionPrior;
-    }
+    return substitutionPrior;
 }
 
 

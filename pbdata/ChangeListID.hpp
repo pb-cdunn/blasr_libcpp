@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <stdlib.h>
+#include <sstream>
 
 #ifndef _QVScale_
 #define _QVScale_
@@ -24,6 +25,12 @@ public:
     int LessThan(ChangeListID &rhs, int depth = 0); 
 
     QVScale DetermineQVScaleFromChangeListID();
+
+    /// Get version string from ChangeListID.
+    /// changeListID "2.3.0.144058" --> Version "2.3".
+    /// \returns version string
+    std::string GetVersion();
+
 };
 
 void AppendPerforceChangelist(std::string perforceVersionString, std::string &version); 

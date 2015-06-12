@@ -20,19 +20,16 @@ void CompressedSequence<T_Sequence>::ShallowCopy(CompressedSequence<T_Sequence> 
 
 template<typename T_Sequence>
 void CompressedSequence<T_Sequence>::MakeRC(CompressedSequence &rc) {
+    rc.Free(); //Free rc.seq and rc.title before allocate.
+
     rc.Allocate(length);
     DNALength i;
     for (i = 0; i < length; i++) {
         rc.seq[length - i - 1] = ReverseComplementNuc[ThreeBit[seq[i] & MaskCount]];
         rc.seq[length - i - 1] += (seq[i] & MaskNuc); 
     }
-    if (rc.title != NULL) {
-        delete[] rc.title;
-    }
-    rc.title = new char[titleLength+1];
-    memcpy(rc.title, title, titleLength);
-    rc.titleLength = titleLength;
-    rc.title[titleLength] = '\0';
+
+    rc.CopyTitle(title, titleLength);
 }
 
 template<typename T_Sequence>
@@ -89,6 +86,22 @@ CompressedSequence<T_Sequence>::CompressedSequence() {
 }
 
 template<typename T_Sequence>
+CompressedSequence<T_Sequence>::~CompressedSequence() {
+    CompressedSequence::Free();
+}
+
+template<typename T_Sequence>
+void CompressedSequence<T_Sequence>::Free() {
+    if (hasIndex) {
+        index.Free();
+    }
+    if(qual) {delete [] qual; qual = NULL;}
+    FASTASequence::Free();
+    hasIndex = 0;
+    hasTitle = 0;
+}
+
+template<typename T_Sequence>
 void CompressedSequence<T_Sequence>::SetHasTitle() {
     hasTitle = 1;
 }
@@ -118,16 +131,20 @@ void CompressedSequence<T_Sequence>::Write(std::string outFileName) {
 
 template<typename T_Sequence>
 void CompressedSequence<T_Sequence>::Read(std::string inFileName) {
+    Free(); //Free before reusing this object.
     std::ifstream in;
     CrucialOpen(inFileName, in, std::ios::binary | std::ios::in);
     // step 1, read in the options.
     in.read((char*) &hasTitle, sizeof(int));
     in.read((char*) &hasIndex, sizeof(int));
     if (hasTitle) {
-        in.read((char*) &titleLength, sizeof(int));
-        title = new char[titleLength+1];
-        in.read((char*) title, titleLength);
-        title[titleLength] = '\0';
+        int inTitleLength;
+        in.read((char*) &inTitleLength, sizeof(int));
+        char * inTitle = new char[inTitleLength+1];
+        in.read((char*) inTitle, inTitleLength);
+        inTitle[titleLength] = '\0';
+        CopyTitle(inTitle, inTitleLength);
+        delete [] inTitle;
     }
     in.read((char*) &length, sizeof(DNALength));
     seq = new Nucleotide[length];
@@ -135,6 +152,7 @@ void CompressedSequence<T_Sequence>::Read(std::string inFileName) {
     if (hasIndex) {
         index.Read(in);
     }
+    deleteOnExit = true;
 }
 
 template<typename T_Sequence>
@@ -170,6 +188,7 @@ int CompressedSequence<T_Sequence>::BuildReverseIndex(int maxRun, int binSize) {
     //
     // Phase 2. Store the index.
     //
+    index.Free();
     index.indexLength = hpi/index.binSize + 1;
     index.index = new int[index.indexLength];
     hpi = 0;
@@ -275,9 +294,10 @@ void CompressedSequence<T_Sequence>::RemoveCompressionCounts() {
 template<typename T_Sequence>
 DNALength CompressedSequence<T_Sequence>::FourBitDecompressHomopolymers(int start, int end, 
         T_Sequence &decompSeq) {
+    decompSeq.Free(); // Free before decomp;
 
     //
-    // first compute the lenght of the decoded 
+    // first compute the length of the decoded 
     //
     DNALength i;
     decompSeq.length = 0;
@@ -305,6 +325,7 @@ DNALength CompressedSequence<T_Sequence>::FourBitDecompressHomopolymers(int star
         }
     }
     decompSeq.bitsPerNuc = 4;
+    decompSeq.deleteOnExit = true;
     return decompSeq.length;
 }
 

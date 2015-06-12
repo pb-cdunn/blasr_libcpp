@@ -75,7 +75,7 @@ UInt HDFAlnInfoGroup::GetAlnIndexSize() {
 
 void HDFAlnInfoGroup::Read(AlnInfo &alnInfo) {
 
-    int nAlignments = alnIndexArray.GetNRows();
+    UInt nAlignments = alnIndexArray.GetNRows();
     alnInfo.alignments.resize(nAlignments);
     UInt alignmentIndex;
     UInt alignmentRow[NCols];

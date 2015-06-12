@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 
+
 using namespace std;
 
 class FASTASequenceTest : public ::testing::Test {
@@ -30,6 +31,9 @@ public:
     }
 
     virtual void TearDown() {
+        fastaOne.Free();
+        fastaTwo.Free();
+        fastaThree.Free();
     }
 
     FASTASequence fastaOne;
@@ -112,4 +116,28 @@ TEST_F(FASTASequenceTest, ALLFUNC) {
     EXPECT_EQ(thisTitle, ">fasta_seq_one");
     EXPECT_EQ(thisComment, "commentsXXX");
     EXPECT_EQ(thisSeq, "ATGCATGCTC");
+}
+
+
+TEST_F(FASTASequenceTest, CopyFromString) {
+    string name = "read_name";
+    string seq = "ATGGGCGC";
+    fastaOne.Copy(name, seq);
+    EXPECT_EQ(fastaOne.title, name);
+    EXPECT_EQ(fastaOne.length, seq.size());
+    EXPECT_EQ(fastaOne.deleteOnExit, true);
+    for(int i = 0; i < fastaOne.length; i++) {
+        EXPECT_EQ(fastaOne.seq[i], seq[i]);
+    }
+
+    // Copy sequence from another string. 
+    string seq2 = "GGTTGTG";
+    fastaOne.Copy(seq2);
+    // Name not changed.
+    EXPECT_EQ(fastaOne.title, name);
+    EXPECT_EQ(fastaOne.length, seq2.size());
+    EXPECT_EQ(fastaOne.deleteOnExit, true);
+    for(int i = 0; i < fastaOne.length; i++) {
+        EXPECT_EQ(fastaOne.seq[i], seq2[i]);
+    }
 }

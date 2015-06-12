@@ -13,9 +13,14 @@ public:
         RegionEnd, RegionScore} AnnotationRow;
     static const int NCOLS=5;
     int row[NCOLS];
-    int operator<(const RegionAnnotation &rhs) const; 
 
-    int operator<(int holeNumber); 
+    inline
+    bool operator<(const RegionAnnotation &rhs) const
+    { return row[HoleNumber] < rhs.row[HoleNumber]; }
+
+    inline
+    bool operator<(int holeNumber) const
+    { return row[HoleNumber] < holeNumber; }
 
     RegionAnnotation& operator=(const RegionAnnotation &rhs); 
 
@@ -23,7 +28,7 @@ public:
 
     void SetHoleNumber(int holeNumber); 
 
-    int GetType(); 
+    int GetType() const; 
 
     void SetType(int regionType); 
 
@@ -49,7 +54,7 @@ public:
     std::vector<std::string> regionSources;
     std::vector<RegionType> regionTypeEnums;
 
-    int LookupRegionsByHoleNumber(int holeNumber, int &low, int &high); 
+    int LookupRegionsByHoleNumber(int holeNumber, int &low, int &high) const; 
 
     //
     // Define a bunch of accessor functions.
@@ -61,7 +66,7 @@ public:
     // standard encoding.
     //
 
-    RegionType GetType(int regionIndex); 
+    RegionType GetType(int regionIndex) const; 
 
     int GetStart(int regionIndex); 
 

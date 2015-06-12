@@ -22,6 +22,8 @@ class CCSSequence : public SMRTSequence {
 	// with as if it were a normal non-ccs sequence.
 	//
 	SMRTSequence      unrolledRead;
+
+    inline ~CCSSequence();
 	void Free(); 
 
 	int GetStorageSize(); 
@@ -33,5 +35,9 @@ class CCSSequence : public SMRTSequence {
 	// 
 	void Explode(std::vector<SMRTSequence> &subreads); 
 };
+
+inline CCSSequence::~CCSSequence() {
+    CCSSequence::Free();
+}
 
 #endif // _BLASR_CCS_SEQUENCE_HPP_

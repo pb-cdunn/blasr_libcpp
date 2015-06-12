@@ -1,9 +1,25 @@
-#LEGACY := -I../../../../assembly/cpp/common
-INCLUDES = -I../../../../../assembly/seymour/dist/common/include \
-		   -I../pbdata \
-		   -I../hdf
 
-CXXOPTS := -I . -I../hdf/ -pedantic -c -Wno-long-long -MMD -MP -std=c++0x
+include ../common.mk
+
+LIBPBDATA_INCLUDE := ../pbdata
+LIBPBIHDF_INCLUDE := ../hdf
+PBBAM_INCLUDE := $(PBBAM)/include
+HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
+
+INCLUDES = -I$(HDF5_INC) \
+           -I$(LIBPBDATA_INCLUDE) \
+           -I$(LIBPBIHDF_INCLUDE) \
+	   -I.
+
+ifneq ($(ZLIB_ROOT), notfound)
+	INCLUDES += -I$(ZLIB_ROOT)/include
+endif
+
+ifeq ($(origin nopbbam), undefined)
+    INCLUDES += -I$(PBBAM_INCLUDE) -I$(HTSLIB_INCLUDE) -I$(BOOST_INCLUDE)
+endif
+
+CXXOPTS := -std=c++11 -pedantic -Wno-long-long -MMD -MP
 
 sources := $(wildcard algorithms/alignment/*.cpp) \
 		   $(wildcard algorithms/alignment/sdp/*.cpp) \
@@ -31,26 +47,28 @@ endif
 objects := $(sources:.cpp=.o)
 dependencies := $(sources:.cpp=.d)
 
-all : GCCOPTS = -O3
+all : CXXFLAGS ?= -O3
 
-debug : GCCOPTS = -g -ggdb -fno-inline
+debug : CXXFLAGS ?= -g -ggdb -fno-inline
 
-profile : GCCOPTS = -Os -pg
+profile : CXXFLAGS ?= -Os -pg
 
-all debug profile: libblasr.a
+g: CXXFLAGS = -g -ggdb -fno-inline -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer 
 
-libblasr.a: libblasr.a($(objects))
-	$(AR) $(ARFLAGS)s $@ $%
+all debug profile g: libblasr.a
+
+libblasr.a: $(objects)
+	$(AR_pp) $(ARFLAGS) $@ $^
 
 %.o: %.cpp
-	$(CXX) $(GCCOPTS) $(CXXOPTS) $(LEGACY) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -o $@ $<
+	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
 
-.INTERMEDIATE: $(objects)
+# .INTERMEDIATE: $(objects)
 
 clean: 
-	rm -f libblasr.a
-	find . -type f -name \*.o -delete
-	find . -type f -name \*.d -delete
+	@rm -f libblasr.a
+	@find . -type f -name \*.o -delete
+	@find . -type f -name \*.d -delete
 
 
 -include $(dependencies)

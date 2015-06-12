@@ -5,6 +5,7 @@ using namespace std;
 
 template<typename TSequence, typename TTuple>
 void TupleCountTable<TSequence, TTuple>::InitCountTable(TupleMetrics &ptm) {
+    Free();
     tm = ptm;
     tm.InitializeMask();
     assert(tm.tupleSize > 0);
@@ -12,7 +13,12 @@ void TupleCountTable<TSequence, TTuple>::InitCountTable(TupleMetrics &ptm) {
     // properly.
     countTableLength = 4;
     countTableLength = countTableLength << ((tm.tupleSize - 1)*2);
-    InitCountTable(countTableLength);
+
+    assert(countTableLength > 0);
+    countTable = new int[countTableLength];
+    deleteStructures = true;
+    fill(&countTable[0], &countTable[countTableLength], 0);
+    nTuples = 0;
 }
 
 
@@ -21,12 +27,17 @@ TupleCountTable<TSequence, TTuple>::TupleCountTable() {
     countTable = NULL;
     countTableLength = 0;
     nTuples = 0;
-    deleteStructures = true;
+    deleteStructures = false;
 }
 
 
 template<typename TSequence, typename TTuple>
 TupleCountTable<TSequence, TTuple>::~TupleCountTable() {
+    Free();
+}
+
+template<typename TSequence, typename TTuple>
+void TupleCountTable<TSequence, TTuple>::Free() {
     if (deleteStructures == false) {
         //
         // Do not delete this if it is referencing another structure
@@ -35,18 +46,9 @@ TupleCountTable<TSequence, TTuple>::~TupleCountTable() {
     }
     if (countTable != NULL) {
         delete [] countTable;
+        countTable = NULL;
     }
-}
-
-
-template<typename TSequence, typename TTuple>
-void TupleCountTable<TSequence, TTuple>::InitCountTable(
-    int p_countTableLength ) { 
-    countTableLength = p_countTableLength;
-    assert(countTableLength > 0);
-    countTable = new int[countTableLength];
-    fill(&countTable[0], &countTable[countTableLength], 0);
-    nTuples = 0;
+    countTableLength = nTuples = 0;
 }
 
 
@@ -86,11 +88,13 @@ void TupleCountTable<TSequence, TTuple>::Write(ofstream &out) {
 
 template<typename TSequence, typename TTuple>
 void TupleCountTable<TSequence, TTuple>::Read(ifstream &in) {
+    Free(); // Clear before reusing this object.
     in.read((char*) &countTableLength, sizeof(int));
     in.read((char*) &nTuples, sizeof(int));
     in.read((char*) &tm.tupleSize, sizeof(int));
     tm.InitializeMask();
     countTable = new int[countTableLength];
+    deleteStructures = true;
     in.read((char*) countTable, sizeof(int) * countTableLength);
 }
 

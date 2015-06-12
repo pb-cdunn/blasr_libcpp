@@ -1,43 +1,36 @@
-.PHONY: all debug profile gtest clean
+SHELL=/bin/bash
+
+.PHONY: all debug profile gtest clean cleanall
 
 # $Change: 140182 $ 
 
 all:
-	cd pbdata;\
-	make all
-	cd hdf;\
-	make all
-	cd alignment;\
-	make all
+	make -C pbdata all
+	make -C hdf all
+	make -C alignment all
 
 debug:
-	cd pbdata;\
-	make debug 
-	cd hdf;\
-	make debug 
-	cd alignment;\
-	make debug 
+	make -C pbdata debug
+	make -C hdf debug
+	make -C alignment debug
 
 profile:
-	cd pbdata;\
-	make profile 
-	cd hdf;\
-	make profile 
-	cd alignment;\
-	make profile 
+	make -C pbdata profile
+	make -C hdf profile
+	make -C alignment profile
+
+g:
+	make -C pbdata g
+	make -C hdf g
+	make -C alignment g
 
 gtest:
-	cd unittest;\
-	make gtest
+	make -C unittest gtest
 
-clean: 
-	cd pbdata;\
-	make clean
-	cd hdf;\
-	make clean
-	cd alignment;\
-	make clean
-	cd unittest;\
-	make clean
+clean:
+	make -C pbdata clean
+	make -C hdf clean
+	make -C alignment clean
+	make -C unittest clean
 
-
+cleanall: clean

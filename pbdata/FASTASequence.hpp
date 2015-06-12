@@ -27,20 +27,21 @@ public:
     int titleLength;
 
     FASTASequence();
+    inline ~FASTASequence();
 
     void PrintSeq(std::ostream &out, int lineLength = 50, char delim='>');
 
     int GetStorageSize();
 
-    std::string GetName();
+    std::string GetName() const;
 
-    bool StoreHoleNumber(int holeNumber);
-    bool StoreHoleStatus(unsigned char holeStatus);
-    bool StorePlatformId(PlatformId platformId);
-    bool StoreZMWData(ZMWGroupEntry &data);
+    virtual bool StoreHoleNumber(int holeNumber);
+    virtual bool StoreHoleStatus(unsigned char holeStatus);
+    virtual bool StorePlatformId(PlatformId platformId);
+    virtual bool StoreZMWData(ZMWGroupEntry &data);
+    virtual bool StoreXY(int16_t xy[]);
+
     bool GetHoleNumber (int &holeNumberP); 
-
-    bool StoreXY(int16_t xy[]);
 
     bool GetXY(int xyP[]); 
 
@@ -70,8 +71,21 @@ public:
 
     void Copy(const FASTASequence &rhs); 
 
+    void Copy(const std::string & rhsTitle, const std::string & rhsSeq);
+
+    void Copy(const std::string & rhsSeq);
+
+#ifdef USE_PBBAM
+    /// Copies a BamRecord as a FASTASequence.
+    void Copy(const PacBio::BAM::BamRecord & record);
+#endif
+
     void Free(); 
 };
 
+
+inline FASTASequence::~FASTASequence(){
+    FASTASequence::Free();
+}
 
 #endif

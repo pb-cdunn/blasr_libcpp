@@ -20,8 +20,8 @@ public:
 
 	TupleCountTable();
    	~TupleCountTable();
+	void Free();
 
-	void InitCountTable(int p_countTableLength ); 
 	void IncrementCount(TTuple &tuple);
 	void AddSequenceTupleCountsLR(TSequence &seq);
 	void Write(ofstream &out);
@@ -31,4 +31,3 @@ public:
 #include "tuples/TupleCountTableImpl.hpp"
 
 #endif
-

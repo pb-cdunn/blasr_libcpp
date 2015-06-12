@@ -19,8 +19,8 @@ public:
     bool readHoleNumber, readHoleStatus;
     bool readHoleXY;
     bool readNumEvent;
-    int  curZMW;
-    int  nZMWEntries;
+    UInt curZMW;
+    UInt nZMWEntries;
     bool  closeFileOnExit;
     H5::H5File hdfPlsFile;
 
@@ -40,8 +40,6 @@ public:
     bool GetHoleNumberAt(UInt index, UInt & holeNumber);
 
     ~HDFZMWReader(); 
-    
-
 };
 
 #endif

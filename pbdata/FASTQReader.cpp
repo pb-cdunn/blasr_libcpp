@@ -19,6 +19,7 @@ unsigned char FASTQReader::phredQVtoPacbioQV(unsigned char phredQV){
 }
 
 int FASTQReader::GetNext(FASTQSequence &seq) {
+    seq.Free(); // Free seq before being reused. 
     char c;
     while( curPos < fileSize and ( (c = filePtr[curPos]) == ' ' or c == '\t' or c == '\n' or c == '\r') ) {
         curPos++;
@@ -30,7 +31,7 @@ int FASTQReader::GetNext(FASTQSequence &seq) {
     long p = curPos;
     AdvanceToTitleStart(p, '@');
     CheckValidTitleStart(p,'@');
-    ReadTitle(p, seq.title, seq.titleLength);
+    ReadTitle(p, seq);
     // Title ends on '\n', consume that;
     p++;
     long p2;
@@ -66,7 +67,7 @@ int FASTQReader::GetNext(FASTQSequence &seq) {
         p2 = p;
         long seqPos = 0;
         while(p2 < fileSize and filePtr[p2] != '\n') { 
-            seq.qual[seqPos] = filePtr[p2] - FASTQSequence::charToQuality; //phredQVtoPacbioQV(filePtr[p2] - charToQuality); 
+            seq.qual[seqPos] = filePtr[p2] - FASTQSequence::charToQuality;
             p2++; seqPos++;
         }
     }

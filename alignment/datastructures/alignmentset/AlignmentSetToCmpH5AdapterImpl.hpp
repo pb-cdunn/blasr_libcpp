@@ -104,8 +104,8 @@ void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidate(
     AlignmentCandidate<> &alignment, 
     int alnSegment,
     T_CmpFile &cmpFile,
-    int moleculeNumber=-1,
-    bool copyQVs=false) {
+    int moleculeNumber,
+    bool copyQVs) {
   //
   // Find out where the movie is going to get stored.
   //
@@ -213,7 +213,7 @@ void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidate(
     (20): "nBackRead", "nReadOverlap"
   */
   if (moleculeNumber == -1) {
-    moleculeNumber = holeNumber * movieId;
+    moleculeNumber =  numZMWsPerMovieSpringField * (movieId - 1) + holeNumber;
   }
   alnIndex[0]  = numAlignments;  // AlnId
   alnIndex[1]  = pathId;        // AlnGroupID
@@ -244,8 +244,8 @@ template<typename T_CmpFile>
 void AlignmentSetToCmpH5Adapter<T_CmpFile>::StoreAlignmentCandidateList(
     std::vector<AlignmentCandidate<> > &alignments,
     T_CmpFile &cmpFile,
-    int moleculeNumber=-1,
-    bool copyQVs=false) {
+    int moleculeNumber,
+    bool copyQVs) {
   
   int a;
   for (a = 0; a < alignments.size(); a++) {

@@ -6,10 +6,14 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include "Types.h"
 #include "NucConversion.hpp"
+#include "libconfig.h"
 
-typedef uint32_t DNALength;
-typedef unsigned char Nucleotide;
+#ifdef USE_PBBAM
+#include "pbbam/BamRecord.h"
+#endif
+
 
 class DNASequence {
 public:
@@ -19,6 +23,7 @@ public:
     bool deleteOnExit;
 
     inline DNASequence();
+    inline ~DNASequence();
 
     //--- functions ---//
     
@@ -34,9 +39,13 @@ public:
 
     void ShallowCopy(const DNASequence &rhs);
 
+    DNASequence & Copy(const std::string & rhs);
+
     int GetStorageSize();
 
     DNASequence &operator=(const DNASequence &rhs);
+
+    DNASequence &operator=(const std::string &rhs);
 
     void Print(std::ostream &out, int lineLength = 50);
 
@@ -44,7 +53,7 @@ public:
 
     void Allocate(DNALength plength);
 
-    void ReferenceSubstring(const DNASequence &rhs, DNALength pos=0, int substrLength=0); 
+    void ReferenceSubstring(const DNASequence &rhs, DNALength pos=0, DNALength substrLength=0); 
 
     DNALength MakeRCCoordinate(DNALength forPos );
 
@@ -96,13 +105,16 @@ public:
 
     void CleanupOnFree();
 
-    void FreeIfControlled(); 
-
     virtual void Free(); 
 
     void Resize(DNALength newLength);
 
     DNALength GetSeqStorage();
+
+#ifdef USE_PBBAM
+    /// Copies a BamRecord as a DNASequence.
+    DNASequence & Copy(const PacBio::BAM::BamRecord & record);
+#endif 
 };
 
 inline DNASequence::DNASequence() {
@@ -110,6 +122,10 @@ inline DNASequence::DNASequence() {
     length = 0;
     bitsPerNuc = 8;
     deleteOnExit = false;
+}
+
+inline DNASequence::~DNASequence() {
+    DNASequence::Free();
 }
 
 

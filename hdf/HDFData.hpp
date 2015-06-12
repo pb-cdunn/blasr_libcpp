@@ -29,6 +29,15 @@ public:
     //
     // Allow derived classes to be initialized generically.
     //
+    // FIXME(yli): This method and the Initialize methods in
+    // subclasses cause compilation warnings under clang.  For
+    // example, see the discussion here:
+    //
+    // http://stackoverflow.com/questions/18515183/c-overloaded-virtual-function-warning-by-clang
+    //
+    // To fix the problem here may require rethinking the initialize
+    // method more carefully.
+    //
     virtual int Initialize(HDFGroup &parentGroup, const std::string &datasetName);
 
     int BaseInitializeDataset(H5::CommonFG &hdfFile, std::string _datasetName); 

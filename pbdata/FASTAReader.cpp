@@ -106,10 +106,12 @@ void FASTAReader::CheckValidTitleStart(long &p, char delim) {
 }
 
 long FASTAReader::ReadAllSequencesIntoOne(FASTASequence &seq, SequenceIndexDatabase<FASTASequence> *seqDBPtr) {
+    seq.Free();
     long p = curPos;
     AdvanceToTitleStart(p);
     CheckValidTitleStart(p);
-    ReadTitle(p, seq.title, seq.titleLength);
+    ReadTitle(p, seq); 
+     
     if (seq.title == NULL) {
         cout << "ERROR, sequence must have a nonempty title." << endl;
         exit(1);
@@ -119,7 +121,7 @@ long FASTAReader::ReadAllSequencesIntoOne(FASTASequence &seq, SequenceIndexDatab
     }
     long seqLength;
     seqLength = fileSize - p;
-    long memorySize = seqLength+padding;
+    long memorySize = seqLength+padding+1;
 
     long a = memorySize;
     if (memorySize > UINT_MAX) {
@@ -194,6 +196,7 @@ long FASTAReader::ReadAllSequencesIntoOne(FASTASequence &seq, SequenceIndexDatab
     for (; i < memorySize; i++ ){
         seq.seq[i] = 0;
     }
+    seq.deleteOnExit = true;
     if (seqDBPtr != NULL) {
         seqDBPtr->growableSeqStartPos.push_back(seq.length);
         int nSeq = seqDBPtr->growableSeqStartPos.size();
@@ -209,6 +212,14 @@ long FASTAReader::ReadAllSequencesIntoOne(FASTASequence &seq, SequenceIndexDatab
     return seq.length;
 }
 
+void FASTAReader::ReadTitle(long &p, FASTASequence & seq) {
+    char * seqTitle = NULL;
+    int seqTitleLen; 
+    ReadTitle(p, seqTitle, seqTitleLen);
+    seq.CopyTitle(seqTitle, seqTitleLen);
+    if (seqTitle) {delete seqTitle;}
+}
+
 void FASTAReader::ReadTitle(long &p, char *&title, int &titleLength) {
     // 
     // Extract the title.  The length of the title does not include the newline.
@@ -221,6 +232,7 @@ void FASTAReader::ReadTitle(long &p, char *&title, int &titleLength) {
     }
     titleLength = p - curPos;
     if (titleLength > 0) {
+        if (title) {delete [] title; title = NULL;}
         title = new char[titleLength+1];
         int t = 0;
         for (p = curPos; p < curPos + titleLength; p++, t++) {
@@ -239,6 +251,7 @@ int FASTAReader::GetNext(FASTASequence &seq) {
         return 0;
     }
 
+    seq.Free(); //Free seq before read
 
     // 
     // Extract the title of the current record.
@@ -252,7 +265,7 @@ int FASTAReader::GetNext(FASTASequence &seq) {
     //
     CheckValidTitleStart(p);
 
-    ReadTitle(p, seq.title, seq.titleLength);
+    ReadTitle(p, seq); 
 
     //
     // Read in the next sequence.
@@ -281,7 +294,7 @@ int FASTAReader::GetNext(FASTASequence &seq) {
     seq.length = 0;
     if (seqLength > 0) {
         seq.length = seqLength;
-        seq.seq = new Nucleotide[seqLength+padding];
+        seq.seq = new Nucleotide[seqLength+padding+1];
         p = curPos;
         seq.deleteOnExit = true;
         long s = 0;
@@ -296,6 +309,7 @@ int FASTAReader::GetNext(FASTASequence &seq) {
             }
             p++;
         }
+        seq.seq[seqLength] = 0;
     }
     curPos = p;
 
@@ -365,8 +379,8 @@ int FASTAReader::ConcatenateNext(FASTASequence &cur) {
         next.CleanupASCII();
         cur.Concatenate((Nucleotide*) "N");
         cur.Concatenate(next);	
-        delete[] next.seq;
     }
+    next.Free();
     return retVal;
 }
 

@@ -14,6 +14,11 @@ SequenceIndexDatabase(int final) {
     deleteStructures = false;
 }
 
+template<typename TSeq>
+SequenceIndexDatabase<TSeq>::
+~SequenceIndexDatabase() {
+    FreeDatabase();
+}
 
 template<typename TSeq>
 DNALength SequenceIndexDatabase<TSeq>::
@@ -185,17 +190,20 @@ ReadDatabase(std::ifstream &in) {
     deleteStructures = true;
 
     in.read((char*) &nSeqPos, sizeof(int));
+    assert(seqStartPos == NULL);
     seqStartPos = new DNALength[nSeqPos];
     deleteSeqStartPos = true;
     in.read((char*) seqStartPos, sizeof(DNALength) * nSeqPos);
     int nSeq = nSeqPos - 1;
 
     // Get the lengths of the strings to read.
+    assert(nameLengths == NULL);
     nameLengths = new int[nSeq];
     deleteNameLengths = true;
     in.read((char*)nameLengths, sizeof(int) * nSeq);
 
     // Get the titles of the sequences.
+    assert(names == NULL); // Otherwise need to delete names; 
     names = new char*[nSeq];
     deleteNames = true;
     char *namePtr;
@@ -218,7 +226,7 @@ SequenceTitleLinesToNames() {
     for (seqIndex = 0; seqIndex < nSeqPos-1; seqIndex++) {
         std::string tmpName;
         AssignUntilFirstSpace(names[seqIndex], nameLengths[seqIndex], tmpName);
-        delete[] names[seqIndex];
+        if (names[seqIndex]) {delete[] names[seqIndex];}
         names[seqIndex] = new char[tmpName.size()+1];
         strcpy(names[seqIndex], tmpName.c_str());
         names[seqIndex][tmpName.size()] = '\0';
@@ -257,9 +265,12 @@ Finalize() {
     seqStartPos = &growableSeqStartPos[0];
     nSeqPos = growableSeqStartPos.size();
     int nSeq = nSeqPos - 1;
+
+    assert(names==NULL);
     names = new char*[nSeq];
     deleteNames = true;
     unsigned int i;
+    if (nameLengths) {delete [] nameLengths; nameLengths = NULL;}
     nameLengths = new int[nSeq];
     deleteNameLengths = true;
     for (i = 0; i < nSeq; i++) {
@@ -287,12 +298,15 @@ FreeDatabase() {
             delete[] names[i];
         }
         delete[] names;
+        names = NULL;
     }
-    if (nameLengths != NULL) {
+    if (nameLengths != NULL and deleteNameLengths) {
         delete[] nameLengths;
+        nameLengths = NULL;
     }
     if (seqStartPos != NULL and deleteSeqStartPos) {
         delete[] seqStartPos;
+        seqStartPos = NULL;
     }
 }
 

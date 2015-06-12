@@ -52,3 +52,13 @@ void AppendPerforceChangelist(string perforceVersionString, string &version) {
     }
 }
 
+std::string ChangeListID::GetVersion() {
+    stringstream ss;
+    if (intVer.size() == 1) {
+        ss << intVer[0];
+    } else if(intVer.size() >= 2) {
+        ss << intVer[0] << "." << intVer[1];
+    }
+    return ss.str();
+}
+

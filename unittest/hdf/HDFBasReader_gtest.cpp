@@ -26,7 +26,7 @@ using namespace H5;
 class HDFBasReaderTEST : public ::testing::Test {
 public:
     virtual void SetUp() {
-        fileName = baxFile2;
+        fileName = baxFile3;
         reader.InitializeDefaultIncludedFields();
         ASSERT_EQ(reader.Initialize(fileName), 1);
     }
@@ -39,7 +39,7 @@ public:
 
 TEST_F(HDFBasReaderTEST, ReadBaseFromBaseCalls) {
     ASSERT_EQ(reader.GetMovieName(), 
-            "m130220_114643_42129_c100471902550000001823071906131347_s1_p0");
+            "m150223_190837_42175_c100735112550000001823160806051530_s1_p0");
     SMRTSequence seq;
 
     for(int i=0; i < 1000; i++) {
@@ -47,4 +47,10 @@ TEST_F(HDFBasReaderTEST, ReadBaseFromBaseCalls) {
     }
 }
 
-
+TEST_F(HDFBasReaderTEST, GetChemistryTriple) {
+    string bindingKit, sequencingKit, version;
+    reader.GetChemistryTriple(bindingKit, sequencingKit, version);
+    EXPECT_EQ(bindingKit, "100356300");
+    EXPECT_EQ(sequencingKit, "100356200");
+    EXPECT_EQ(version, "2.3");
+}

@@ -102,6 +102,7 @@ TEST_F(DNASequenceTest, Append) {
     DNASequence dnaTwo;
     dnaOne.seq = one; 
     dnaOne.length = oneLen;
+    dnaOne.deleteOnExit = true;
     dnaTwo.seq = two;
     dnaTwo.length = twoLen;
 
@@ -138,17 +139,17 @@ TEST_F(DNASequenceTest, TakeOwnership) {
     dnaOne.length = oneLen;
 
     DNASequence dnaTwo;
+    
+    //a bug may occur if deleteOneExit is true and 
+    //TakeOwnership() is called twice. In that case, both
+    //dnaOne and dnaTwo will become wild pointers 
+    dnaTwo.deleteOnExit = true;
     dnaTwo.TakeOwnership(dnaOne);
+    
     EXPECT_EQ(dnaTwo.length, dnaOne.length);
     EXPECT_EQ(dnaTwo.deleteOnExit, dnaOne.deleteOnExit);
     EXPECT_EQ(dnaTwo.seq, dnaOne.seq);
 
-    dnaTwo.deleteOnExit = true;
-    dnaTwo.TakeOwnership(dnaOne);
-    //a bug may occur if deleteOneExit is true and 
-    //TakeOwnership() is called twice. In that case, both
-    //dnaOne and dnaTwo will become wild pointers 
-    EXPECT_EQ(dnaOne.seq, dnaTwo.seq);
     if(!one) delete one;
 }
 
@@ -258,8 +259,21 @@ TEST_F(DNASequenceTest, ReferenceSubstring) {
 //    EXPECT_DEATH_IF_SUPPORTED(dnaTwo.ReferenceSubstring(dnaOne, 100), "");
     delete dnaOne.seq;
 }
+/*
+TEST_F(DNASequenceTest, CopyFromString) {
+    // Test Copy(const std::string &)
+    string str = "ATGCGGGCCTCGCCG";
+    dnaOne.Copy(str);
 
-TEST_F(DNASequenceTest, TheNext) {
-    EXPECT_TRUE(true);
+    for (int i = 0; i < str.size(); i++) {
+       EXPECT_EQ(dnaOne.seq[i], str[i]);
+    }
+
+    // Test operator = (const std::string)
+    DNASequence dnaTwo;
+    dnaTwo = str;
+    for (int i = 0; i < str.size(); i++) {
+       EXPECT_EQ(dnaOne.seq[i], str[i]);
+    }
 }
-
+*/

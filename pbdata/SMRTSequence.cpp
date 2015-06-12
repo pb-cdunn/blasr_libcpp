@@ -16,10 +16,20 @@ void SMRTSequence::SetNull() {
     // By default, allow the entire read.
     lowQualityPrefix = lowQualitySuffix = 0;
     highQualityRegionScore = 0;
+    // ZMWMetrics
+    for (size_t i = 0; i < 4; i++) {
+        hqRegionSnr[i] = -1;
+    }
+    readScore = -1;
+    holeNumber = static_cast<UInt>(-1);
+    readGroupId = "";
+    copiedFromBam = false;
+#ifdef USE_PBBAM
+    bamRecord = PacBio::BAM::BamRecord();
+#endif
 }
 
 SMRTSequence::SMRTSequence() : FASTQSequence() {
-    holeNumber = -1;
     SetNull();
 }
 
@@ -41,13 +51,13 @@ void SMRTSequence::Allocate(DNALength length) {
     deleteOnExit  = true;
 }
 
-void SMRTSequence::SetSubreadTitle(SMRTSequence &subread, DNALength subreadStart, DNALength  subreadEnd) {
+void SMRTSequence::SetSubreadTitle(SMRTSequence &subread, DNALength subreadStart, DNALength subreadEnd) {
     stringstream titleStream;
     titleStream << title << "/"<< subreadStart << "_" << subreadEnd;
     subread.CopyTitle(titleStream.str());
 }    
 
-void SMRTSequence::SetSubreadBoundaries(SMRTSequence &subread, DNALength &subreadStart, int &subreadEnd) {
+void SMRTSequence::SetSubreadBoundaries(SMRTSequence &subread, DNALength subreadStart, DNALength subreadEnd) {
     if (subreadEnd == -1) {
         subreadEnd = length;
     }
@@ -64,7 +74,7 @@ void SMRTSequence::MakeSubreadAsMasked(SMRTSequence &subread,
     // This creates the entire subread, but masks out the portions
     // that do not correspond to this insert.
     //
-    ((SMRTSequence&)subread).Copy(*this);
+    static_cast<SMRTSequence*>(&subread)->Copy(*this);
     SetSubreadBoundaries(subread, subreadStart, subreadEnd);
     DNALength pos;
     for (pos = 0; pos < subreadStart; pos++) { subread.seq[pos] = 'N'; }
@@ -79,7 +89,7 @@ void SMRTSequence::MakeSubreadAsReference(SMRTSequence &subread,
     //
     // Just create a reference to a substring of this read.  
     //
-    ((FASTQSequence)subread).ReferenceSubstring(*this, subreadStart, subreadEnd - subreadStart);
+    static_cast<FASTQSequence*>(&subread)->ReferenceSubstring(*this, subreadStart, subreadEnd - subreadStart);
     SetSubreadBoundaries(subread, subreadStart, subreadEnd);
     // The subread references this read, protect the memory.
     assert(not subread.deleteOnExit);
@@ -99,11 +109,11 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
     FASTQSequence subseq; 
     // subseq.seq is referenced, while seq.title is not, we need to call 
     // subseq.Free() to prevent memory leak.
-    ((FASTQSequence&)subseq).ReferenceSubstring((FASTQSequence&)rhs, rhsPos, rhsLength);
-    ((FASTQSequence&)subseq).CopyTitle(rhs.title, rhs.titleLength); 
+    static_cast<FASTQSequence*>(&subseq)->ReferenceSubstring(rhs, rhsPos, rhsLength);
+    static_cast<FASTQSequence*>(&subseq)->CopyTitle(rhs.title, rhs.titleLength); 
 
     if (rhs.length == 0) {
-        ((FASTQSequence*)this)->Copy(subseq);
+        static_cast<FASTQSequence*>(this)->Copy(subseq);
         //
         // Make sure that no values of length 0 are allocated by returning here.
         //
@@ -114,7 +124,7 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
         assert(rhsPos < rhs.length);
 
         // Copy seq, title and FASTQ QVs from subseq
-        ((FASTQSequence*)this)->Copy(subseq); 
+        static_cast<FASTQSequence*>(this)->Copy(subseq); 
 
         // Copy SMRT QVs
         if (rhs.preBaseFrames != NULL) {
@@ -142,6 +152,10 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
     assert(deleteOnExit); // should have control over seq and all QVs
 
     subseq.Free();
+    copiedFromBam = rhs.copiedFromBam;
+#ifdef USE_PBBAM
+    bamRecord = rhs.bamRecord;
+#endif
 }
 
 void SMRTSequence::Print(ostream &out) {
@@ -183,7 +197,12 @@ void SMRTSequence::Free() {
     xy[0] = 0; xy[1] = 0;
     lowQualityPrefix = lowQualitySuffix = 0;
     highQualityRegionScore = 0;
-    holeNumber = -1;
+    holeNumber = static_cast<UInt>(-1);
+    readGroupId = "";
+    copiedFromBam = false;
+#ifdef USE_PBBAM
+    bamRecord = PacBio::BAM::BamRecord();
+#endif 
 
     // Free seq, title and FASTQ QVs, also reset deleteOnExit.
     // Don't call FASTQSequence::Free() before freeing SMRT QVs.
@@ -201,12 +220,12 @@ bool SMRTSequence::StorePlatformId(PlatformId pid) {
     return true;
 }
 
-bool SMRTSequence::StoreHoleNumber(int holeNumberP){ 
+bool SMRTSequence::StoreHoleNumber(UInt holeNumberP){ 
     zmwData.holeNumber = holeNumber = holeNumberP;
     return true;
 }
 
-bool SMRTSequence::StoreHoleStatus(unsigned int s) {
+bool SMRTSequence::StoreHoleStatus(unsigned char s) {
     zmwData.holeStatus = s;
     return true;
 }
@@ -222,7 +241,43 @@ bool SMRTSequence::GetXY(int xyP[]) {
     return true;
 }
 
-bool SMRTSequence::GetHoleNumber(int& holeNumberP) {
+bool SMRTSequence::GetHoleNumber(UInt & holeNumberP) {
     holeNumberP = holeNumber;
     return true;
 }
+
+std::string SMRTSequence::GetReadGroupId() {
+    return readGroupId;
+}
+
+void SMRTSequence::SetReadGroupId(const std::string & rid) {
+    readGroupId = rid;
+}
+
+#ifdef USE_PBBAM
+void SMRTSequence::Copy(const PacBio::BAM::BamRecord & record) {
+    Free();
+
+    copiedFromBam = true;
+
+    bamRecord = PacBio::BAM::BamRecord(record);
+    
+    // Only copy insertionQV, deletionQV, substitutionQV, mergeQV, 
+    // deletionTag and substitutionTag from BamRecord to SMRTSequence.
+    // Do NOT copy other SMRTQVs such as startFrame, meanSignal...
+    (static_cast<FASTQSequence*>(this))->Copy(record);
+
+    // Copy read group id from BamRecord.
+    SetReadGroupId(record.ReadGroupId());
+
+    // PacBio bam for secondary analysis does NOT carry zmw
+    // info other than holeNumber, including holeStatus, holeX,
+    // holeY, numEvents. 
+    zmwData.holeNumber = static_cast<UInt> (record.HoleNumber()); 
+
+    // Set hq region read score
+    if (record.Impl().HasTag("rq"))
+        highQualityRegionScore = record.Impl().TagValue("rq").ToInt32();
+
+}
+#endif

@@ -54,20 +54,36 @@ PackedDNASequence::PackedDNASequence() {
     seq = NULL;
 }
 
+PackedDNASequence::~PackedDNASequence() {
+    nCountInWord = 0;
+    nCountNuc = 0;
+    length = arrayLength = 0;
+    if (seq) {
+        delete [] seq; 
+        seq = NULL;
+    }
+}
+
 void PackedDNASequence::Allocate(DNALength numberOfNucleotides) {
     arrayLength = CeilOfFraction(numberOfNucleotides, NucsPerWord);
     length = numberOfNucleotides;
-    seq = new PackedDNAWord[arrayLength];
-    std::fill(seq, seq + arrayLength, 0);
+    if (seq) {delete [] seq; seq = NULL;}
+    if (arrayLength > 0) {
+        seq = new PackedDNAWord[arrayLength];
+        std::fill(seq, seq + arrayLength, 0);
+    }
 }
 
 void PackedDNASequence::CreateFromDNASequence(DNASequence &dnaSeq) {
     arrayLength = CeilOfFraction(dnaSeq.length, NucsPerWord);
     length = dnaSeq.length;
-    seq = new PackedDNAWord[arrayLength];
-    DNALength pos;
-    for (pos = 0; pos < dnaSeq.length; pos++) {
-        Set(pos, ThreeBit[dnaSeq[pos]]);
+    if (seq) {delete [] seq; seq = NULL;}
+    if (arrayLength > 0) {
+        seq = new PackedDNAWord[arrayLength];
+        DNALength pos;
+        for (pos = 0; pos < dnaSeq.length; pos++) {
+            Set(pos, ThreeBit[dnaSeq[pos]]);
+        }
     }
 }
 
@@ -196,6 +212,7 @@ void PackedDNASequence::Write(std::ostream &out) {
 void PackedDNASequence::Read(std::istream &in) {
     in.read((char*)&arrayLength, sizeof(arrayLength));
     in.read((char*)&length, sizeof(length));
+    if (seq) {delete [] seq; seq = NULL;}
     if (arrayLength > 0) {
         seq = new PackedDNAWord[arrayLength];
         in.read((char*)seq, sizeof(PackedDNAWord)*arrayLength);

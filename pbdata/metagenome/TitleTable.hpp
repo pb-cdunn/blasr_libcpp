@@ -14,6 +14,7 @@ public:
     char **table;
     int tableLength;
     TitleTable();
+    ~TitleTable();
 
     void Copy(char **src, int nSrc);
 

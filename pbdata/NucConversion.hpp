@@ -44,4 +44,7 @@ extern unsigned char ReverseComplementNuc[256];
 //
 extern int NucToHdfColumnOrder[256];
 
+// Convert a FASTQ character to Quality.
+const unsigned int FASTQ_CHAR_TO_QUALITY = 33; 
+
 #endif // _BLASR_NUC_CONVERSION_HPP_

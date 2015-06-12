@@ -355,4 +355,16 @@ public:
 //
 typedef AlignmentCandidate<DNASequence,FASTQSequence> T_AlignmentCandidate;
 
+class SortAlignmentPointersByScore {
+public:
+    /// Sort AlignmentCandidate pointer by score, then by target position.
+    int operator()(T_AlignmentCandidate *lhs, T_AlignmentCandidate* rhs);
+};
+
+class SortAlignmentPointersByMapQV {
+public:
+    /// Sort AlignmentCandidate pointer by mapQV, then by target position.
+    int operator()(T_AlignmentCandidate *lhs, T_AlignmentCandidate* rhs);
+};
+
 #endif // _ALIGNMENT_ALIGNMENT_CANDIDATE_HPP_

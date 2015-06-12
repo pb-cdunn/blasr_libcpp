@@ -35,7 +35,7 @@ HDFPulseDataFile::HDFPulseDataFile() {
 
 void HDFPulseDataFile::PrepareForRandomAccess() {
     GetAllReadLengths(eventOffset);
-    int i;
+    size_t i;
     int curOffset = 0;
     for (i = 0; i < eventOffset.size(); i++) {
         int curLength = eventOffset[i];

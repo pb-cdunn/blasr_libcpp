@@ -1,14 +1,16 @@
+#ifndef _BLASR_MATRIX_IMPL_HPP
+#define _BLASR_MATRIX_IMPL_HPP
 #include <cassert>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <stdint.h>
 #include "Types.h"
-#include "Matrix.hpp"
 
 template<typename T>
 void CreateMatrix(int rows, int cols, std::vector<T*> matrix) {
 	matrix.resize(rows);
+    if (matrix[0]) {delete [] matrix[0]; matrix[0] = NULL;}
 	matrix[0] = new T[rows*cols];
 	VectorIndex r = 1;
 	for (r = 1; r < rows; r++) {
@@ -58,10 +60,7 @@ void Matrix<T>::Resize(VectorIndex nRowsP, VectorIndex nColsP) {
         }
         else {
             if (matrix[0] != NULL) {
-                delete[] matrix[0];
-            }
-            if (nRows > rowsBufferSize) {
-                delete[] matrix;
+                delete[] matrix[0]; matrix[0] = NULL;
             }
         }
         matrix[0] = new T[matrixBufferSize];
@@ -101,6 +100,7 @@ void Matrix<T>::Free() {
         }
         delete[] matrix;
     }
+    matrix = NULL;
 }
 
 template<typename T>
@@ -114,3 +114,4 @@ void Matrix<T>::Print(std::ofstream &out) {
         out << std::endl;
     }
 }
+#endif

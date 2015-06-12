@@ -186,8 +186,14 @@ class HDFCCSReader : public T_HDFBasReader<T_Sequence> {
 			return 0;
 		}
         try {
-		numPassesArray.Read(this->curRead, this->curRead+1, &ccsSequence.numPasses);
-		if (ccsSequence.numPasses > 0) {
+        UInt numPasses;
+		numPassesArray.Read(this->curRead, this->curRead+1, &numPasses);
+		if (numPasses > 0) {
+			// Read in the ccs bases
+			if ((retVal = ccsBasReader.GetNext((SMRTSequence&)ccsSequence)) == 0)
+                return 0;
+
+            ccsSequence.numPasses = numPasses;
 
 			if (this->includedFields["AdapterHitAfter"]) {
 				ccsSequence.adapterHitAfter.resize(ccsSequence.numPasses);
@@ -218,14 +224,6 @@ class HDFCCSReader : public T_HDFBasReader<T_Sequence> {
 				passNumPulsesArray.Read(curPassPos,    curPassPos + ccsSequence.numPasses, &ccsSequence.passNumPulses[0]);			
 			}
 			curPassPos += ccsSequence.numPasses;
-
-			// Read in the ccs bases
-
-			retVal = ccsBasReader.GetNext((SMRTSequence&)ccsSequence);
-
-			if (retVal == 0) {
-				return 0;
-			}
 		}
 		else {
 			// advance a read in the ccs sequence without advancing positions.

@@ -290,7 +290,7 @@ public:
     }
 
 	int WriteHoleXY(int x=0, int y=0) {
-		int16_t xy[2] = {(uint16_t) x, (uint16_t) y};
+		int16_t xy[2] = {static_cast<int16_t>(x), static_cast<int16_t>(y)};
 		holeXY2D.WriteRow(xy, 2);
 	}		
 
@@ -338,7 +338,7 @@ public:
 	}
 
 	int WriteBases(FASTASequence &seq ) {
-		int lenArray[1] = {seq.length};
+		int lenArray[1] = {static_cast<int>(seq.length)};
 		nElemArray.Write(lenArray, 1);
 		baseArray.Write((const unsigned char*) seq.seq, seq.length);
 		return 1;

@@ -9,16 +9,14 @@
 #include "NucConversion.hpp"
 #include "DNASequence.hpp"
 #include "Enumerations.h"
-#include "ReverseCompressIndex.hpp"
 #include "FASTQSequence.hpp"
-#include "CompressedSequence.hpp"
 
 using namespace std;
 
 //
 // Initialize a read with quality probabilities from one with quality values.
 //
-int FASTQSequence::charToQuality = 33;
+int FASTQSequence::charToQuality = FASTQ_CHAR_TO_QUALITY;
 
 QVScale FASTQSequence::GetQVScale() {
     return qvScale;
@@ -82,11 +80,14 @@ FASTQSequence::FASTQSequence() : FASTASequence() {
 
     //
     // For now assume a prior distribution to be the variation of the human genome.
+    // FIXME: these were set to 0.001, which ends up being 0 because these priors are integer types
+    //        I'm setting these explicitly to 0 to silence the warning and maintain behavior,
+    //        but mkinsella recommends revisiting these for potential removal
     //
-    deletionQVPrior = 0.001; 
-    insertionQVPrior = 0.001; 
-    substitutionQVPrior = 0.001;
-    preBaseDeletionQVPrior = 0.001;
+    deletionQVPrior = 0;
+    insertionQVPrior = 0;
+    substitutionQVPrior = 0;
+    preBaseDeletionQVPrior = 0;
 
     subreadStart = subreadEnd = 0;
     qvScale = PHRED;
@@ -163,7 +164,7 @@ void FASTQSequence::ShallowCopy(const FASTQSequence &rhs) {
     CheckBeforeCopyOrReference(rhs, "FASTQSequence");
     FASTQSequence::Free();
 
-    qual.ShallowCopy(rhs.qual);
+    qual.ShallowCopy(rhs.qual, 0, length);
     FASTASequence::ShallowCopy(rhs);
 }
 
@@ -188,19 +189,19 @@ void FASTQSequence::ReferenceSubstring(const FASTQSequence &rhs, DNALength pos, 
     }
     FASTASequence::ReferenceSubstring(rhs,pos,substrLength);
     if (rhs.qual.Empty() == false) {
-        qual.ShallowCopy(rhs.qual, pos);
+        qual.ShallowCopy(rhs.qual, pos, substrLength);
     }
     if (rhs.deletionQV.Empty() == false) {
-        deletionQV.ShallowCopy(rhs.deletionQV, pos);
+        deletionQV.ShallowCopy(rhs.deletionQV, pos, substrLength);
     }
     if (rhs.mergeQV.Empty() == false) {
-        mergeQV.ShallowCopy(rhs.mergeQV, pos);
+        mergeQV.ShallowCopy(rhs.mergeQV, pos, substrLength);
     }
     if (rhs.insertionQV.Empty() == false) {
-        insertionQV.ShallowCopy(rhs.insertionQV, pos);
+        insertionQV.ShallowCopy(rhs.insertionQV, pos, substrLength);
     }
     if (rhs.preBaseDeletionQV.Empty() == false ){
-        preBaseDeletionQV.ShallowCopy(rhs.preBaseDeletionQV, pos);
+        preBaseDeletionQV.ShallowCopy(rhs.preBaseDeletionQV, pos, substrLength);
     }
     if (rhs.deletionTag != NULL) {
         deletionTag = &rhs.deletionTag[pos];
@@ -209,7 +210,7 @@ void FASTQSequence::ReferenceSubstring(const FASTQSequence &rhs, DNALength pos, 
         substitutionTag = &rhs.substitutionTag[pos];
     }
     if (rhs.substitutionQV.Empty() == false) {
-        substitutionQV.ShallowCopy(rhs.substitutionQV, pos);
+        substitutionQV.ShallowCopy(rhs.substitutionQV, pos, substrLength);
     }
     deletionQVPrior = rhs.deletionQVPrior;
     insertionQVPrior = rhs.insertionQVPrior;
@@ -350,38 +351,88 @@ void FASTQSequence::PrintFastqQuality(ostream &out, int lineLength) {
     PrintAsciiQual(out, lineLength);
 }
 
+bool FASTQSequence::GetQVs(const QVIndex & qvIndex, std::vector<uint8_t> & qvs, bool reverse) {
+    qvs.clear();
+    uint8_t *  qualPtr;
+    int charOffset = charToQuality;
+    if (qvIndex == I_QualityValue) {
+        qualPtr = qual.data;
+    } else if (qvIndex == I_InsertionQV) {
+        qualPtr = insertionQV.data;
+    } else if (qvIndex == I_DeletionQV) {
+        qualPtr = deletionQV.data;
+    } else if (qvIndex == I_SubstitutionQV) {
+        qualPtr = substitutionQV.data;
+    } else if (qvIndex == I_MergeQV) {
+        qualPtr = mergeQV.data;
+    } else if (qvIndex == I_SubstitutionTag) {
+        qualPtr = (uint8_t*)(substitutionTag);
+        charOffset = 0;
+    } else if (qvIndex == I_DeletionTag) {
+        qualPtr = (uint8_t*)(deletionTag);
+        charOffset = 0;
+    }
+    if (qualPtr == NULL) {
+        return false;
+    }
+
+    qvs.resize(length);
+    for (DNALength i = 0; i < length; i++) {
+        if (not reverse) { // The same orientation
+            qvs[i] = static_cast<uint8_t>(qualPtr[i] + charOffset);
+        } else if (qvIndex != I_SubstitutionTag and qvIndex != I_DeletionTag) {
+            // Reverse orientation, reverse QVs, except SubstitutionTag and DeletionTag
+            qvs[i] = static_cast<uint8_t>(qualPtr[length - i - 1] + charOffset);
+        } else { // Reverse and complement SubstitutionTag and DeletionTag
+            qvs[i] = static_cast<uint8_t>(ReverseComplementNuc[qualPtr[length - i - 1] + charOffset]);
+        }
+        //assert(qvs[i] > 32 and qvs[i] < 127);
+    }
+    return true;
+}
+
+QVIndex FASTQSequence::GetQVIndex(const std::string & qvName) {
+    if (qvName == "QualityValue") {
+        return I_QualityValue;
+    } else if (qvName == "InsertionQV") {
+        return I_InsertionQV;
+    } else if (qvName == "DeletionQV") {
+        return I_DeletionQV;
+    } else if (qvName == "SubstitutionQV") {
+        return I_SubstitutionQV;
+    } else if (qvName == "MergeQV") {
+        return I_MergeQV;
+    } else if (qvName == "SubstitutionTag") {
+        return  I_SubstitutionTag;
+    } else if (qvName == "DeletionTag"){
+        return I_DeletionTag;
+    } else {
+        std::cout << "ERROR: unknown Quality Value " << qvName << std::endl;
+        assert(false);
+    }
+}
+
+bool FASTQSequence::GetQVs(const std::string & qvName, std::vector<uint8_t> & qvs, bool reverse){
+    return GetQVs(GetQVIndex(qvName), qvs, reverse);
+}
+
+bool FASTQSequence::GetQVs(const std::string & qvName, std::string & qvsStr, bool reverse) {
+    std::vector<uint8_t> qvs;
+    bool OK = GetQVs(qvName, qvs, reverse);
+    qvsStr = string(qvs.begin(), qvs.end());
+    return OK;
+}
+
 void FASTQSequence::PrintAsciiRichQuality(ostream &out, 
         int whichQuality, int lineLength) {
-    unsigned char* qualPtr;
-    int charOffset = charToQuality;
-    if (whichQuality == 0) {
-        qualPtr = qual.data;
-    }
-    else if (whichQuality == 1) {
-        qualPtr = insertionQV.data;
-    }
-    else if (whichQuality == 2) {
-        qualPtr = deletionQV.data;
-    }
-    else if (whichQuality == 3) {
-        qualPtr = substitutionQV.data; 
-    }
-    else if (whichQuality == 4) {
-        qualPtr = mergeQV.data;
-    }
-    else if (whichQuality == 5) {
-        qualPtr = (unsigned char*) substitutionTag;
-        charOffset = 0;
-    }
-    else if (whichQuality == 6) {
-        qualPtr = (unsigned char*) deletionTag;
-        charOffset = 0;
-    }
-    int i;
+    vector<uint8_t> qvs;
+    bool OK = GetQVs(static_cast<QVIndex>(whichQuality), qvs);
+    
+    DNALength i;
     if (lineLength == 0) {
         for (i = 0; i < length; i++) {
-            if (qualPtr != NULL) {
-                out << (char)(qualPtr[i]+charOffset);
+            if (OK) {
+                out << static_cast<char>(qvs[i]);
             }
             else {
                 // Fake bad quality
@@ -391,10 +442,8 @@ void FASTQSequence::PrintAsciiRichQuality(ostream &out,
     }
     else {
         for (i = 0; i < length; i++) {
-            assert(((unsigned char) (qualPtr[i] + charOffset) > 32) &&
-                    ((unsigned char) (qualPtr[i] + charOffset) < 127));
-            if (qualPtr != NULL) {
-                out << (char)(qualPtr[i]+charOffset);
+            if (OK) {
+                out << static_cast<char>(qvs[i]);
             }
             else {
                 // Fake pretty bad quality.
@@ -432,58 +481,77 @@ void FASTQSequence::PrintQual(ostream &out, int lineLength) {
 
 void FASTQSequence::PrintQualSeq(ostream &out, int lineLength) {
     FASTASequence::PrintSeq(out, lineLength);
-    int i;
     lineLength /= 4;
     PrintQual(out, lineLength);
 }
 
 // Create a reverse complement FASTQSequence of *this and assign to rhs.
 void FASTQSequence::MakeRC(FASTQSequence &rc) {
-    rc.SetQVScale(qvScale);
+    rc.Free();
     FASTASequence::MakeRC(rc);
-    if (qual.Empty() == true) {
-        // there is no quality values, don't make an rc.
-        return;
-    }
+    rc.SetQVScale(qvScale);
 
-    if (rc.qual.Empty() == false) {
-        rc.qual.Free();
-    }
-    ((FASTQSequence&)rc).AllocateQualitySpace(length);
-    int i;
-    for (i = 0; i < length; i++ ){
-        rc.qual.data[length - i - 1] = qual[i];
-    }
-
-    if (deletionQV.Empty() == false) {
-        //
-        // The read contains rich quality values. Reverse them here.
-        //
-        ((FASTQSequence&)rc).AllocateRichQualityValues(length);
-        DNALength pos;
-
-        for (pos = 0; pos < length; pos++) {
-            if (insertionQV.Empty() == false) {
-                rc.insertionQV[length - pos - 1] = insertionQV[pos];
-            }
-            if (substitutionQV.Empty() == false) {
-                rc.substitutionQV[length - pos - 1]           = substitutionQV[pos];
-            }
-            if (deletionQV.Empty() == false) {
-                rc.deletionQV[length - pos - 1]               = deletionQV[pos];
-            }
-
-            if (mergeQV.Empty() == false) {
-                rc.mergeQV[length - pos - 1]               = mergeQV[pos];
-            }
-          if (substitutionTag != NULL) {
-                rc.substitutionTag[length - pos - 1] = ReverseComplementNuc[substitutionTag[pos]];
-            }
-            if (deletionTag != NULL) {
-                rc.deletionTag[length - pos - 1]     = ReverseComplementNuc[deletionTag[pos]];
-            }
+    if (not qual.Empty()) {
+        // QVs are independent of one another. A FASTQSequence can have
+        // insertionQV without having QualityValue.
+        (static_cast<FASTQSequence*>(&rc))->AllocateQualitySpace(length);
+        for (DNALength pos = 0; pos < length; pos++ ){
+            rc.qual.data[length - pos - 1] = qual[pos];
         }
     }
+
+    //
+    // The read contains rich quality values. Reverse them here.
+    //
+    if (deletionQV.Empty() == false) {
+        (static_cast<FASTQSequence*>(&rc))->AllocateDeletionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.deletionQV[length - pos - 1] = deletionQV[pos];
+        }
+    }
+
+    if (insertionQV.Empty() == false) {
+        (static_cast<FASTQSequence*>(&rc))->AllocateInsertionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.insertionQV[length - pos - 1] = insertionQV[pos];
+        }
+    }
+
+    if (substitutionQV.Empty() == false) {
+        (static_cast<FASTQSequence*>(&rc))->AllocateSubstitutionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.substitutionQV[length - pos - 1] = substitutionQV[pos];
+        }
+    }
+
+    if (mergeQV.Empty() == false) {
+        (static_cast<FASTQSequence*>(&rc))->AllocateMergeQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.mergeQV[length - pos - 1] = mergeQV[pos];
+        }
+    }
+
+    if (substitutionTag != NULL) {
+        (static_cast<FASTQSequence*>(&rc))->AllocateSubstitutionTagSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.substitutionTag[length - pos - 1] = ReverseComplementNuc[substitutionTag[pos]];
+        }
+    }
+
+    if (deletionTag != NULL) {
+        (static_cast<FASTQSequence*>(&rc))->AllocateDeletionTagSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.deletionTag[length - pos - 1] = ReverseComplementNuc[deletionTag[pos]];
+        }
+    }
+
+    if (preBaseDeletionQV.Empty() == false) {
+        (static_cast<FASTQSequence*>(&rc))->AllocatePreBaseDeletionQVSpace(length);
+        for (DNALength pos = 0; pos < length; pos++) {
+            rc.preBaseDeletionQV[length - pos - 1] = preBaseDeletionQV[pos];
+        }
+    }
+
     deletionQVPrior = rc.deletionQVPrior;
     insertionQVPrior = rc.insertionQVPrior;
     substitutionQVPrior = rc.substitutionQVPrior;
@@ -536,3 +604,48 @@ float FASTQSequence::GetAverageQuality() {
     }
     return totalQ / length;
 }
+
+#ifdef USE_PBBAM
+void FASTQSequence::Copy(const PacBio::BAM::BamRecord & record) {
+    FASTQSequence::Free();
+
+    // Copy title and sequence.
+    static_cast<FASTASequence*>(this)->Copy(record);
+
+    // Copy QVs.
+    qual.Copy(record.Qualities().Fastq());
+
+    // iq
+    if (record.HasInsertionQV()) {
+        insertionQV.Copy(record.InsertionQV().Fastq());
+    }
+    // dq
+    if (record.HasDeletionQV()) {
+        deletionQV.Copy(record.DeletionQV().Fastq());
+    }
+    // sq
+    if (record.HasSubstitutionQV()) {
+        substitutionQV.Copy(record.SubstitutionQV().Fastq());
+    }
+    // mq
+    if (record.HasMergeQV()) {
+        mergeQV.Copy(record.MergeQV().Fastq());
+    }
+    // st
+    if (record.HasSubstitutionTag()) {
+        std::string qvs = record.SubstitutionTag();
+        AllocateSubstitutionTagSpace(static_cast<DNALength>(qvs.size()));
+        std::memcpy(substitutionTag, qvs.c_str(), qvs.size() * sizeof(char));
+    }
+    // dt
+    if (record.HasDeletionTag()) {
+        std::string qvs = record.DeletionTag();
+        AllocateDeletionTagSpace(static_cast<DNALength>(qvs.size()));
+        std::memcpy(deletionTag, qvs.c_str(), qvs.size() * sizeof(char));
+    }
+    // preBaseQVs are not included in BamRecord, and will not be copied.
+    
+    subreadStart = static_cast<int>(record.QueryStart());
+    subreadEnd = static_cast<int>(record.QueryEnd());
+}
+#endif

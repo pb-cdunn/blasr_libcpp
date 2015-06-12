@@ -67,7 +67,7 @@ int HDFRegionTableReader::GetNext(RegionAnnotation &annotation) {
 }	
 
 void HDFRegionTableReader::RegionTypesToMap(RegionTable &table) {
-    int i;
+    size_t i;
     table.regionTypeEnums.resize(table.regionTypes.size());
     for (i = 0;i < table.regionTypes.size(); i++) {
         if (table.regionTypes[i] == "GlobalAccuracy") {

@@ -11,21 +11,21 @@ void DatasetCollection::MakeFieldOptional(std::string &fieldName) {
 }
 
 void DatasetCollection::InitializeAllFields(bool value) {
-    int f;
+    size_t f;
     for (f = 0; f < fieldNames.size(); f++ ) {
         includedFields[fieldNames[f]] = value;
     }
 }
 
 void DatasetCollection::InitializeFields(std::vector<std::string> &fieldList) {
-    int i;
+    size_t i;
     for (i = 0; i < fieldList.size(); i++) {
         includedFields[fieldList[i]] = true;
     }
 }
 
 void DatasetCollection::InitializeFields(std::vector<char*> &fieldList) {
-    int i;
+    size_t i;
     InitializeAllFields(false);
     for (i = 0; i < fieldList.size(); i++) {
         includedFields[fieldList[i]] = true;
@@ -52,7 +52,7 @@ bool DatasetCollection::FieldIsIncluded(std::string fieldName) {
 }
 
 bool DatasetCollection::ContainsField(std::string fieldName) {
-    int f;
+    size_t f;
     for (f = 0; f < fieldNames.size(); f++) {
         if (fieldNames[f] == fieldName) return true;
     }

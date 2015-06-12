@@ -1,34 +1,30 @@
 include ../common.mk
 
-INCDIRS    = -I../ \
-			 -I$(PBINCROOT)/pbdata
-
-LIBDIRS    = -L$(PBINCROOT)/pbdata
-
-LDFLAGS   := -lpbdata -lpthread -lz -ldl
-
 SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard utils/*.cpp) \
 		     $(wildcard metagenome/*.cpp) \
-		     $(wildcard saf/*.cpp)
+		     $(wildcard saf/*.cpp) \
+		     $(wildcard reads/*.cpp) \
+		     $(wildcard qvs/*.cpp) 
 OBJECTS    = $(SOURCES:.cpp=.o)
-EXECS      = $(SOURCES:.cpp=)
 
+EXE := test-runner
 
-all: $(EXECS)
+all debug profile: $(EXE)
 
+libpbdata_gtest.a: $(OBJECTS)
+	$(AR_pp) $(ARFLAGS)c $@ $^
 
-$(EXECS): % : %.o
-	$(CXX) $(CCOPTS) $(CCFLAGS) $< $(GTEST_MAINA) -static -o $@ $(LIBDIRS) $(LDFLAGS)
+$(EXE): $(OBJECTS)
+	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $^ $(GTEST_SRC) -o $@ -I$(GTEST_ROOT) $(LIBDIRS) $(LDFLAGS)
 
-.cpp.o:
-	$(CXX) $(CCOPTS) $(CCFLAGS) -c $< -o $@ $(INCDIRS) $(GTESTINCDIRS) 
+$(OBJECTS): %.o: %.cpp
+	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) -c $< -o $@ $(INCDIRS)
 
-gtest: $(EXECS)
-	@(for exe in $(EXECS); do echo "Running $$exe"; ./$$exe --gtest_output=xml:../xml/$$exe.xml; done;)
+gtest: $(EXE)
+	./$< --gtest_output=xml:../xml/pbdata.xml
 
 clean:
-	@(find . -type f -name \*.o -delete)
-	@(find . -type f -name \*.d -delete)
-	@(for exe in $(EXECS); do rm -f $$exe; rm -f ../xml/$$exe.xml; done;)
-
+	@find . -type f -name \*.o -delete
+	@find . -type f -name \*.d -delete
+	@rm -f libpbdata_gtest.a $(EXE) ../xml/pbdata.xml

@@ -57,6 +57,8 @@ int HDFScanDataWriter::Initialize(HDFGroup & _rootGroup) {
     CreateAcqParamsGroup();
     CreateDyeSetGroup();
     CreateRunInfoGroup();
+
+    return 1;
 }
 
 void HDFScanDataWriter::Write(ScanData & scanData) {

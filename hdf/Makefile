@@ -1,28 +1,46 @@
-INCLUDES = -I../../../../../assembly/seymour/dist/common/include \
-		   -I../pbdata
-CXXOPTS := -std=c++0x -pedantic -c -fmessage-length=0 -MMD -MP
+
+include ../common.mk
+
+PBDATA_INCLUDE := ../pbdata
+PBBAM_INCLUDE := $(PBBAM)/include
+HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
+
+INCLUDES = -I$(HDF5_INC) \
+	   -I$(PBDATA_INCLUDE)
+
+ifeq ($(origin nopbbam), undefined)
+    INCLUDES += -I$(PBBAM_INCLUDE) -I$(HTSLIB_INCLUDE) -I$(BOOST_INCLUDE)
+endif
+
+ifneq ($(ZLIB_ROOT), notfound)
+	INCLUDES += -I$(ZLIB_ROOT)/include
+endif
+
+CXXOPTS := -std=c++11 -pedantic -MMD -MP
 sources := $(wildcard *.cpp)
 objects := $(sources:.cpp=.o)
 dependencies := $(sources:.cpp=.d)
 
-all : GCCOPTS = -O3
+all : CXXFLAGS ?= -O3
 
-debug : GCCOPTS = -g -ggdb -fno-inline
+debug : CXXFLAGS ?= -g -ggdb -fno-inline
 
-profile : GCCOPTS = -Os -pg
+profile : CXXFLAGS ?= -Os -pg
 
-all debug profile: libpbihdf.a
+g : CXXFLAGS ?= -g -ggdb -fno-inline -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer 
 
-libpbihdf.a: libpbihdf.a($(objects))
-	$(AR) $(ARFLAGS)s $@ $%
+all debug profile g: libpbihdf.a
+
+libpbihdf.a: $(objects)
+	$(AR_pp) $(ARFLAGS) $@ $^
 
 %.o: %.cpp
-	$(CXX) $(GCCOPTS) $(CXXOPTS) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -o $@ $<
+	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
 
-.INTERMEDIATE: $(objects)
+# .INTERMEDIATE: $(objects)
 
 clean: 
-	rm -f libpbihdf.a
-	rm -f $(objects) $(dependencies)
+	@rm -f libpbihdf.a
+	@rm -f $(objects) $(dependencies)
 
 -include $(dependencies)

@@ -194,8 +194,14 @@ public:
         tm.tupleSize = lookupPrefixLength = prefixLengthP;
         tm.InitializeMask();
         lookupTableLength = 1 << (2*lookupPrefixLength);
-        startPosTable = new SAIndex[lookupTableLength];
-        endPosTable   = new SAIndex[lookupTableLength];
+
+        if (startPosTable) {delete [] startPosTable;}
+        startPosTable = ProtectedNew<SAIndex>(lookupTableLength);
+
+        if (endPosTable) {delete [] endPosTable;}
+        endPosTable   = ProtectedNew<SAIndex>(lookupTableLength);
+        deleteStructures = true;
+
         Tuple curPrefix, nextPrefix;
         SAIndex tablePrefixIndex = 0;
 
@@ -242,12 +248,16 @@ public:
     }
 
     void AllocateSuffixArray(SAIndexLength stringLength) {
+        assert(index == NULL or not deleteStructures);
         index = ProtectedNew<SAIndex>(stringLength + 1);
+        deleteStructures = true;
         length = stringLength;
     }
 
     void LarssonBuildSuffixArray(T* target, SAIndexLength targetLength, Sigma &alphabet) {
+        assert(index == NULL or not deleteStructures);
         index =  ProtectedNew<SAIndex>(targetLength+1);
+        deleteStructures = true;
         SAIndex *p = ProtectedNew<SAIndex>(targetLength+1);
         SAIndexLength i;
         for (i = 0; i < targetLength; i++) { index[i] = target[i] + 1;}
@@ -262,7 +272,9 @@ public:
     }
 
     void LightweightBuildSuffixArray(T*target, SAIndexLength targetLength, int diffCoverSize=2281) {
+        assert(index == NULL or not deleteStructures);
         index = ProtectedNew<SAIndex>(targetLength+1);
+        deleteStructures = true;
         length = targetLength;
         DNALength pos;
         for (pos = 0; pos < targetLength; pos++) {
@@ -295,7 +307,10 @@ public:
         std::fill(bh.begin(), bh.end(), false);
         std::fill(b2h.begin(), b2h.end(), false);
         std::fill(count.begin(), count.end(), 0);
-        index = new SAIndex[targetLength];
+        assert(index == NULL or not deleteStructures);
+        index = ProtectedNew<SAIndex>(targetLength);
+        //index = new SAIndex[targetLength];
+        deleteStructures = true;
         for (a = 0; a < alphabet.size(); a++ ) {
             bucket[a] = -1;
         }
@@ -407,7 +422,7 @@ public:
                 // current bucket (from l ... bh[c]==true).
                 for (c = l; c == l or bh[c] == false; c++)  {
                     d = index[c] - h;
-                    if (d >= 0 and d < targetLength) {
+                    if (d < targetLength) {
                         b2h[prm[d]] = true;
                     }
                 }
@@ -417,7 +432,7 @@ public:
                 //
                 for (c = l; c == l or bh[c] == false; c++) {
                     d = index[c] - h;
-                    if (d >= 0 and d < targetLength) {
+                    if (d < targetLength) {
                         if (b2h[prm[d]] == true) {
                             j = prm[d] + 1;
                             // advance j to the next bucket.
@@ -451,7 +466,9 @@ public:
 
     void BuildSuffixArray(T* target, SAIndex targetLength, Sigma &alphabet) {
         length = targetLength;
+        assert(index == NULL or not deleteStructures);
         index  = ProtectedNew<SAIndex>(length);
+        deleteStructures = true;
         CompareSuffixes<T*> cmp(target, length);
         SAIndex i;
         for (i = 0; i < length; i++ ){ 
@@ -553,7 +570,9 @@ public:
 
     void ReadArray(std::ifstream &in) {
         in.read((char*) &length, sizeof(int));
+        assert(index == NULL or not deleteStructures);
         index = ProtectedNew<SAIndex>(length);
+        deleteStructures = true;
         ReadAllocatedArray(in);
     }
 
@@ -570,8 +589,11 @@ public:
     void ReadLookupTable(std::ifstream &in) {
         ReadLookupTableLengths(in);
         tm.Initialize(lookupPrefixLength);
+        assert(startPosTable == NULL or not deleteStructures);
+        assert(endPosTable == NULL or not deleteStructures);
         startPosTable = ProtectedNew<SAIndex>(lookupTableLength);
         endPosTable   = ProtectedNew<SAIndex>(lookupTableLength);
+        deleteStructures = true;
         ReadAllocatedLookupTable(in);
     }
 

@@ -89,7 +89,13 @@ public:
     HDFArray<uint16_t> preBaseFramesArray;
     HDFArray<int> pulseIndexArray;
     HDFArray<int> holeIndexArray;
+ 
+    // useful ZMWMetrics data
+    HDF2DArray<float> hqRegionSNRMatrix;
+    HDFArray<float> readScoreArray;
+
     HDFGroup baseCallsGroup;
+    HDFGroup zmwMetricsGroup;
     HDFGroup zmwGroup;
     //	HDFArray<HalfWord> pulseWidthArray; This is deprecated
     HDFAtom<std::string> changeListIDAtom;
@@ -99,6 +105,7 @@ public:
     //    bool usePulseWidth; This is deprecated
 
     std::string baseCallsGroupName;
+    std::string zmwMetricsGroupName;
     bool qualityFieldsAreCritical;
 
     //bool useHoleNumbers, useHoleStatus;
@@ -107,6 +114,7 @@ public:
     //bool useBasecall;
     //bool useQuality;
     bool readBasesFromCCS;
+    ChangeListID changeList;
     QVScale qvScale;
 
     PlatformId GetPlatform() {
@@ -114,12 +122,7 @@ public:
     }
 
     std::string GetMovieName() {
-        if (scanDataReader.useMovieName) {
-            return scanDataReader.GetMovieName();
-        }
-        else {
-            return "";
-        }
+        return scanDataReader.GetMovieName();
     }
 
     int GetReadAt(int index, SMRTSequence &read) {
@@ -148,6 +151,7 @@ public:
         preparedForRandomAccess = false;
         readBasesFromCCS = false;
         baseCallsGroupName = "BaseCalls";
+        zmwMetricsGroupName = "ZMWMetrics";
         qualityFieldsAreCritical = true;
         useZmwReader = false;
         useBasHoleXY = true;
@@ -166,6 +170,9 @@ public:
         fieldNames.push_back("MergeQV");
         fieldNames.push_back("SimulatedCoordinate");
         fieldNames.push_back("SimulatedSequenceIndex");
+        // Useful ZMWMetrics fields
+        fieldNames.push_back("HQRegionSNR");
+        fieldNames.push_back("ReadScore");
         // Start out with no fields being read.
         InitializeAllFields(false);
         // Then by default always read bases.
@@ -186,16 +193,20 @@ public:
 
     void InitializeDefaultRawBasIncludeFields() {
         IncludeField("Basecall");
-        IncludeField("DeletionQV");
-        IncludeField("DeletionTag");
-        IncludeField("InsertionQV");
-        IncludeField("SubstitutionTag");
-        IncludeField("SubstitutionQV");
         IncludeField("QualityValue");
+        IncludeField("InsertionQV");
+        IncludeField("DeletionQV");
+        IncludeField("MergeQV");
+        IncludeField("SubstitutionQV");
+        IncludeField("DeletionTag");
+        IncludeField("SubstitutionTag"); // used in IDSScoreFunction
+        // FIXME: The following QVs are not really used by downstream
+        // analysis such as Quiver, make them optional to include.
         IncludeField("WidthInFrames");
         IncludeField("PulseIndex");
         IncludeField("PreBaseFrames");
-        IncludeField("MergeQV");
+        IncludeField("HQRegionSNR");
+        IncludeField("ReadScore");
     }
     void InitializeDefaultIncludedFields() {
         if (readBasesFromCCS == false) {
@@ -238,6 +249,15 @@ public:
             changeListID = "0";
         }
     }
+ 
+    /// Get BindingKit, SequencingKit and Base Caller Version.
+    void GetChemistryTriple(std::string & bindingKit,
+                            std::string & sequencingKit, 
+                            std::string & baseCallerVersion) {
+        scanDataReader.ReadBindingKit(bindingKit);
+        scanDataReader.ReadSequencingKit(sequencingKit);
+        baseCallerVersion = changeList.GetVersion();
+    }
 
     int InitializeForReadingBases() {
 
@@ -260,8 +280,8 @@ public:
         if (baseCallsGroup.ContainsAttribute("ChangeListID")) {
             changeListIDAtom.Initialize(baseCallsGroup.group, "ChangeListID");
             std::string changeListIdString;
-            ChangeListID changeList;
             GetChangeListID(changeListIdString);
+            changeList = ChangeListID(changeListIdString);
             qvScale = changeList.DetermineQVScaleFromChangeListID();
         }
         if (pulseDataGroup.ContainsObject("Regions")) {
@@ -386,7 +406,6 @@ public:
             includedFields["PreBaseFrames"] = false;
         }
 
-
         //
         // These fields are not always present in bas.h5 files.
         //
@@ -411,6 +430,22 @@ public:
             includedFields["MergeQV"] = false;
         }
 
+        if ((includedFields["HQRegionSNR"] or includedFields["ReadScore"]) and
+                (baseCallsGroup.ContainsObject(zmwMetricsGroupName) == 0 or
+                zmwMetricsGroup.Initialize(baseCallsGroup.group, zmwMetricsGroupName) == 0)) {
+            includedFields["HQRegionSNR"] = false;
+            includedFields["ReadScore"] = false;
+        }
+        if (includedFields["HQRegionSNR"] and (zmwMetricsGroup.ContainsObject("HQRegionSNR") == 0 or
+                GetDatasetNDim(zmwMetricsGroup.group, "HQRegionSNR") != 2 or
+                hqRegionSNRMatrix.InitializeForReading(zmwMetricsGroup, "HQRegionSNR") == false or
+                hqRegionSNRMatrix.GetNCols() != 4)) {
+            includedFields["HQRegionSNR"] = false;
+        }
+        if (includedFields["ReadScore"] and (zmwMetricsGroup.ContainsObject("ReadScore") == 0 or
+                readScoreArray.InitializeForReading(zmwMetricsGroup, "ReadScore")) == false) {
+            includedFields["ReadScore"] = false;
+        }
 
         return 1;
     }
@@ -586,6 +621,15 @@ public:
                 return 0;
             }
 
+            // must be done before GetNextWithoutPosAdvance (which increments curRead)
+            // get ZMWMetrics fields
+            if (includedFields["HQRegionSNR"]) {
+                GetNextHQRegionSNR(seq);
+            }
+            if (includedFields["ReadScore"]) {
+                GetNextReadScore(seq);
+            }
+
             int seqLength = GetNextWithoutPosAdvance(seq);
             seq.length = seqLength;
             if(readQVs) {
@@ -631,16 +675,28 @@ public:
         // Getting next advances the curBasPos to the end of 
         // the current sequence. 
         //
+        try {
+            // must check before looking at HQRegionSNR/ReadScore!!
+            if (curRead == nReads) {
+                return 0;
+            }
 
-        retVal = this->GetNext((FASTQSequence&)seq);
+            // get ZMWMetrics fields, must be done before GetNext
+            // (which calls GetNextWithoutAdvancePos, which increments curRead)
+            if (includedFields["HQRegionSNR"]) {
+                GetNextHQRegionSNR(seq);
+            }
+            if (includedFields["ReadScore"]) {
+                GetNextReadScore(seq);
+            }
+
         //
         // Bail now if the file is already done
         //
-        if (retVal  == 0) {
+        if ((retVal = this->GetNext((FASTQSequence&)seq)) == 0) {
             return 0;
         }
 
-        try {
             DNALength nextBasePos = curBasePos;
             curBasePos = curBasPosCopy;
 
@@ -746,6 +802,8 @@ public:
         unsigned char holeStatus;
         zmwReader.holeNumberArray.Read(curRead, curRead+1, &holeNumber);
         seq.StoreHoleNumber(holeNumber);
+
+        zmwReader.holeStatusArray.Read(curRead, curRead+1, &holeStatus);
         seq.StoreHoleStatus(holeStatus);
 
         DNALength simIndex=0, simCoordinate=0;
@@ -756,8 +814,6 @@ public:
         if (includedFields["SimulatedCoordinate"] == true) {
             simulatedCoordinateArray.Read(curRead, curRead+1, &simCoordinate);
         }
-
-
 
         BuildReadTitle(scanDataReader.GetMovieName(), holeNumber, readTitle, simIndex, simCoordinate);
 
@@ -796,6 +852,10 @@ public:
 
     int GetNextWidthInFrames(SMRTSequence &seq) {
         if (seq.length == 0) return 0;
+        if (seq.widthInFrames) {
+            delete [] seq.widthInFrames;
+            seq.widthInFrames = NULL;
+        }
         seq.widthInFrames = new HalfWord[seq.length];
         basWidthInFramesArray.Read((int)curBasePos, (int) curBasePos + seq.length, (HalfWord*) seq.widthInFrames);
         return seq.length;
@@ -803,17 +863,32 @@ public:
 
     int GetNextPreBaseFrames(SMRTSequence &seq) {
         if (seq.length == 0) return 0;
+        if (seq.preBaseFrames) {
+            delete [] seq.preBaseFrames;
+            seq.preBaseFrames = NULL;
+        }
         seq.preBaseFrames = new HalfWord[seq.length];
         preBaseFramesArray.Read((int)curBasePos, (int) curBasePos + seq.length, (HalfWord*) seq.preBaseFrames);
         return seq.length;
     }
     int GetNextPulseIndex(SMRTSequence &seq) {
         if (seq.length == 0) return 0;
+        if (seq.pulseIndex) {
+            delete [] seq.pulseIndex;
+            seq.pulseIndex = NULL;
+        }
         seq.pulseIndex = new int[seq.length];
         pulseIndexArray.Read((int)curBasePos, (int) curBasePos + seq.length, (int*) seq.pulseIndex);
         return seq.length;
     }
-
+    int GetNextHQRegionSNR(SMRTSequence &seq) {
+        hqRegionSNRMatrix.Read(curRead, curRead + 1, seq.hqRegionSnr);
+        return 4;
+    }
+    int GetNextReadScore(SMRTSequence &seq) {
+        readScoreArray.Read(curRead, curRead + 1, &seq.readScore);
+        return 1;
+    }
     int GetNextSubstitutionQV(FASTQSequence &seq) {
         if (seq.length == 0) return 0;
         seq.AllocateSubstitutionQVSpace(seq.length);
@@ -865,6 +940,14 @@ public:
         }
         if (includedFields["PulseIndex"]) {
             pulseIndexArray.Close();
+        }
+
+        // ZMWMetrics fields
+        if (includedFields["HQRegionSNR"]) {
+            hqRegionSNRMatrix.Close();
+        }
+        if (includedFields["ReadScore"]) {
+            readScoreArray.Close();
         }
 
         HDFPulseDataFile::Close();

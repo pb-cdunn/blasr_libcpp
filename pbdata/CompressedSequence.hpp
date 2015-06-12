@@ -59,6 +59,9 @@ public:
     void SortHomopolymerQualities(); 
 
     CompressedSequence(); 
+    ~CompressedSequence(); 
+
+    void Free(); 
 
     void SetHasTitle(); 
 

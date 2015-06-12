@@ -222,14 +222,14 @@ CommandLineToString(int argc, char* argv[],
 
 
 int CommandLineParser::
-ParseCommandLine(int argc, char* argv[]) {
+ParseCommandLine(int argc, char* argv[], bool isProgramNameOnlyAllowed) {
     std::vector<std::string> ufv;
-    return ParseCommandLine(argc, argv, ufv);
+    return ParseCommandLine(argc, argv, ufv, isProgramNameOnlyAllowed);
 }
 
 int CommandLineParser::
 ParseCommandLine(int argc, char* argv[], 
-    std::vector<std::string> &unflaggedValues) {
+    std::vector<std::string> &unflaggedValues, bool isProgramNameOnlyAllowed) {
 
     VectorIndex argi = 1;
     int curUnnamedOption = 0;
@@ -239,10 +239,10 @@ ParseCommandLine(int argc, char* argv[],
     //
     int i;
     for (i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-h")==0 or
-            strcmp(argv[i], "--help") == 0 and 
+        if (strcmp(argv[i], "-h") == 0 or
+            (strcmp(argv[i], "--help") == 0 and 
             // Check to see if there is non default argument for help
-            (IsOption(argv[i]) and !FindOption(&argv[i][1]))) {
+            IsOption(argv[i]) and !FindOption(&argv[i][1]))) {
             PrintUsage();
             exit(0);
         }
@@ -256,15 +256,19 @@ ParseCommandLine(int argc, char* argv[],
             exit(0);
         }
     }
-    if (argc == 1 || argc < numUnnamedOptions) {
-        if (conciseHelp != "") {
-            std::cout << conciseHelp;
+
+    if ( !isProgramNameOnlyAllowed ) {
+        if ( argc == 1 || argc < numUnnamedOptions) {
+            if (conciseHelp != "") {
+                std::cout << conciseHelp;
+            }
+            else {
+                PrintUsage();
+            }
+            exit(0);
         }
-        else {
-            PrintUsage();
-        }
-        exit(0);
     }
+
     // 
     // Now parse the (probably optional) options.
     //

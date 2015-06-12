@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include "Enumerations.h"
+#include "reads/ReadType.hpp"
 #include "files/BaseSequenceIO.hpp"
 
 #include "FASTAReader.hpp"
@@ -15,6 +16,12 @@
 #include "HDFBasReader.hpp"
 #include "HDFCCSReader.hpp"
 
+#ifdef USE_PBBAM
+#include "pbbam/BamFile.h"
+#include "pbbam/EntireFileQuery.h"
+#include "pbbam/BamRecord.h"
+#endif
+
 class ReaderAgglomerate : public BaseSequenceIO {
   FASTAReader fastaReader;
   FASTQReader fastqReader;
@@ -24,6 +31,8 @@ class ReaderAgglomerate : public BaseSequenceIO {
   float subsample;
   bool useRegionTable;
   bool ignoreCCS;
+  ReadType::ReadTypeEnum readType;
+
 public:
   //
   // Create interfaces for reading hdf 
@@ -34,6 +43,7 @@ public:
   vector<CCSSequence>           ccsBuffer;
   string readGroupId;
 
+public:
   void SetToUpper();
 
   void InitializeParameters();
@@ -47,6 +57,21 @@ public:
 
   void GetMovieName(string &movieName);
 
+  /// Get BindingKit, SequencingKit and Base Caller Version from h5.
+  ///
+  /// /param [out] sequencingKit - sequencingKit from 
+  /// /ScanData/RunInfo/SequencingKit.
+  ///
+  /// /param [out] bindingKit - BindingKit from 
+  /// /ScanData/RunInfo/BindingKit.
+  ///
+  /// /param [out] baseCallerVersion - Base Caller Version
+  /// from /PulseData/BaseCalls/ChangeListID.
+  ///
+  void GetChemistryTriple(string & bindingKit, 
+                          string & sequencingKit, 
+                          string & baseCallerVersion);
+ 
   bool FileHasZMWInformation();
 
   void SkipReadQuality();
@@ -69,6 +94,13 @@ public:
 
   bool Subsample(float rate);
 
+  // Set read type to SUBREAD, CCS, or UNKNOWN.
+  void SetReadType(const ReadType::ReadTypeEnum & readType_);
+  
+  // returns read type, SUBREAD, CCS, or UNKNOWN
+  ReadType::ReadTypeEnum GetReadType();
+
+public:
   int GetNext(FASTASequence &seq);
   int GetNext(FASTQSequence &seq);
   int GetNext(SMRTSequence &seq);
@@ -82,6 +114,14 @@ public:
   int Advance(int nSteps);
 
   void Close();
+
+#ifdef USE_PBBAM
+public:
+  // Define reader to fetch sequences from bam.
+  PacBio::BAM::BamFile * bamFilePtr;
+  PacBio::BAM::EntireFileQuery * entireFileQueryPtr;
+  PacBio::BAM::EntireFileQuery::iterator bamIterator;
+#endif
 };
 
 

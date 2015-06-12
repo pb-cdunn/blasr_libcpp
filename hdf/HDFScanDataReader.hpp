@@ -28,6 +28,8 @@ public:
     HDFAtom<std::string> movieNameAtom;
     HDFAtom<std::string> runCodeAtom;
     HDFAtom<std::string> baseMapAtom;
+    HDFAtom<std::string> bindingKitAtom;
+    HDFAtom<std::string> sequencingKitAtom;
 
     //
     // It is useful to cache the movie name in the reader since this is
@@ -38,7 +40,10 @@ public:
     std::string movieName, runCode;
     std::map<char, int> baseMap;
     PlatformId platformId;
+
     HDFScanDataReader(); 
+
+    void Reset();
 
     int InitializeAcqParamsAtoms(); 
 
@@ -68,11 +73,28 @@ public:
 
     int ReadPlatformId(PlatformId &pid); 
 
+    /// Reads value of Attribute /ScanData/RunInfo/BindingKit
+    int ReadBindingKit(std::string &bindingKit);
+
+    /// Reads value of Attribute /ScanData/RunInfo/SequencingKit
+    int ReadSequencingKit(std::string &sequencingKit);
+
     int LoadMovieName(std::string &movieName); 
 
     int LoadBaseMap(map<char, int> & baseMap); 
 
     void Close(); 
+
+private:
+    /// Reads value of a string attribute within a HDFGroup.
+    /// \returns 1 if succesfully read value of the string attribute, 0 otherwise.
+    /// \param[out] attributeValue, value of a string attribute.
+    /// \param[in] attributeName, name of the string attribute.
+    /// \param[in] group, HDFGroup of the string attribute .
+    /// \param[in] atom, initialized HDFAtom obj for reading attribute .
+    int ReadStringAttribute(std::string & attributeValue, 
+                            const std::string & attributeName, 
+                            HDFGroup & group, HDFAtom<std::string> & atom); 
 
 };
 

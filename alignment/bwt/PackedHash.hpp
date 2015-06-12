@@ -20,6 +20,46 @@ public:
     std::vector<int> hashLengths;
     static const uint32_t BinNumBits = 5;
     static const uint32_t BinSize = 1 <<(BinNumBits);
+    PackedHash() {
+        table = NULL;
+        values = NULL;
+        tableLength = 0;
+    }
+
+    ~PackedHash() {
+        Free();
+    }
+
+    void Free() {
+        // In general convertions between int and pointer is not desired, 
+        // Consequences depending on the implementation, as the resulting 
+        // pointers may incorrectly aligned. See C standard subclause 6.3.2.3.
+        if (tableLength <= 0) {
+            table = NULL;
+            values = NULL;
+            tableLength = 0;
+            hashLengths.clear();
+            return;
+        }
+
+        for(DNALength i = 0; i < tableLength; i++) {
+            int nSetBits = CountBits(table[i]);
+            if (nSetBits >= 3) {
+                //values[i] is a pointer to a list of uint32 integers
+                volatile uintptr_t iptr = values[i];
+                uint32_t * ptr = (uint32_t *)iptr;
+                if (ptr != NULL) {
+                    delete [] ptr;
+                } //otherwise, values[i] is an uint_64.
+            }
+        }
+        if (values) {delete [] values;}
+        if (table) {delete [] table;}
+        table = NULL;
+        values = NULL;
+        tableLength = 0;
+        hashLengths.clear();
+    }
 
     /*
      * Create a mask that retains the lower 5 bits (0 .. 31) of a
@@ -28,6 +68,8 @@ public:
     static const uint32_t BinModMask = 0x1FU; 
 
     void Allocate(uint32_t sequenceLength) {
+        Free();
+
         tableLength = CeilOfFraction(sequenceLength, (DNALength) BinSize);
         table  = new uint32_t[tableLength];
         values = new uint64_t[tableLength];
@@ -120,7 +162,7 @@ public:
         }
         assert(curStorageLength < 32);
         newListPtr[newValuePos] = newValue;
-        delete[] ((DNALength*)storage);
+        if (storage){delete[] ((DNALength*)storage);}
         storage = (uint64_t)newListPtr;
     }
 
@@ -286,6 +328,7 @@ public:
     }
 
     void Read(std::istream &in) {
+        Free();
         in.read((char*)&tableLength, sizeof(tableLength));
         if (tableLength > 0) {
             table  = new uint32_t[tableLength];
