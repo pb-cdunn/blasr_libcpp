@@ -28,9 +28,9 @@ gtest:
 	make -C unittest gtest
 
 clean:
-	make -C pbdata clean
-	make -C hdf clean
-	make -C alignment clean
-	make -C unittest clean
+	@make -C pbdata clean
+	@make -C hdf clean
+	@make -C alignment clean
+	@make -C unittest clean
 
 cleanall: clean
