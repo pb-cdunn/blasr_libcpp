@@ -127,9 +127,7 @@ int ReaderAgglomerate::Initialize(FileType &pFileType, string &pFileName) {
 
 bool ReaderAgglomerate::HasRegionTable() {
     switch(fileType) {
-#ifdef USE_PBBAM
         case PBBAM:
-#endif
         case Fasta:
         case Fastq:
             return false;
@@ -199,8 +197,8 @@ int ReaderAgglomerate::Initialize() {
                 if (init == 0) return 0;
             }
             break;
+        case PBBAM: 
 #ifdef USE_PBBAM
-        case PBBAM: {
             RESET_PBBAM_PTRS();
             try {
                 bamFilePtr = new PacBio::BAM::BamFile(fileName);
@@ -212,7 +210,6 @@ int ReaderAgglomerate::Initialize() {
             entireFileQueryPtr = new PacBio::BAM::EntireFileQuery(*bamFilePtr);
             bamIterator = entireFileQueryPtr->begin();
             break;
-        }
 #endif
         case HDFCCS:
         case Fourbit:
@@ -268,11 +265,10 @@ int ReaderAgglomerate::GetNext(FASTASequence &seq) {
             cout << "ERROR! Reading CCS into a structure that cannot handle it." << endl;
             assert(0);
             break;
+        case PBBAM:
 #ifdef USE_PBBAM
-        case PBBAM:{
             GET_NEXT_FROM_BAM();
             break;
-        }
 #endif
         case Fourbit:
         case None:
@@ -299,11 +295,10 @@ int ReaderAgglomerate::GetNext(FASTQSequence &seq) {
         case HDFBase:
             numRecords = hdfBasReader.GetNext(seq);
             break;
+        case PBBAM:
 #ifdef USE_PBBAM
-        case PBBAM:{
             GET_NEXT_FROM_BAM();
             break;
-        }
 #endif
         case HDFCCSONLY:
         case HDFCCS:
@@ -346,11 +341,10 @@ int ReaderAgglomerate::GetNext(SMRTSequence &seq) {
             assert(hdfBasReader.readBasesFromCCS == true);
             numRecords = hdfBasReader.GetNext(seq);
             break;
+        case PBBAM:
 #ifdef USE_PBBAM
-        case PBBAM:{
             GET_NEXT_FROM_BAM();
             break;
-        }
 #endif
         case Fourbit:
         case None:
@@ -396,8 +390,8 @@ int ReaderAgglomerate::GetNextBases(SMRTSequence &seq, bool readQVs) {
             cout << "ERROR! Can not GetNextBases from a CCS File." << endl;
             assert(0);
             break;
-#ifdef USE_PBBAM
         case PBBAM:
+#ifdef USE_PBBAM
             cout << "ERROR! Can not GetNextBases from a BAM File." << endl;
 #endif
         case Fourbit:
@@ -440,8 +434,8 @@ int ReaderAgglomerate::GetNext(CCSSequence &seq) {
         case HDFCCS:
             numRecords = hdfCcsReader.GetNext(seq);
             break;
-#ifdef USE_PBBAM
         case PBBAM:
+#ifdef USE_PBBAM
             cout << "ERROR! Could not read BamRecord as CCSSequence" << endl;
 #endif
         case Fourbit:
@@ -472,9 +466,7 @@ int ReaderAgglomerate::Advance(int nSteps) {
             return hdfCcsReader.Advance(nSteps);
         case Fastq:
             return fastqReader.Advance(nSteps);
-#ifdef USE_PBBAM
         case PBBAM:
-#endif
         case Fourbit:
         case None:
             UNREACHABLE();
@@ -499,8 +491,8 @@ void ReaderAgglomerate::Close() {
         case HDFCCS:
             hdfCcsReader.Close();
             break;
-#ifdef USE_PBBAM
         case PBBAM:
+#ifdef USE_PBBAM
             RESET_PBBAM_PTRS();
             break;
 #endif
