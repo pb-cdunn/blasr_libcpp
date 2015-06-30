@@ -1,5 +1,4 @@
 SHELL=/bin/bash
-#test github pull request
 
 .PHONY: all debug profile gtest clean cleanall
 
