@@ -83,7 +83,7 @@ libpbihdf.so: $(shared_objects) $(DEP_LIBS)
 	$(CXX) $(CXX_SHAREDFLAGS) $(CXXOPTS) $(CXXFLAGS) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
 
 $(HDF_HEADERS): 
-	curl -L https://www.dropbox.com/s/8971bcyy5o42rxb/hdf5-1.8.12-headers.tar.bz2\?dl\=0 | tar xjf - 
+	curl -k -L https://www.dropbox.com/s/8971bcyy5o42rxb/hdf5-1.8.12-headers.tar.bz2\?dl\=0 | tar xjf - 
 
 # .INTERMEDIATE: $(objects)
 
