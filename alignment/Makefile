@@ -33,10 +33,15 @@ LIBPBIHDF_INCLUDE := ../hdf
 PBBAM_INCLUDE := $(PBBAM)/include
 HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
 
-INCLUDES = -I$(HDF5_INC) \
-           -I$(LIBPBDATA_INCLUDE) \
+INCLUDES = -I$(LIBPBDATA_INCLUDE) \
            -I$(LIBPBIHDF_INCLUDE) \
 	   -I.
+ifneq ($(HDF5_INC),)
+INCLUDES += -I$(HDF5_INC)
+else
+HDF_HEADERS := hdf5-1.8.12-headers
+INCLUDES += -I../hdf/$(HDF_HEADERS)/src -I../hdf/$(HDF_HEADERS)/c++/src
+endif
 
 ifneq ($(ZLIB_ROOT), notfound)
 	INCLUDES += -I$(ZLIB_ROOT)/include
@@ -92,7 +97,7 @@ libblasr.so: $(shared_objects) $(DEP_LIBS)
 	$(CXX_pp) $(LD_SHAREDFLAGS) -o $@ $^
 
 %.o: %.cpp
-	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
+	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
 
 %.shared.o: %.cpp
 	$(CXX_pp) $(CXX_SHAREDFLAGS) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
