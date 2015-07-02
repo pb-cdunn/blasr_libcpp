@@ -14,8 +14,8 @@ ifneq ($(SHARED_LIB),)
     TARGET_LIB      := libpbdata.so
     # Developers should set these to appropriate defaults (other systems 
     # will override these on the command line):
-    HTSLIB_LIB      := ../../../staging/PostPrimary/pbbam/_output/install-build/lib/libpbbam.so
-    PBBAM_LIB       := ../../../staging/PostPrimary/pbbam/third-party/htslib/_output/install-build/lib/libhts.so
+    PBBAM_LIB      := ../../../staging/PostPrimary/pbbam/_output/install-build/lib/libpbbam.so
+    HTSLIB_LIB       := ../../../staging/PostPrimary/htslib/_output/install-build/lib/libhts.so
 else
     # Generating shared library
     CXX_SHAREDFLAGS :=
