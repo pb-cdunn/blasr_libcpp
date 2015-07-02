@@ -31,7 +31,7 @@ DEP_LIBS := $(HDF5_LIB) $(ZLIB_LIB) $(HTSLIB_LIB) $(PBBAM_LIB) $(PBDATA_LIB)
 LIBPBDATA_INCLUDE := ../pbdata
 LIBPBIHDF_INCLUDE := ../hdf
 PBBAM_INCLUDE := $(PBBAM)/include
-HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
+HTSLIB_INCLUDE ?= $(PBBAM)/third-party/htslib
 
 INCLUDES = -I$(LIBPBDATA_INCLUDE) \
            -I$(LIBPBIHDF_INCLUDE) \
