@@ -28,7 +28,7 @@ endif
 DEP_LIBS := $(HTSLIB_LIB) $(PBBAM_LIB)
 
 PBBAM_INCLUDE := $(PBBAM)/include
-HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
+HTSLIB_INCLUDE ?= $(PBBAM)/third-party/htslib
 
 sources := $(wildcard *.cpp) \
 	       $(wildcard matrix/*.cpp) \
