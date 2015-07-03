@@ -17,7 +17,7 @@ ifneq ($(SHARED_LIB),)
     PBBAM_LIB      := ../../../staging/PostPrimary/pbbam/_output/install-build/lib/libpbbam.so
     HTSLIB_LIB       := ../../../staging/PostPrimary/htslib/_output/install-build/lib/libhts.so
 else
-    # Generating shared library
+    # Generating static library
     CXX_SHAREDFLAGS :=
     TARGET_LIB      := libpbdata.a
     LD_SHAREDFLAGS  :=
@@ -28,7 +28,7 @@ endif
 DEP_LIBS := $(HTSLIB_LIB) $(PBBAM_LIB)
 
 PBBAM_INCLUDE := $(PBBAM)/include
-HTSLIB_INCLUDE ?= $(PBBAM)/third-party/htslib
+HTSLIB_INCLUDE ?= $(HTSLIB)
 
 sources := $(wildcard *.cpp) \
 	       $(wildcard matrix/*.cpp) \

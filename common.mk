@@ -69,6 +69,9 @@ endif
 ifeq ($(origin PBBAM), undefined)
 PBBAM := $(shell cd $(THIRD_PARTY_PREFIX)/../staging/PostPrimary/pbbam 2>/dev/null && pwd || echo -n notfound)
 endif
+ifeq ($(origin HTSLIB), undefined)
+HTSLIB := $(shell cd $(THIRD_PARTY_PREFIX)/../staging/PostPrimary/htslib 2>/dev/null && pwd || echo -n notfound)
+endif
 
 # magic for non-verbose builds
 V ?= 0
