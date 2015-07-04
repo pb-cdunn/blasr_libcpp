@@ -5,32 +5,32 @@ SHELL=/bin/bash
 # $Change: 140182 $ 
 
 all:
-	make -C pbdata all
-	make -C hdf all
-	make -C alignment all
+	${MAKE} -C pbdata all
+	${MAKE} -C hdf all
+	${MAKE} -C alignment all
 
 debug:
-	make -C pbdata debug
-	make -C hdf debug
-	make -C alignment debug
+	${MAKE} -C pbdata debug
+	${MAKE} -C hdf debug
+	${MAKE} -C alignment debug
 
 profile:
-	make -C pbdata profile
-	make -C hdf profile
-	make -C alignment profile
+	${MAKE} -C pbdata profile
+	${MAKE} -C hdf profile
+	${MAKE} -C alignment profile
 
 g:
-	make -C pbdata g
-	make -C hdf g
-	make -C alignment g
+	${MAKE} -C pbdata g
+	${MAKE} -C hdf g
+	${MAKE} -C alignment g
 
 gtest:
-	make -C unittest gtest
+	${MAKE} -C unittest gtest
 
 clean:
-	@make -C pbdata clean
-	@make -C hdf clean
-	@make -C alignment clean
-	@make -C unittest clean
+	@${MAKE} -C pbdata clean
+	@${MAKE} -C hdf clean
+	@${MAKE} -C alignment clean
+	@${MAKE} -C unittest clean
 
 cleanall: clean
