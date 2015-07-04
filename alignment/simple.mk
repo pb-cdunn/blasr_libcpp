@@ -11,21 +11,11 @@ include ../simple.mk
 
 LIBPBDATA_INCLUDE := ../pbdata
 LIBPBIHDF_INCLUDE := ../hdf
-#PBBAM_INCLUDE := $(PBBAM)/include
-#HTSLIB_INCLUDE := $(PBBAM)/third-party/htslib
 
 INCLUDES = -I${PREFIX}/include \
            -I$(LIBPBDATA_INCLUDE) \
            -I$(LIBPBIHDF_INCLUDE) \
 	   -I.
-
-#ifneq ($(ZLIB_ROOT), notfound)
-#	INCLUDES += -I$(ZLIB_ROOT)/include
-#endif
-
-#ifeq ($(origin nopbbam), undefined)
-#    INCLUDES += -I$(PBBAM_INCLUDE) -I$(HTSLIB_INCLUDE) -I$(BOOST_INCLUDE)
-#endif
 
 CXXOPTS := -std=c++11 -pedantic -Wno-long-long -MMD -MP
 

@@ -11,7 +11,7 @@ Blasr_libcpp is a **library** used by blasr and other executables such as samtoh
 
 
 ##Appendix: Dependencies##
-+ libpbdata
+- libpbdata
    -  does **not** depend on ```libhdf5```
    -  should build without the ```pbbam``` library *for now*
 
@@ -22,3 +22,5 @@ Blasr_libcpp is a **library** used by blasr and other executables such as samtoh
    -  depends on the ```libpbdata``` library to build
    -  can build either with or without the ```libpbhdf``` library
    -  can build either with or without the ```pbbam``` library
+- hts
+   - if you use pbbam, you will need [HTSLib](https://github.com/samtools/htslib)
