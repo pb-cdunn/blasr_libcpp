@@ -56,13 +56,15 @@ g: CXXFLAGS = -g -ggdb -fno-inline -fno-builtin-malloc -fno-builtin-calloc -fno-
 
 all debug profile g: mklibconfig $(TARGET_LIB)
 
-mklibconfig:
 ifeq ($(origin nopbbam), undefined)
-	@grep "USE_PBBAM" libconfig.h 2>/dev/null 1>/dev/null || echo "#define USE_PBBAM" > libconfig.h
     INCLUDES += -I$(PBBAM_INCLUDE) -I$(HTSLIB_INCLUDE) -I$(BOOST_INCLUDE)
+    USE_PBBAM:=YES
 else
-	@rm -f libconfig.h && echo "" > libconfig.h && echo "no use libpbbam"
+    USE_PBBAM:=NO
 endif
+
+mklibconfig:
+	./mklibconfig.sh libconfig.h ${USE_PBBAM}
 
 libpbdata.a: $(objects)
 	$(AR_pp) $(ARFLAGS) $@ $^
