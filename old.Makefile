@@ -2,27 +2,19 @@ SHELL=/bin/bash
 
 .PHONY: all debug profile gtest clean cleanall
 
-# $Change: 140182 $ 
-
-all:
+subs:
 	${MAKE} -C pbdata all
 	${MAKE} -C hdf all
 	${MAKE} -C alignment all
 
 debug:
-	${MAKE} -C pbdata debug
-	${MAKE} -C hdf debug
-	${MAKE} -C alignment debug
+	${MAKE} subs
 
 profile:
-	${MAKE} -C pbdata profile
-	${MAKE} -C hdf profile
-	${MAKE} -C alignment profile
+	${MAKE} subs
 
 g:
-	${MAKE} -C pbdata g
-	${MAKE} -C hdf g
-	${MAKE} -C alignment g
+	${MAKE} subs
 
 gtest:
 	${MAKE} -C unittest gtest

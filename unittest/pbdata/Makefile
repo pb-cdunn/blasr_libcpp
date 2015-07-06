@@ -1,4 +1,5 @@
-include ../common.mk
+include ../../rules.mk
+include ../defines.mk
 
 SOURCES    = $(wildcard *.cpp) \
 		     $(wildcard utils/*.cpp) \
@@ -13,13 +14,13 @@ EXE := test-runner
 all debug profile: $(EXE)
 
 libpbdata_gtest.a: $(OBJECTS)
-	$(AR_pp) $(ARFLAGS)c $@ $^
+	$(AR) $(ARFLAGS)c $@ $^
 
 $(EXE): $(OBJECTS)
-	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) $^ $(GTEST_SRC) -o $@ -I$(GTEST_ROOT) $(LIBDIRS) $(LDFLAGS)
+	$(CXX) $(CXXOPTS) $(CXXFLAGS) $^ $(GTEST_SRC) -o $@ -I$(GTEST_ROOT) $(LIBDIRS) $(LDFLAGS)
 
 $(OBJECTS): %.o: %.cpp
-	$(CXX_pp) $(CXXOPTS) $(CXXFLAGS) -c $< -o $@ $(INCDIRS)
+	$(CXX) $(CXXOPTS) $(CXXFLAGS) -c $< -o $@ $(INCDIRS)
 
 gtest: $(EXE)
 	./$< --gtest_output=xml:../xml/pbdata.xml
