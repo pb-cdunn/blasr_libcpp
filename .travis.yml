@@ -1,6 +1,8 @@
 language: cpp
 script: 
-  - make nopbbam=1 COMMON_NO_THIRD_PARTY_REQD=true
+  - NOPBBAM=1 ./configure.py
+  - make -j all
+# - make -j gtest
 compiler:
   - gcc
 # - clang
@@ -13,8 +15,8 @@ addons:
     packages:
     - gcc-4.8
     - g++-4.8
-    - clang
-#   - libxqilla-dev # missing, but not needed?
+#   - clang
+#   - libhdf5-serial-1.8.4
 notifications:
   email: false
 sudo: false
