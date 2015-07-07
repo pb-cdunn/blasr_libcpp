@@ -23,7 +23,7 @@ def shell(cmd):
         raise Exception('%d <- %r' %(status, cmd))
     return output
 
-def update(fn, content):
+def update_content(fn, content):
     current_content = open(fn).read() if os.path.exists(fn) else None
     if content != current_content:
         log('writing to %r' %fn)
@@ -44,8 +44,8 @@ def compose_defines_with_hdf_headers(HDF_HEADERS):
     return """
 HDF_HEADERS:=%(HDF_HEADERS)s
 #HDF5_INC?=${HDF_HEADERS}/src
-INCLUDES+=-I${HDF_HEADERS}/src -I${HDF_HEADERS}/c++/src
-INCLUDES+=-I../pbdata -I../hdf -I../alignment
+CPPFLAGS+=-I${HDF_HEADERS}/src -I${HDF_HEADERS}/c++/src
+CPPFLAGS+=-I../pbdata -I../hdf -I../alignment
 """%(dict(HDF_HEADERS=HDF_HEADERS))
 
 def compose_defines():
@@ -57,6 +57,84 @@ def compose_defines():
 nohdf:=1
 INCLUDES+=-I../pbdata -I../hdf -I../alignment
 """
+
+def get_OS_STRING():
+    G_BUILDOS_CMD = """bash -c 'set -e; set -o pipefail; id=$(lsb_release -si | tr "[:upper:]" "[:lower:]"); rel=$(lsb_release -sr); case $id in ubuntu) printf "$id-%04d\n" ${rel/./};; centos) echo "$id-${rel%%.*}";; *) echo "$id-$rel";; esac' 2>/dev/null"""
+    return shell(G_BUILDOS_CMD)
+def get_PREBUILT():
+    cmd = 'cd ../../../../prebuilt.out 2>/dev/null && pwd || echo -n notfound'
+    return shell(cmd)
+def get_BOOST_INCLUDE(env):
+    key_bi = 'BOOST_INCLUDE'
+    key_br = 'BOOST_ROOT'
+    if key_bi in env:
+        return env[key_bi]
+    if key_br in env:
+        return env[key_br]
+    return '${PREBUILT}/boost/boost_1_55_0'
+
+def get_PBBAM(env, prefix):
+    """
+    key = 'PBBAM'
+    if key in env:
+        return env[key]
+    cmd = 'cd $(THIRD_PARTY_PREFIX)/../staging/PostPrimary/pbbam 2>/dev/null && pwd || echo -n notfound' %(
+            THIRD_PARTY_PREFIX=prefix)
+    return shell(cmd)
+    """
+def get_HTSLIB(env, prefix):
+    """
+    key = 'HTSLIB'
+    if key in env:
+        return env[key]
+    cmd = 'cd $(THIRD_PARTY_PREFIX)/../staging/PostPrimary/htslib 2>/dev/null && pwd || echo -n notfound' %(
+            THIRD_PARTY_PREFIX=prefix)
+    return shell(cmd)
+    """
+def ifenvf(env, key, func):
+    if key in env:
+        return env[key]
+    else:
+        return func()
+def setifenvf(envout, envin, key, func):
+    envout[key] = ifenvf(envin, key, func)
+def setifenv(envout, envin, key, val):
+    envout[key] = envin.get(key, val)
+def setenv(envout, key, val):
+    envout[key] = val
+def update_env_if(envout, envin, keys):
+    for key in keys:
+        if key in envin:
+            envout[key] = envin[key]
+def compose_defs_env(env):
+    return '\n'.join('%-20s ?= %s' %(k, v) for k,v in env.items()) + '\n'
+
+def compose_defines_pacbio(envin):
+    """
+    This is used by mobs via buildcntl.sh.
+    """
+    env = dict()
+    setenv(env, 'SHELL', 'bash')
+    setifenvf(env, envin, 'OS_STRING', get_OS_STRING)
+    setifenvf(env, envin, 'PREBUILT', get_PREBUILT)
+    setifenv(env, envin, 'LIBPBDATA_INCLUDE', '../pbdata')
+    setifenv(env, envin, 'LIBPBIHDF_INCLUDE', '../hdf')
+    setifenv(env, envin, 'LIBBLASR_INCLUDE', '../alignment')
+    setifenv(env, envin, 'LIBPBDATA_LIB', '../pbdata/libpbdata.so')
+    setifenv(env, envin, 'LIBPBIHDF_LIB', '../hdf/libpbihdf.so')
+    setifenv(env, envin, 'LIBBLASR_LIB', '../alignment/libblasr.so')
+    setifenv(env, envin, 'nohdf', '1')
+    nondefaults = set([
+            'CXX', 'AR',
+            'HDF5_INC', 'HDF5_LIB',
+            'PBBAM_INCLUDE', 'PBBAM_LIB',
+            'HTSLIB_INCLUDE', 'HTSLIB_LIB',
+            'BOOST_INCLUDE',
+            'ZLIB_LIB',
+    ])
+    update_env_if(env, envin, nondefaults)
+    return compose_defs_env(env)
+
 
 @contextlib.contextmanager
 def cd(nwd):
@@ -78,20 +156,41 @@ def fetch_hdf5_headers():
             shell(cmd)
     return os.path.join('../hdf', version) # Relative path might help caching.
 
+def update(content_defines_mk, content_libconfig_h):
+    """ Write these relative to the same directory as *this* file.
+    """
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    fn_defines_mk = os.path.join(thisdir, 'defines.mk')
+    update_content(fn_defines_mk, content_defines_mk)
+    fn_libconfig_h = os.path.join(thisdir, 'pbdata', 'libconfig.h')
+    update_content(fn_libconfig_h, content_libconfig_h)
+
 def configure_nopbbam():
     HDF_HEADERS = fetch_hdf5_headers()
-    content = compose_defines_with_hdf_headers(HDF_HEADERS)
-    update('defines.mk', content)
-    content = compose_libconfig(pbbam=False)
-    update('pbdata/libconfig.h', content)
+    content1 = compose_defines_with_hdf_headers(HDF_HEADERS)
+    content2 = compose_libconfig(pbbam=False)
+    update(content1, content2)
 
 def configure_nopbbam_nohdf5():
-    content = compose_defines()
-    update('defines.mk', content)
-    content = compose_libconfig(pbbam=False)
-    update('pbdata/libconfig.h', content)
+    content1 = compose_defines()
+    content2 = compose_libconfig(pbbam=False)
+    update(content1, content2)
 
-def main():
+def configure_pacbio(envin):
+    content1 = compose_defines_pacbio(envin)
+    content2 = compose_libconfig(pbbam=True)
+    update(content1, content2)
+
+def get_make_style_env(envin, args):
+    envout = dict()
+    for arg in args:
+        if '=' in arg:
+            k, v = arg.split('=')
+            envout[k] = v
+    envout.update(envin)
+    return envout
+
+def main(prog, *args):
     """We are still deciding what env-vars to use, if any.
     """
     if 'NOPBBAM' in os.environ:
@@ -100,8 +199,9 @@ def main():
         else:
             configure_nopbbam()
     else:
-        log('not ready for pacbio internal yet')
+        envin = get_make_style_env(os.environ, args)
+        configure_pacbio(envin)
 
 
 if __name__=="__main__":
-    main()
+    main(*sys.argv)

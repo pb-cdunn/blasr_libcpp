@@ -1,4 +1,8 @@
-ARFLAGS := rc
+ARFLAGS         := rc
+CXX_SHAREDFLAGS := -fPIC
+LD_SHAREDFLAGS  := -shared -fPIC
+CPPFLAGS        += $(patsubst %,-I%,${INCLUDES})
+
 
 %.a:
 	${AR} $(ARFLAGS) $@ $^
@@ -7,7 +11,7 @@ ARFLAGS := rc
 	${CXX} ${LD_SHAREDFLAGS} -o $@ $^
 
 %.o: %.cpp
-	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
+	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(CPPFLAGS) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
 
 %.shared.o: %.cpp
-	$(CXX_pp) $(CXX_SHAREDFLAGS) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(INCLUDES) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
+	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(CPPFLAGS) $(CXX_SHAREDFLAGS) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
