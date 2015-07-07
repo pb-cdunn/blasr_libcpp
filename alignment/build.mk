@@ -4,7 +4,10 @@ include ../rules.mk
 include ../defines.mk
 
 CXXOPTS := -std=c++11 -pedantic -MMD -MP -Wno-long-long
-all: libblasr.a
+INCLUDES += ${LIBPBDATA_INCLUDE} ${HDF5_INCLUDE} ${PBBAM_INCLUDE} ${HTSLIB_INCLUDE} ${BOOST_INCLUDE}
+DEP_LIBS += ${LIBPBDATA_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
+
+all: libblasr.a libblasr.so
 
 sources := $(wildcard algorithms/alignment/*.cpp) \
 		   $(wildcard algorithms/alignment/sdp/*.cpp) \

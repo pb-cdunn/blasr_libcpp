@@ -3,8 +3,11 @@ all:
 include ../rules.mk
 include ../defines.mk
 
-CXXOPTS += -std=c++11 -pedantic -MMD -MP
-all: libpbihdf.a
+CXXOPTS  += -std=c++11 -pedantic -MMD -MP
+INCLUDES += ${LIBPBDATA_INCLUDE} ${HDF5_INCLUDE} ${PBBAM_INCLUDE} ${HTSLIB_INCLUDE} ${BOOST_INCLUDE}
+DEP_LIBS += ${LIBPBDATA_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
+
+all: libpbihdf.a libpbihdf.so
 
 sources := $(wildcard *.cpp)
 objects := $(sources:.cpp=.o)

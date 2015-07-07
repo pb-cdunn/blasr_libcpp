@@ -3,10 +3,12 @@ all:
 include ../rules.mk
 include ../defines.mk
 
-CXXOPTS += -std=c++11 -pedantic -MMD -MP
-INCLUDES += -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils -Ialignment
+CXXOPTS  += -std=c++11 -pedantic -MMD -MP
+CPPFLAGS += -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils -Ialignment
+INCLUDES += ${PBBAM_INCLUDE} ${HTSLIB_INCLUDE} ${BOOST_INCLUDE}
+DEP_LIBS += ${PBBAM_LIB} ${HTSLIB_LIB}
 
-all: libpbdata.a
+all: libpbdata.a libpbdata.so
 
 sources := $(wildcard *.cpp) \
 	       $(wildcard matrix/*.cpp) \

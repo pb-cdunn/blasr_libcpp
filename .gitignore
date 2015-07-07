@@ -1,6 +1,7 @@
 *.o
-*.a
 *.d
+*.a
+*.so
 defines.mk
 /pbdata/libconfig.h
 /hdf/hdf5-1.8.12-headers/
