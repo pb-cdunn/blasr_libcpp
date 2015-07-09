@@ -40,6 +40,28 @@ def compose_libconfig(pbbam=False):
 """
     return content
 
+def compose_defines_with_hdf(HDF5_INCLUDE, HDF5_LIB):
+    """We have to use := for HDF5_LIB b/c blasr
+    is using it to mean the directory, not the file,
+    and it's in the environment.
+    """
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    return """
+HDF5_INCLUDE:=%(HDF5_INCLUDE)s
+HDF5_LIB:=%(HDF5_LIB)s
+#CPPFLAGS+=-I../pbdata -I../hdf -I../alignment
+LIBPBDATA_INCLUDE     ?=../pbdata
+LIBPBIHDF_INCLUDE     ?=../hdf
+LIBBLASR_INCLUDE      ?=../alignment
+LIBPBDATA_LIB     ?=../pbdata/libpbdata.so
+LIBPBIHDF_LIB     ?=../hdf/libpbihdf.so
+LIBBLASR_LIB      ?=../alignment/libblasr.so
+"""%(dict(
+    thisdir=thisdir,
+    HDF5_INCLUDE=HDF5_INCLUDE,
+    HDF5_LIB=HDF5_LIB))
+
+
 def compose_defines_with_hdf_headers(HDF_HEADERS):
     thisdir = os.path.dirname(os.path.abspath(__file__))
     return """
@@ -181,6 +203,22 @@ def update(content_defines_mk, content_libconfig_h):
     update_content(fn_libconfig_h, content_libconfig_h)
 
 def configure_nopbbam():
+    """Use HDF5 from env-vars.
+    This is the path used by blasr in a GitHub build, for now.
+    """
+    HDF5_INCLUDE = os.environ.get('HDF5_INCLUDE')
+    if not HDF5_INCLUDE:
+        HDF5_INCLUDE = os.environ['HDF5_INC']
+    HDF5_LIB = os.environ['HDF5_LIB']
+    content1 = compose_defines_with_hdf(HDF5_INCLUDE, HDF5_LIB)
+    content2 = compose_libconfig(pbbam=False)
+    update(content1, content2)
+
+def configure_nopbbam_skip_hdf():
+    """Fetch HDF5 headers.
+    We lack HDF5 libs, so we cannot build our hdf/ subdir.
+    But the others are fine.
+    """
     HDF_HEADERS = fetch_hdf5_headers()
     content1 = compose_defines_with_hdf_headers(HDF_HEADERS)
     content2 = compose_libconfig(pbbam=False)
@@ -212,7 +250,15 @@ def main(prog, *args):
         if 'NOHDF' in os.environ:
             configure_nopbbam_nohdf5()
         else:
-            configure_nopbbam()
+            if 'HDF5_LIB' in os.environ:
+                assert 'HDF5_INC' in os.environ or 'HDF5_INCLUDE' in os.environ, 'Hey! You have HDF5_LIB but not HDF5_INCLUDE!'
+                if 'HDF5_INC' not in os.environ:
+                    print "NOT1"
+                if 'HDF5_INCLUDE' not in os.environ:
+                    print "NOT2"
+                configure_nopbbam()
+            else:
+                configure_nopbbam_skip_hdf()
     else:
         envin = get_make_style_env(os.environ, args)
         configure_pacbio(envin)
