@@ -19,7 +19,7 @@ libpbihdf.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
 libpbihdf.so: $(shared_objects) $(DEP_LIBS)
-	$(CXX) $(LD_SHAREDFLAGS) -o $@ $^
+	$(CXX) $(LD_SHAREDFLAGS) -o $@ -Wl,-soname,$@ $^
 
 clean: 
 	@rm -f libpbihdf.a libpbihdf.so

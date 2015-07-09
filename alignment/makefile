@@ -41,7 +41,7 @@ libblasr.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
 libblasr.so: $(shared_objects) $(DEP_LIBS)
-	$(CXX) $(LD_SHAREDFLAGS) -o $@ $^
+	$(CXX) $(LD_SHAREDFLAGS) -o $@ -Wl,-soname,$@ $^
 
 clean: 
 	@rm -f libblasr.a libblasr.so

@@ -31,7 +31,7 @@ libpbdata.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
 libpbdata.so: $(shared_objects) $(DEP_LIBS)
-	$(CXX) $(LD_SHAREDFLAGS) -o $@ $^
+	$(CXX) $(LD_SHAREDFLAGS) -o $@ -Wl,-soname,$@ $^
 
 clean: 
 	@rm -f libpbdata.a  libpbdata.so
