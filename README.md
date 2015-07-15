@@ -29,6 +29,7 @@ simplicity, we use the same `defines.mk` for all 3 sub-dirs.
 ## unittest
 There is at least one failing for now, and we cannot run them in Travis without installing HDF5. TODO.
 
+(unittests mostly pass in Jenkins. We will get them into Travis later.)
 
 ##Appendix: Dependencies##
 - libpbdata
