@@ -267,10 +267,13 @@ def getOsType():
 
 def update_env_for_linux(env):
     env['SET_LIB_NAME'] = '-soname'
+    env['SH_LIB_EXT'] = '.so'
 def update_env_for_darwin(env):
     env['SET_LIB_NAME'] = '-install_name'
+    env['SH_LIB_EXT'] = '.dylib'
 def update_env_for_unknown(env):
     env['SET_LIB_NAME'] = '-soname'
+    env['SH_LIB_EXT'] = '.so'
 update_env_for_os = {
     OsType.Linux: update_env_for_linux,
     OsType.Darwin: update_env_for_darwin,
