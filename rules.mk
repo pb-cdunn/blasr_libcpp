@@ -1,6 +1,6 @@
 ARFLAGS         := rc
 CXX_SHAREDFLAGS := -fPIC
-LD_SHAREDFLAGS  := -shared -fPIC
+#LD_SHAREDFLAGS  := -dynamiclib -fPIC
 CPPFLAGS        += $(patsubst %,-I%,${INCLUDES})
 
 
@@ -8,7 +8,10 @@ CPPFLAGS        += $(patsubst %,-I%,${INCLUDES})
 	${AR} $(ARFLAGS) $@ $^
 
 %.so:
-	${CXX} ${LD_SHAREDFLAGS} ${LDFLAGS} -o $@ -Wl,${SET_LIB_NAME},$@ $^
+	${CXX} -shared -fPIC ${LDFLAGS} -o $@ -Wl,-soname,$@ $^
+
+%.dylib:
+	${CXX} -dynamiclib ${LDFLAGS} -o $@ -Wl,-install_name,$@ $^
 
 %.o: %.cpp
 	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(CPPFLAGS) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@

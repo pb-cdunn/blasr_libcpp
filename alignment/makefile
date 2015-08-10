@@ -8,7 +8,7 @@ INCLUDES += . ${LIBPBDATA_INCLUDE} ${LIBPBIHDF_INCLUDE} ${HDF5_INCLUDE} ${PBBAM_
 DEP_LIBS += ${LIBPBDATA_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
 LDFLAGS  += $(patsubst %,$(dirname %),${DEP_LIBS})
 
-all: libblasr.a libblasr.so
+all: libblasr.a libblasr${SH_LIB_EXT}
 
 sources := $(wildcard algorithms/alignment/*.cpp) \
 		   $(wildcard algorithms/alignment/sdp/*.cpp) \

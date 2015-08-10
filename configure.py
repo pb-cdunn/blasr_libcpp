@@ -147,7 +147,7 @@ def compose_defs_env(env):
 def append_common(env, content):
     """Dumb way to do this, but this whole thing is evolving.
     """
-    reqs = ['SET_LIB_NAME']
+    reqs = ['SH_LIB_EXT',]
     vals = ['%-20s := %s' %(k, v) for k,v in env.items() if k in reqs]
     return content + '\n'.join([''] + vals + [''])
 def compose_defines_pacbio(envin):
