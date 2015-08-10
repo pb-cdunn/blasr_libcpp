@@ -144,6 +144,12 @@ def compose_defs_env(env):
     ovr    = ['%-20s ?= %s' %(k, v) for k,v in env.items() if k not in nons]
     nonovr = ['%-20s := %s' %(k, v) for k,v in env.items() if k in nons]
     return '\n'.join(ovr + nonovr + [''])
+def append_common(env, content):
+    """Dumb way to do this, but this whole thing is evolving.
+    """
+    reqs = ['SH_LIB_EXT',]
+    vals = ['%-20s := %s' %(k, v) for k,v in env.items() if k in reqs]
+    return content + '\n'.join([''] + vals + [''])
 def compose_defines_pacbio(envin):
     """
     This is used by mobs via buildcntl.sh.
@@ -171,7 +177,6 @@ def compose_defines_pacbio(envin):
     ])
     update_env_if(env, envin, nondefaults)
     return compose_defs_env(env)
-
 
 @contextlib.contextmanager
 def cd(nwd):
@@ -211,6 +216,7 @@ def configure_nopbbam():
         HDF5_INCLUDE = os.environ['HDF5_INC']
     HDF5_LIB = os.environ['HDF5_LIB']
     content1 = compose_defines_with_hdf(HDF5_INCLUDE, HDF5_LIB)
+    content1 = append_common(os.environ, content1)
     content2 = compose_libconfig(pbbam=False)
     update(content1, content2)
 
@@ -221,16 +227,19 @@ def configure_nopbbam_skip_hdf():
     """
     HDF_HEADERS = fetch_hdf5_headers()
     content1 = compose_defines_with_hdf_headers(HDF_HEADERS)
+    content1 = append_common(os.environ, content1)
     content2 = compose_libconfig(pbbam=False)
     update(content1, content2)
 
 def configure_nopbbam_nohdf5():
     content1 = compose_defines()
+    content1 = append_common(os.environ, content1)
     content2 = compose_libconfig(pbbam=False)
     update(content1, content2)
 
 def configure_pacbio(envin):
     content1 = compose_defines_pacbio(envin)
+    content1 = append_common(envin, content1)
     content2 = compose_libconfig(pbbam=True)
     update(content1, content2)
 
@@ -243,9 +252,39 @@ def get_make_style_env(envin, args):
     envout.update(envin)
     return envout
 
+class OsType:
+    Unknown, Linux, Darwin = range(3)
+
+def getOsType():
+    uname = shell('uname -s')
+    log('uname=%r' %uname)
+    if 'Darwin' in uname:
+        return OsType.Darwin
+    elif 'Linux' in uname:
+        return OsType.Linux
+    else:
+        return OsType.Unknown
+
+def update_env_for_linux(env):
+    env['SET_LIB_NAME'] = '-soname'
+    env['SH_LIB_EXT'] = '.so'
+def update_env_for_darwin(env):
+    env['SET_LIB_NAME'] = '-install_name'
+    env['SH_LIB_EXT'] = '.dylib'
+def update_env_for_unknown(env):
+    env['SET_LIB_NAME'] = '-soname'
+    env['SH_LIB_EXT'] = '.so'
+update_env_for_os = {
+    OsType.Linux: update_env_for_linux,
+    OsType.Darwin: update_env_for_darwin,
+    OsType.Unknown: update_env_for_unknown,
+}
+
 def main(prog, *args):
     """We are still deciding what env-vars to use, if any.
     """
+    ost = getOsType()
+    update_env_for_os[ost](os.environ)
     if 'NOPBBAM' in os.environ:
         if 'NOHDF' in os.environ:
             configure_nopbbam_nohdf5()

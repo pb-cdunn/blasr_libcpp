@@ -9,7 +9,7 @@ INCLUDES += ${PBBAM_INCLUDE} ${HTSLIB_INCLUDE} ${BOOST_INCLUDE}
 DEP_LIBS += ${PBBAM_LIB} ${HTSLIB_LIB}
 LDFLAGS  += $(patsubst %,$(dirname %),${DEP_LIBS})
 
-all: libpbdata.a libpbdata.so
+all: libpbdata.a libpbdata${SH_LIB_EXT}
 
 sources := $(wildcard *.cpp) \
 	       $(wildcard matrix/*.cpp) \
@@ -31,7 +31,6 @@ libpbdata.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
 libpbdata.so: $(shared_objects) $(DEP_LIBS)
-	$(CXX) $(LD_SHAREDFLAGS) -o $@ -Wl,-soname,$@ $^
 
 clean: 
 	@rm -f libpbdata.a  libpbdata.so
