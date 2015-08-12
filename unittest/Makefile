@@ -148,4 +148,4 @@ $(OUTDIR)/%/:
 clean:
 	$(V@)$(RM) -r $(OUTDIR)
 
--include ($DEPS)
+-include ${depfiles}

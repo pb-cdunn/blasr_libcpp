@@ -66,12 +66,12 @@ def compose_defines_with_hdf_headers(HDF_HEADERS):
     thisdir = os.path.dirname(os.path.abspath(__file__))
     return """
 HDF_HEADERS:=%(HDF_HEADERS)s
-#HDF5_INCLUDE?=${HDF_HEADERS}/src
+#HDF5_INC  ?=${HDF_HEADERS}/src
 CPPFLAGS+=-I${HDF_HEADERS}/src -I${HDF_HEADERS}/c++/src
 CPPFLAGS+=-I../pbdata -I../hdf -I../alignment
-LIBPBDATA_LIB     ?=../pbdata/libpbdata.so
-LIBPBIHDF_LIB     ?=../pbdata/libpbihdf.so
-LIBBLASR_LIB      ?=../pbdata/libblasr.so
+LIBPBDATA_LIB     ?=../pbdata/
+LIBPBIHDF_LIB     ?=../hdf/
+LIBBLASR_LIB      ?=../alignment/
 """%(dict(thisdir=thisdir, HDF_HEADERS=HDF_HEADERS))
 
 def compose_defines():
@@ -81,29 +81,18 @@ def compose_defines():
     """
     thisdir = os.path.dirname(os.path.abspath(__file__))
     return """
-LIBPBDATA_INCLUDE ?=../pbdata
-LIBPBIHDF_INCLUDE ?=../hdf
-LIBBLASR_INCLUDE  ?=../alignment
-LIBPBDATA_LIB     ?=%(thisdir)s/pbdata/libpbdata.so
-LIBPBIHDF_LIB     ?=%(thisdir)s/pbdata/libpbihdf.so
-LIBBLASR_LIB      ?=%(thisdir)s/pbdata/libblasr.so
-nohdf             ?=1
+LIBPBDATA_INC ?=../pbdata
+LIBPBIHDF_INC ?=../hdf
+LIBBLASR_INC  ?=../alignment
+LIBPBDATA_LIB ?=%(thisdir)s/pbdata/
+LIBPBIHDF_LIB ?=%(thisdir)s/hdf/
+LIBBLASR_LIB  ?=%(thisdir)s/alignment/
+nohdf         ?=1
 """%(dict(thisdir=thisdir))
 
 def get_OS_STRING():
     G_BUILDOS_CMD = """bash -c 'set -e; set -o pipefail; id=$(lsb_release -si | tr "[:upper:]" "[:lower:]"); rel=$(lsb_release -sr); case $id in ubuntu) printf "$id-%04d\n" ${rel/./};; centos) echo "$id-${rel%%.*}";; *) echo "$id-$rel";; esac' 2>/dev/null"""
     return shell(G_BUILDOS_CMD)
-def get_PREBUILT():
-    cmd = 'cd ../../../../prebuilt.out 2>/dev/null && pwd || echo -n notfound'
-    return shell(cmd)
-def get_BOOST_INCLUDE(env):
-    key_bi = 'BOOST_INCLUDE'
-    key_br = 'BOOST_ROOT'
-    if key_bi in env:
-        return env[key_bi]
-    if key_br in env:
-        return env[key_br]
-    return '${PREBUILT}/boost/boost_1_55_0'
 
 def get_PBBAM(env, prefix):
     """
@@ -157,23 +146,23 @@ def compose_defines_pacbio(envin):
     env = dict()
     setenv(env, 'SHELL', 'bash')
     setifenvf(env, envin, 'OS_STRING', get_OS_STRING)
-    setifenvf(env, envin, 'PREBUILT', get_PREBUILT)
-    setifenv(env, envin, 'LIBPBDATA_INCLUDE', '../pbdata')
-    setifenv(env, envin, 'LIBPBIHDF_INCLUDE', '../hdf')
-    setifenv(env, envin, 'LIBBLASR_INCLUDE', '../alignment')
-    setifenv(env, envin, 'LIBPBDATA_LIB', '../pbdata/libpbdata.so')
-    setifenv(env, envin, 'LIBPBIHDF_LIB', '../hdf/libpbihdf.so')
-    setifenv(env, envin, 'LIBBLASR_LIB', '../alignment/libblasr.so')
+    setifenv(env, envin, 'LIBPBDATA_INC', '../pbdata')
+    setifenv(env, envin, 'LIBPBIHDF_INC', '../hdf')
+    setifenv(env, envin, 'LIBBLASR_INC', '../alignment')
+    setifenv(env, envin, 'LIBPBDATA_LIB', '../pbdata/')
+    setifenv(env, envin, 'LIBPBIHDF_LIB', '../hdf/')
+    setifenv(env, envin, 'LIBBLASR_LIB', '../alignment/')
     if 'nohdf' in envin:
         env['nohdf'] = envin['nohdf']
         # Otherwise, do not define it at all.
     nondefaults = set([
             'CXX', 'AR',
-            'HDF5_INCLUDE', 'HDF5_LIB',
-            'PBBAM_INCLUDE', 'PBBAM_LIB',
-            'HTSLIB_INCLUDE', 'HTSLIB_LIB',
-            'BOOST_INCLUDE',
+            'HDF5_INC', 'HDF5_LIB',
+            'PBBAM_INC', 'PBBAM_LIB',
+            'HTSLIB_INC', 'HTSLIB_LIB',
+            'BOOST_INC',
             'ZLIB_LIB',
+            'GCC_LIB',
     ])
     update_env_if(env, envin, nondefaults)
     return compose_defs_env(env)

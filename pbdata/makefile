@@ -4,10 +4,10 @@ include ../rules.mk
 include ../defines.mk
 
 CXXOPTS  += -std=c++11 -pedantic -MMD -MP
-CPPFLAGS += -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils -Ialignment
-INCLUDES += ${PBBAM_INCLUDE} ${HTSLIB_INCLUDE} ${BOOST_INCLUDE}
-DEP_LIBS += ${PBBAM_LIB} ${HTSLIB_LIB}
-LDFLAGS  += $(patsubst %,$(dirname %),${DEP_LIBS})
+CPPFLAGS += -I. -Imatrix -Ireads -Iqvs -Imetagenome -Isaf -Iutils
+INCLUDES += ${LIBBLASR_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
+LIBS     += ${PBBAM_LIB} ${HTSLIB_LIB}
+LDFLAGS  += $(patsubst %,-L%,${LIBS})
 
 all: libpbdata.a libpbdata${SH_LIB_EXT}
 

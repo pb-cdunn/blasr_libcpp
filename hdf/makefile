@@ -4,9 +4,9 @@ include ../rules.mk
 include ../defines.mk
 
 CXXOPTS  += -std=c++11 -pedantic -MMD -MP
-INCLUDES += ${LIBPBDATA_INCLUDE} ${HDF5_INCLUDE} ${PBBAM_INCLUDE} ${HTSLIB_INCLUDE} ${BOOST_INCLUDE}
-DEP_LIBS += ${LIBPBDATA_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
-LDFLAGS  += $(patsubst %,$(dirname %),${DEP_LIBS})
+INCLUDES += ${LIBPBDATA_INC} ${HDF5_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
+LIBS     += ${LIBPBDATA_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
+LDFLAGS  += $(patsubst %,-L%,${LIBS})
 
 all: libpbihdf.a libpbihdf${SH_LIB_EXT}
 
@@ -18,7 +18,7 @@ dependencies := $(objects:.o=.d) $(shared_objects:.o=.d)
 libpbihdf.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
-libpbihdf.so: $(shared_objects) $(DEP_LIBS)
+libpbihdf.so: $(shared_objects)
 
 clean: 
 	@rm -f libpbihdf.a libpbihdf.so
