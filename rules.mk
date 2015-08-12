@@ -8,10 +8,10 @@ CPPFLAGS        += $(patsubst %,-I%,${INCLUDES})
 	${AR} $(ARFLAGS) $@ $^
 
 %.so:
-	${CXX} -shared -fPIC ${LDFLAGS} -o $@ -Wl,-soname,$@ $^
+	${CXX} -shared -fPIC ${LDFLAGS} -o $@ -Wl,-soname,$@ $^ ${LDLIBS}
 
 %.dylib:
-	${CXX} -dynamiclib ${LDFLAGS} -o $@ -Wl,-install_name,$@ $^
+	${CXX} -dynamiclib ${LDFLAGS} -o $@ -Wl,-install_name,$@ $^ ${LDLIBS}
 
 %.o: %.cpp
 	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(CPPFLAGS) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@

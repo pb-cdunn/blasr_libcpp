@@ -1,32 +1,23 @@
 SHELL=/bin/bash
 
-.PHONY: all debug profile gtest clean cleanall
+THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
-# $Change: 140182 $ 
+.PHONY: all libpbdata libhdf libblasr gtest clean cleanall
 
-all:
-	${MAKE} -C pbdata all
-	${MAKE} -C hdf all
-	${MAKE} -C alignment all
-
-debug:
-	${MAKE} subs
-
-profile:
-	${MAKE} subs
-
-g:
-	${MAKE} subs
-
+all: libpbdata libhdf libblasr
+libpbdata:
+	${MAKE} -C ${THISDIR}/pbdata all
+libhdf:
+	${MAKE} -C ${THISDIR}/hdf all
+libblasr:
+	${MAKE} -C ${THISDIR}/alignment all
 gtest:
-	${MAKE} -C unittest -f normal.Makefile gtest
-
+	${MAKE} -C ${THISDIR}/unittest gtest
 clean:
-	${MAKE} -C pbdata clean
-	${MAKE} -C hdf clean
-	${MAKE} -C alignment clean
-	#@${MAKE} -C unittest clean
-
+	${MAKE} -C ${THISDIR}/pbdata clean
+	${MAKE} -C ${THISDIR}/hdf clean
+	${MAKE} -C ${THISDIR}/alignment clean
+	#@${MAKE} -C ${THISDIR}/unittest clean
 cleanall: clean
 
 # Note: hdf/ will not build if nohdf=1 is configured.

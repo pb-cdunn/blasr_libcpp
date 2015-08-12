@@ -1,51 +1,39 @@
 all:
 
-include ../rules.mk
-include ../defines.mk
+THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+-include ${CURDIR}/defines.mk
+include ${THISDIR}/../rules.mk
 
-CXXOPTS := -std=c++11 -pedantic -MMD -MP -Wno-long-long
-INCLUDES += . ${LIBPBDATA_INCLUDE} ${LIBPBIHDF_INCLUDE} ${HDF5_INCLUDE} ${PBBAM_INCLUDE} ${HTSLIB_INCLUDE} ${BOOST_INCLUDE}
-DEP_LIBS += ${LIBPBDATA_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
-LDFLAGS  += $(patsubst %,$(dirname %),${DEP_LIBS})
+CXXOPTS  := -std=c++11 -pedantic -MMD -MP -Wno-long-long
+INCLUDES += ${THISDIR} ${LIBPBDATA_INC} ${LIBPBIHDF_INC} ${HDF5_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
+LIBS     += ${LIBPBDATA_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
+LDFLAGS  += $(patsubst %,-L%,${LIBS})
 
 all: libblasr.a libblasr${SH_LIB_EXT}
 
-sources := $(wildcard algorithms/alignment/*.cpp) \
-		   $(wildcard algorithms/alignment/sdp/*.cpp) \
-		   $(wildcard algorithms/anchoring/*.cpp) \
-		   $(wildcard algorithms/compare/*.cpp) \
-		   $(wildcard algorithms/sorting/*.cpp) \
-		   $(wildcard datastructures/alignment/*.cpp) \
-		   $(wildcard datastructures/alignmentset/*.cpp) \
-		   $(wildcard datastructures/anchoring/*.cpp) \
-		   $(wildcard datastructures/tuplelists/*.cpp) \
-		   $(wildcard suffixarray/*.cpp) \
-		   $(wildcard qvs/*.cpp) \
-		   $(wildcard statistics/*.cpp) \
-		   $(wildcard tuples/*.cpp) \
-		   $(wildcard utils/*.cpp) \
-		   $(wildcard files/*.cpp) \
-		   $(wildcard format/*.cpp) \
-		   $(wildcard simulator/*.cpp) \
-		   $(wildcard *.cpp) 
+paths := . simulator format files utils tuples statistics qvs suffixarray \
+	datastructures/alignment datastructures/alignmentset datastructures/anchoring datastructures/tuplelists \
+	algorithms/alignment algorithms/alignment/sdp algorithms/anchoring algorithms/compare algorithms/sorting
+paths := $(patsubst %,${THISDIR}%,${paths})
+sources := $(shell find ${THISDIR} -name '*.cpp')
 
 ifdef nohdf
-sources := $(filter-out files/% utils/FileOfFileNames.cpp format/SAMHeaderPrinter.cpp, $(sources))
+sources := $(filter-out ${THISDIR}files/% ${THISDIR}utils/FileOfFileNames.cpp ${THISDIR}format/SAMHeaderPrinter.cpp, $(sources))
 endif
 
+sources := $(notdir ${sources})
 objects := $(sources:.cpp=.o)
 shared_objects := $(sources:.cpp=.shared.o)
 dependencies := $(objects:.o=.d) $(shared_objects:.o=.d)
 
+vpath %.cpp ${paths}
+
 libblasr.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
-libblasr.so: $(shared_objects) $(DEP_LIBS)
+libblasr.so: $(shared_objects)
 
 clean: 
-	@rm -f libblasr.a libblasr.so
-	@rm -f $(objects) $(shared_objects) $(dependencies)
-	@find . -type f -name \*.o -delete
-	@find . -type f -name \*.d -delete
+	rm -f libblasr.a libblasr.so *.o *.d
 
 -include $(dependencies)

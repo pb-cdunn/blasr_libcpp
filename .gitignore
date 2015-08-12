@@ -4,5 +4,7 @@
 *.so
 *.dylib
 defines.mk
-/pbdata/libconfig.h
+all.xml
+*.h5
+libconfig.h
 /hdf/hdf5-1.8.12-headers/

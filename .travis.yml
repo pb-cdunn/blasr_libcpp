@@ -1,8 +1,6 @@
 language: cpp
 script: 
-  - NOPBBAM=1 ./configure.py
-  - make -j all
-# - make -j gtest
+  - ./travis.sh
 compiler:
   - gcc
 # - clang
