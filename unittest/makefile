@@ -104,7 +104,7 @@ test-runner: $(objects)
 	$(LINK.o) $^ $(LDLIBS) -o $@
 
 gtest: test-runner
-	LD_LIBRARY_PATH=$(subst $(space),:,$(strip $(dir $(libs)))) ./$< --gtest_output=xml:./xml/all.xml
+	LD_LIBRARY_PATH=$(subst $(space),:,$(strip $(libs))) ./$< --gtest_output=xml:./xml/all.xml
 
 # Build objects
 %.o: %.cpp
