@@ -199,6 +199,14 @@ def update(content_defines_mk, content_libconfig_h):
     update_content(fn_defines_mk, content_defines_mk)
     fn_libconfig_h = os.path.join('.', 'libconfig.h')
     update_content(fn_libconfig_h, content_libconfig_h)
+    if thisdir == os.path.abspath('.'):
+        # This was run in the root directory, so symlink defines.mk
+        # in sub-dirs, which now include defines.mk from CURDIR
+        # in order to facilitate building in external output directories.
+        for sub in ('pbdata', 'hdf', 'alignment', 'unittest'):
+            lname = os.path.join(sub, 'defines.mk')
+            if not os.path.lexists(lname):
+                os.symlink(os.path.join('..', 'defines.mk'), lname)
 
 def configure_nopbbam():
     """Use HDF5 from env-vars.
