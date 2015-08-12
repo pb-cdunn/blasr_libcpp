@@ -1,7 +1,9 @@
 all:
 
-include ../rules.mk
-include ../defines.mk
+THISDIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR:=${THISDIR}
+-include ${THISDIR}/../defines.mk
+include ${THISDIR}/../rules.mk
 
 CXXOPTS  += -std=c++11 -pedantic -MMD -MP
 INCLUDES += ${LIBPBDATA_INC} ${HDF5_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
