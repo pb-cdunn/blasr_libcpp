@@ -5,7 +5,7 @@ THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include ${THISDIR}/../rules.mk
 
 CXXOPTS  += -std=c++11 -pedantic -MMD -MP
-INCLUDES += . matrix reads qvs metagenome saf utils
+INCLUDES += ${THISDIR} matrix reads qvs metagenome saf utils
 INCLUDES += ${LIBBLASR_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
 LIBS     += ${PBBAM_LIB} ${HTSLIB_LIB}
 LDFLAGS  += $(patsubst %,-L%,${LIBS})

@@ -1,5 +1,5 @@
 SHELL=bash
-THISDIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 SRCDIR:=${THISDIR}
 -include ${CURDIR}/defines.mk
 include ${THISDIR}/../rules.mk
@@ -40,8 +40,12 @@ test_sources   := $(wildcard ${SRCDIR}/pbdata/*.cpp) \
 # Remove broken tests from the test_sources list
 test_sources   := $(filter-out $(broken_test_sources),$(test_sources))
 
-
+paths := alignment alignment/files alignment/datastructures/alignment alignment/utils alignment/format \
+	pbdata pbdata/utils pbdata/metagenome pbdata/saf pbdata/reads pbdata/qvs \
+	hdf
+paths := $(patsubst %,${SRCDIR}%,${paths}) ${GTEST_SRCDIR}/gtest
 sources   := $(gtest_sources) $(test_sources)
+sources   := $(notdir ${sources})
 objects   := $(patsubst %.cc,%.o,$(filter %.cc,$(sources))) \
              $(patsubst %.cpp,%.o,$(filter %.cpp,$(sources))) \
              $(null)
@@ -49,7 +53,7 @@ depfiles  := $(objects:%.o=%.d)
 
 
 includes := \
-    . \
+    ${SRCDIR} \
     $(GTEST_INC) \
     $(LIBBLASR_INC) \
     $(LIBPBIHDF_INC) \
@@ -91,6 +95,8 @@ COMPILE.cpp   = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 COMPILE.cc    = $(COMPILE.cpp)
 LINK.o        = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 
+vpath %.cpp ${paths}
+vpath %.cc ${paths}
 
 all: test-runner
 
