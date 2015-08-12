@@ -1,8 +1,7 @@
 all:
 
-THISDIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-SRCDIR:=${THISDIR}
--include ${THISDIR}/../defines.mk
+THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+-include ${CURDIR}/defines.mk
 include ${THISDIR}/../rules.mk
 
 CXXOPTS  += -std=c++11 -pedantic -MMD -MP
@@ -12,10 +11,13 @@ LDFLAGS  += $(patsubst %,-L%,${LIBS})
 
 all: libpbihdf.a libpbihdf${SH_LIB_EXT}
 
-sources := $(wildcard *.cpp)
+paths := ${THISDIR}
+sources := $(wildcard ${THISDIR}*.cpp)
 objects := $(sources:.cpp=.o)
 shared_objects := $(sources:.cpp=.shared.o)
 dependencies := $(objects:.o=.d) $(shared_objects:.o=.d)
+
+vpath %.cpp ${paths}
 
 libpbihdf.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
@@ -23,7 +25,6 @@ libpbihdf.a: $(objects)
 libpbihdf.so: $(shared_objects)
 
 clean: 
-	@rm -f libpbihdf.a libpbihdf.so
-	@rm -f $(objects) $(shared_objects) $(dependencies)
+	rm -f libpbihdf.a libpbihdf.so *.o *.d
 
 -include $(dependencies)

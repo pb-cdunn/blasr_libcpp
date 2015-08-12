@@ -188,7 +188,7 @@ def fetch_hdf5_headers():
         with cd(thisdir, 'hdf'):
             cmd = 'curl -k -L https://www.dropbox.com/s/8971bcyy5o42rxb/hdf5-1.8.12-headers.tar.bz2\?dl\=0 | tar xjf -'
             shell(cmd)
-    return os.path.join('../hdf', version) # Relative path might help caching.
+    return os.path.join(thisdir, 'hdf', version) # Relative path might help caching.
 
 def update(content_defines_mk, content_libconfig_h):
     """ Write these relative to the same directory as *this* file.
@@ -271,18 +271,9 @@ update_env_for_os = {
     OsType.Unknown: update_env_for_unknown,
 }
 
-def link_makefile_if_external():
-    """If not building in src-tree, write a makefile.
-    """
-    if os.path.abspath('.') == thisdir:
-        return
-    if not os.path.lexists('makefile'):
-        os.symlink(os.path.join(thisdir, 'makefile'), 'makefile')
-
 def main(prog, *args):
     """We are still deciding what env-vars to use, if any.
     """
-    link_makefile_if_external()
     ost = getOsType()
     update_env_for_os[ost](os.environ)
     if 'NOPBBAM' in os.environ:
