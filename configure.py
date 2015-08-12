@@ -12,6 +12,8 @@ import contextlib
 import os
 import sys
 
+thisdir = os.path.dirname(os.path.abspath(__file__))
+
 def log(msg):
     sys.stderr.write(msg)
     sys.stderr.write('\n')
@@ -24,6 +26,9 @@ def shell(cmd):
     return output
 
 def update_content(fn, content):
+    direc = os.path.abspath(os.path.dirname(fn))
+    if not os.path.isdir(direc):
+        shell('mkdir -p %s' %direc)
     current_content = open(fn).read() if os.path.exists(fn) else None
     if content != current_content:
         log('writing to %r' %fn)
@@ -45,7 +50,6 @@ def compose_defines_with_hdf(HDF5_INCLUDE, HDF5_LIB):
     is using it to mean the directory, not the file,
     and it's in the environment.
     """
-    thisdir = os.path.dirname(os.path.abspath(__file__))
     return """
 HDF5_INCLUDE:=%(HDF5_INCLUDE)s
 HDF5_LIB:=%(HDF5_LIB)s
@@ -63,7 +67,6 @@ LIBBLASR_LIB      ?=../alignment/libblasr.so
 
 
 def compose_defines_with_hdf_headers(HDF_HEADERS):
-    thisdir = os.path.dirname(os.path.abspath(__file__))
     return """
 HDF_HEADERS:=%(HDF_HEADERS)s
 #HDF5_INC  ?=${HDF_HEADERS}/src
@@ -79,7 +82,6 @@ def compose_defines():
     Note that our local 'hdf' subdir will not even build
     in this case.
     """
-    thisdir = os.path.dirname(os.path.abspath(__file__))
     return """
 LIBPBDATA_INC ?=../pbdata
 LIBPBIHDF_INC ?=../hdf
@@ -182,8 +184,8 @@ def fetch_hdf5_headers():
     Return actual directory path, relative to subdirs.
     """
     version = 'hdf5-1.8.12-headers'
-    if not os.path.isdir(os.path.join('hdf', version)):
-        with cd('hdf'):
+    if not os.path.isdir(os.path.join(thisdir, 'hdf', version)):
+        with cd(thisdir, 'hdf'):
             cmd = 'curl -k -L https://www.dropbox.com/s/8971bcyy5o42rxb/hdf5-1.8.12-headers.tar.bz2\?dl\=0 | tar xjf -'
             shell(cmd)
     return os.path.join('../hdf', version) # Relative path might help caching.
@@ -191,11 +193,9 @@ def fetch_hdf5_headers():
 def update(content_defines_mk, content_libconfig_h):
     """ Write these relative to the same directory as *this* file.
     """
-    thisdir = '.'
-    fn_defines_mk = os.path.join(thisdir, 'defines.mk')
+    fn_defines_mk = 'defines.mk'
     update_content(fn_defines_mk, content_defines_mk)
-    shell('mkdir -p %s' %(os.path.join(thisdir, 'pbdata')))
-    fn_libconfig_h = os.path.join(thisdir, 'pbdata', 'libconfig.h')
+    fn_libconfig_h = os.path.join('.', 'pbdata', 'libconfig.h')
     update_content(fn_libconfig_h, content_libconfig_h)
 
 def configure_nopbbam():
@@ -271,9 +271,18 @@ update_env_for_os = {
     OsType.Unknown: update_env_for_unknown,
 }
 
+def link_makefile_if_external():
+    """If not building in src-tree, write a makefile.
+    """
+    if os.path.abspath('.') == thisdir:
+        return
+    if not os.path.lexists('makefile'):
+        os.symlink(os.path.join(thisdir, 'makefile'), 'makefile')
+
 def main(prog, *args):
     """We are still deciding what env-vars to use, if any.
     """
+    link_makefile_if_external()
     ost = getOsType()
     update_env_for_os[ost](os.environ)
     if 'NOPBBAM' in os.environ:
