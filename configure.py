@@ -53,7 +53,7 @@ def compose_defines_with_hdf(HDF5_INCLUDE, HDF5_LIB):
     return """
 HDF5_INCLUDE:=%(HDF5_INCLUDE)s
 HDF5_LIB:=%(HDF5_LIB)s
-#CPPFLAGS+=-I../pbdata -I../hdf -I../alignment
+#CPPFLAGS+= -I../pbdata -I../hdf -I../alignment
 LIBPBDATA_INCLUDE     ?=../pbdata
 LIBPBIHDF_INCLUDE     ?=../hdf
 LIBBLASR_INCLUDE      ?=../alignment
@@ -70,8 +70,8 @@ def compose_defines_with_hdf_headers(HDF_HEADERS):
     return """
 HDF_HEADERS:=%(HDF_HEADERS)s
 #HDF5_INC  ?=${HDF_HEADERS}/src
-CPPFLAGS+=-I${HDF_HEADERS}/src -I${HDF_HEADERS}/c++/src
-CPPFLAGS+=-I../pbdata -I../hdf -I../alignment
+CPPFLAGS+= -I${HDF_HEADERS}/src -I${HDF_HEADERS}/c++/src
+CPPFLAGS+= -I../pbdata -I../hdf -I../alignment
 LIBPBDATA_LIB     ?=../pbdata/
 LIBPBIHDF_LIB     ?=../hdf/
 LIBBLASR_LIB      ?=../alignment/
@@ -138,6 +138,11 @@ def compose_defs_env(env):
 def append_common(env, content):
     """Dumb way to do this, but this whole thing is evolving.
     """
+    # Look into original configure dir for libconfig.h always.
+    content += """
+CPPFLAGS      += -I%s
+"""%os.getcwd()
+    # Some extra defs.
     reqs = ['SH_LIB_EXT',]
     vals = ['%-20s := %s' %(k, v) for k,v in env.items() if k in reqs]
     return content + '\n'.join([''] + vals + [''])
