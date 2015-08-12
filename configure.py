@@ -181,21 +181,23 @@ def cd(nwd):
 
 def fetch_hdf5_headers():
     """Fetch into ./hdf/HEADERS directory.
+    This should not be used when an external build-dir is needed.
     Return actual directory path, relative to subdirs.
     """
     version = 'hdf5-1.8.12-headers'
-    if not os.path.isdir(os.path.join(thisdir, 'hdf', version)):
-        with cd(thisdir, 'hdf'):
+    version_dn = os.path.join(thisdir, 'hdf', version)
+    if not os.path.isdir(version_dn):
+        with cd(os.path.dirname(version_dn)):
             cmd = 'curl -k -L https://www.dropbox.com/s/8971bcyy5o42rxb/hdf5-1.8.12-headers.tar.bz2\?dl\=0 | tar xjf -'
             shell(cmd)
-    return os.path.join(thisdir, 'hdf', version) # Relative path might help caching.
+    return version_dn # Relative path might help caching.
 
 def update(content_defines_mk, content_libconfig_h):
     """ Write these relative to the same directory as *this* file.
     """
     fn_defines_mk = 'defines.mk'
     update_content(fn_defines_mk, content_defines_mk)
-    fn_libconfig_h = os.path.join('.', 'pbdata', 'libconfig.h')
+    fn_libconfig_h = os.path.join('.', 'libconfig.h')
     update_content(fn_libconfig_h, content_libconfig_h)
 
 def configure_nopbbam():

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -ex
 ( cd pbdata; NOPBBAM=1 ../configure.py; )
 ( cd hdf; NOPBBAM=1 ../configure.py; )
 ( cd alignment; NOPBBAM=1 ../configure.py; )
