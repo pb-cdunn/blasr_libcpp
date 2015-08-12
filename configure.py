@@ -163,6 +163,7 @@ def compose_defines_pacbio(envin):
             'BOOST_INC',
             'ZLIB_LIB',
             'GCC_LIB',
+            'GTEST_INC', 'GTEST_SRCDIR',
     ])
     update_env_if(env, envin, nondefaults)
     return compose_defs_env(env)
@@ -190,9 +191,10 @@ def fetch_hdf5_headers():
 def update(content_defines_mk, content_libconfig_h):
     """ Write these relative to the same directory as *this* file.
     """
-    thisdir = os.path.dirname(os.path.abspath(__file__))
+    thisdir = '.'
     fn_defines_mk = os.path.join(thisdir, 'defines.mk')
     update_content(fn_defines_mk, content_defines_mk)
+    shell('mkdir -p %s' %(os.path.join(thisdir, 'pbdata')))
     fn_libconfig_h = os.path.join(thisdir, 'pbdata', 'libconfig.h')
     update_content(fn_libconfig_h, content_libconfig_h)
 

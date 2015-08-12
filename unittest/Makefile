@@ -1,47 +1,19 @@
 SHELL=bash
-
-V  := 0
-V@ := @
-ifeq ($(V),$(filter $(V),1))
-    # Enable verbose mode if V=1 or V= specified on command ine
-    V@ :=
-endif
+THISDIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR:=${THISDIR}
+-include ${CURDIR}/defines.mk
+include ${THISDIR}/../rules.mk
 
 MKDIR := mkdir
 
 null :=
 space := $(null) $(null)
 
-
-
-OUTDIR := _output
-
-GTEST_SRCDIR       := __UNSET__
-
-LIBBLASR_INCLUDE   := __UNSET__
-LIBPBIHDF_INCLUDE  := __UNSET__
-LIBPBDATA_INCLUDE  := __UNSET__
-PBBAM_INCLUDE      := __UNSET__
-HTSLIB_INCLUDE     := __UNSET__
-HDF5_INCLUDE       := __UNSET__
-BOOST_INCLUDE      := __UNSET__
-GTEST_INCLUDE      := __UNSET__
-
-LIBBLASR_LIB       := __UNSET__
-LIBPBIHDF_LIB      := __UNSET__
-LIBPBDATA_LIB      := __UNSET__
-PBBAM_LIB          := __UNSET__
-HTSLIB_LIB         := __UNSET__
-HDF5_LIB           := __UNSET__
-ZLIB_LIB           := __UNSET__
-
-
-
 broken_test_sources := \
-	alignment/files/ReaderAgglomerate_gtest.cpp \
-	alignment/format/SAMHeaderPrinter_gtest.cpp \
-	alignment/format/SAMPrinter_gtest.cpp \
-	alignment/utils/FileUtils_gtest.cpp \
+	${SRCDIR}/alignment/files/ReaderAgglomerate_gtest.cpp \
+	${SRCDIR}/alignment/format/SAMHeaderPrinter_gtest.cpp \
+	${SRCDIR}/alignment/format/SAMPrinter_gtest.cpp \
+	${SRCDIR}/alignment/utils/FileUtils_gtest.cpp \
 	$(null)
 
 
@@ -49,20 +21,20 @@ gtest_sources  := $(GTEST_SRCDIR)/gtest/gtest-all.cc \
                   $(GTEST_SRCDIR)/gtest/gtest_main.cc \
 		  $(null)
 
-test_sources   := $(wildcard pbdata/*.cpp) \
-                  $(wildcard pbdata/utils/*.cpp) \
-                  $(wildcard pbdata/metagenome/*.cpp) \
-                  $(wildcard pbdata/saf/*.cpp) \
-                  $(wildcard pbdata/reads/*.cpp) \
-                  $(wildcard pbdata/qvs/*.cpp)  \
+test_sources   := $(wildcard ${SRCDIR}/pbdata/*.cpp) \
+                  $(wildcard ${SRCDIR}/pbdata/utils/*.cpp) \
+                  $(wildcard ${SRCDIR}/pbdata/metagenome/*.cpp) \
+                  $(wildcard ${SRCDIR}/pbdata/saf/*.cpp) \
+                  $(wildcard ${SRCDIR}/pbdata/reads/*.cpp) \
+                  $(wildcard ${SRCDIR}/pbdata/qvs/*.cpp)  \
                   \
-                  $(wildcard hdf/*.cpp) \
+                  $(wildcard ${SRCDIR}/hdf/*.cpp) \
                   \
-                  $(wildcard alignment/*.cpp) \
-                  $(wildcard alignment/utils/*.cpp) \
-                  $(wildcard alignment/datastructures/alignment/*.cpp) \
-                  $(wildcard alignment/files/*.cpp) \
-                  $(wildcard alignment/format/*.cpp) \
+                  $(wildcard ${SRCDIR}/alignment/*.cpp) \
+                  $(wildcard ${SRCDIR}/alignment/utils/*.cpp) \
+                  $(wildcard ${SRCDIR}/alignment/datastructures/alignment/*.cpp) \
+                  $(wildcard ${SRCDIR}/alignment/files/*.cpp) \
+                  $(wildcard ${SRCDIR}/alignment/format/*.cpp) \
                   $(null)
 
 # Remove broken tests from the test_sources list
@@ -70,22 +42,22 @@ test_sources   := $(filter-out $(broken_test_sources),$(test_sources))
 
 
 sources   := $(gtest_sources) $(test_sources)
-objects   := $(patsubst %.cc,$(OUTDIR)/%.o,$(filter %.cc,$(sources))) \
-             $(patsubst %.cpp,$(OUTDIR)/%.o,$(filter %.cpp,$(sources))) \
+objects   := $(patsubst %.cc,%.o,$(filter %.cc,$(sources))) \
+             $(patsubst %.cpp,%.o,$(filter %.cpp,$(sources))) \
              $(null)
 depfiles  := $(objects:%.o=%.d)
 
 
 includes := \
-    -I. \
-    -I$(GTEST_INCLUDE) \
-    -I$(LIBBLASR_INCLUDE) \
-    -I$(LIBPBIHDF_INCLUDE) \
-    -I$(LIBPBDATA_INCLUDE) \
-    -I$(PBBAM_INCLUDE) \
-    -I$(HTSLIB_INCLUDE) \
-    -I$(HDF5_INCLUDE) \
-    -I$(BOOST_INCLUDE) \
+    . \
+    $(GTEST_INC) \
+    $(LIBBLASR_INC) \
+    $(LIBPBIHDF_INC) \
+    $(LIBPBDATA_INC) \
+    $(PBBAM_INC) \
+    $(HTSLIB_INC) \
+    $(HDF5_INC) \
+    $(BOOST_INC) \
     $(null)
 
 libs := \
@@ -97,23 +69,24 @@ libs := \
     $(HDF5_LIB) \
     $(HDF5_CPP_LIB) \
     $(ZLIB_LIB) \
+    $(GCC_LIB) \
     $(null)
 
+ldlibs     := -lblasr -lpbihdf -lpbdata -lpbbam -lhts -lhdf5_cpp -lhdf5 -lz
+sys_ldlibs := -lpthread -ldl -lrt
 
-sys_ldflags := -lpthread -ldl -lrt
-
-
-cxxopts := -std=c++11 -Wno-div-by-zero 
+cxxopts  := -std=c++11 -Wno-div-by-zero 
 cxxflags := -O3
-ldflags := $(libs) $(sys_ldflags)
+cppflags := $(patsubst %,-I%,${includes})
+ldflags  := $(patsubst %,-L%,${libs}) $(sys_ldflags)
 
 
 
-CPPFLAGS := $(includes) $(EXTRA_CPPFLAGS)
-CXXFLAGS := $(cxxflags) $(cxxopts) $(EXTRA_CXXFLAGS)
-LDLIBS   := $(ldflags) $(EXTRA_LDLIBS)
+CPPFLAGS += $(cppflags) $(EXTRA_CPPFLAGS)
+CXXFLAGS += $(cxxflags) $(cxxopts) $(EXTRA_CXXFLAGS)
+LDLIBS   += $(ldlibs) $(sys_ldlibs)
+LDFLAGS  += $(ldflags)
 
-OUTPUT_OPTION = -o $@
 COMPILE.cpp   = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 COMPILE.cc    = $(COMPILE.cpp)
 LINK.o        = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
@@ -122,30 +95,19 @@ LINK.o        = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 all: test-runner
 
 test-runner: $(objects)
-	$(V@)$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
+	$(LINK.o) $^ $(LDLIBS) -o $@
 
 gtest: test-runner
-	$(V@)LD_LIBRARY_PATH=$(subst $(space),:,$(strip $(dir $(libs)))) ./$< --gtest_output=xml:$(OUTDIR)/xml/all.xml
+	LD_LIBRARY_PATH=$(subst $(space),:,$(strip $(dir $(libs)))) ./$< --gtest_output=xml:./xml/all.xml
 
 # Build objects
-$(OUTDIR)/%.o: %.cpp
-	@echo "  CXX    $@"
-	$(V@)$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+%.o: %.cpp
+	$(COMPILE.cpp) -o $@ $<
 
-$(OUTDIR)/%.o: %.cc
-	@echo "  CXX    $@"
-	$(V@)$(COMPILE.cc) $(OUTPUT_OPTION) $<
-
-# Make all directories of object files 'order-only' dependencies of all objects
-# This will make all the output directories we need before building any objects
-$(objects): | $(dir $(objects))
-
-# Create any output directories
-$(OUTDIR)/%/:
-	$(V@)$(MKDIR) -p "$@"
-
+%.o: %.cc
+	$(COMPILE.cc) -o $@ $<
 
 clean:
-	$(V@)$(RM) -r $(OUTDIR)
+	$(RM) -r $(OUTDIR)
 
 -include ${depfiles}

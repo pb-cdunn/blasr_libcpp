@@ -6,5 +6,5 @@
 defines.mk
 all.xml
 *.h5
-/pbdata/libconfig.h
+libconfig.h
 /hdf/hdf5-1.8.12-headers/
