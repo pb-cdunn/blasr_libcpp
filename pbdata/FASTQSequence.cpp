@@ -644,8 +644,12 @@ void FASTQSequence::Copy(const PacBio::BAM::BamRecord & record) {
         std::memcpy(deletionTag, qvs.c_str(), qvs.size() * sizeof(char));
     }
     // preBaseQVs are not included in BamRecord, and will not be copied.
-    
-    subreadStart = static_cast<int>(record.QueryStart());
-    subreadEnd = static_cast<int>(record.QueryEnd());
+    if (record.Type() != PacBio::BAM::RecordType::CCS) { 
+        subreadStart = static_cast<int>(record.QueryStart());
+        subreadEnd = static_cast<int>(record.QueryEnd());
+    } else {
+        subreadStart = 0;
+        subreadEnd =  static_cast<int>(record.Sequence().length());;
+    }
 }
 #endif
