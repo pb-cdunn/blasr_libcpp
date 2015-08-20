@@ -52,7 +52,7 @@ objects   := $(patsubst %.cc,%.o,$(filter %.cc,$(sources))) \
 depfiles  := $(objects:%.o=%.d)
 
 
-includes := \
+INCLUDES+= \
     ${SRCDIR} \
     $(GTEST_INC) \
     $(LIBBLASR_INC) \
@@ -64,7 +64,7 @@ includes := \
     $(BOOST_INC) \
     $(null)
 
-libs := \
+LIBS+= \
     $(LIBBLASR_LIB) \
     $(LIBPBIHDF_LIB) \
     $(LIBPBDATA_LIB) \
@@ -82,7 +82,7 @@ sys_ldlibs := -lpthread -ldl -lrt
 cxxopts  := -std=c++11 -Wno-div-by-zero 
 cxxflags := -O3
 cppflags := $(patsubst %,-I%,${includes})
-ldflags  := $(patsubst %,-L%,${libs}) $(sys_ldflags)
+ldflags  := $(patsubst %,-L%,${LIBS}) $(sys_ldflags)
 
 
 
@@ -104,7 +104,7 @@ test-runner: $(objects)
 	$(LINK.o) $^ $(LDLIBS) -o $@
 
 gtest: test-runner
-	LD_LIBRARY_PATH=$(subst $(space),:,$(strip $(libs))) ./$< --gtest_output=xml:./xml/all.xml
+	LD_LIBRARY_PATH=$(subst $(space),:,$(strip $(LIBS))) ./$< --gtest_output=xml:./xml/all.xml
 
 # Build objects
 %.o: %.cpp

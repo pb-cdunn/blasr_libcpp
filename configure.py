@@ -132,10 +132,10 @@ def update_env_if(envout, envin, keys):
 def compose_defs_env(env):
     # We disallow env overrides for anything with a default from GNU make.
     nons = ['CXX', 'CC', 'AR'] # 'SHELL'?
-    ovr    = ['%-20s ?= %s' %(k, v) for k,v in env.items() if k not in nons]
-    nonovr = ['%-20s := %s' %(k, v) for k,v in env.items() if k in nons]
+    ovr    = ['%-20s ?= %s' %(k, v) for k,v in sorted(env.items()) if k not in nons]
+    nonovr = ['%-20s := %s' %(k, v) for k,v in sorted(env.items()) if k in nons]
     return '\n'.join(ovr + nonovr + [''])
-def append_common(env, content):
+def append_common(envin, content):
     """Dumb way to do this, but this whole thing is evolving.
     """
     # This is the original libconfig.h. However, in case somebody (like
@@ -143,13 +143,26 @@ def append_common(env, content):
     # libconfig.h wherever pbdata is actually built, which we will not
     # know until later. This can all be cleared up later, when we are
     # more clear about where things are built.
+    libconfig_h = os.path.abspath(os.path.join(os.getcwd(), 'libconfig.h'))
     content += """
-#CPPFLAGS      += -I%s
-"""%os.getcwd()
+LIBCONFIG_H:=%s
+# Use PREFIX dir, if available.
+INCLUDES      += ${PREFIX_INC}
+LIBS          += ${PREFIX_LIB}
+"""%libconfig_h
+    env = dict(envin)
     # Some extra defs.
-    reqs = ['SH_LIB_EXT', 'EXTRA_LDFLAGS', 'LIB_CONFIG_H']
-    vals = ['%-20s := %s' %(k, v) for k,v in env.items() if k in reqs]
-    return content + '\n'.join([''] + vals + [''])
+    if 'PREFIX' in envin:
+        PREFIX = envin['PREFIX']
+        setenv(env, 'PREFIX_INC', os.path.join(PREFIX, 'include'))
+        setenv(env, 'PREFIX_LIB', os.path.join(PREFIX, 'lib'))
+    poss = [
+        'SH_LIB_EXT',
+        'EXTRA_LDFLAGS',
+        'PREFIX_LIB', 'PREFIX_INC',
+    ]
+    vals = ['%-20s := %s' %(k, v) for k,v in sorted(env.items()) if k in poss]
+    return '\n'.join([''] + vals + ['']) + content
 def compose_defines_pacbio(envin):
     """
     This is used by mobs via buildcntl.sh.
@@ -165,7 +178,7 @@ def compose_defines_pacbio(envin):
     setifenv(env, envin, 'LIBBLASR_LIB', '../alignment/')
     if 'nohdf' in envin:
         env['nohdf'] = envin['nohdf']
-        # Otherwise, do not define it at all.
+        # Otherwise, do not define it at all. TODO(CD): Remove nohdf, as it is not used.
     nondefaults = set([
             'CXX', 'AR',
             'HDF5_INC', 'HDF5_LIB',
@@ -209,7 +222,7 @@ def update(content_defines_mk, content_libconfig_h):
     """
     fn_libconfig_h = os.path.join('.', 'libconfig.h')
     update_content(fn_libconfig_h, content_libconfig_h)
-    content_defines_mk += 'LIBCONFIG_H:=%s\n' %os.path.abspath(fn_libconfig_h)
+    #content_defines_mk += 'LIBCONFIG_H:=%s\n' %os.path.abspath(fn_libconfig_h)
     fn_defines_mk = 'defines.mk'
     update_content(fn_defines_mk, content_defines_mk)
     if thisdir == os.path.abspath('.'):
@@ -221,33 +234,33 @@ def update(content_defines_mk, content_libconfig_h):
             if not os.path.lexists(lname):
                 os.symlink(os.path.join('..', 'defines.mk'), lname)
 
-def configure_nopbbam():
+def configure_nopbbam(envin):
     """Use HDF5 from env-vars.
     This is the path used by blasr in a GitHub build, for now.
     """
-    HDF5_INC = os.environ.get('HDF5_INC')
+    HDF5_INC = envin.get('HDF5_INC')
     if not HDF5_INC:
-        HDF5_INC = os.environ['HDF5_INCLUDE']
-    HDF5_LIB = os.environ['HDF5_LIB']
+        HDF5_INC = envin['HDF5_INCLUDE']
+    HDF5_LIB = envin['HDF5_LIB']
     content1 = compose_defines_with_hdf(HDF5_INC, HDF5_LIB)
-    content1 = append_common(os.environ, content1)
+    content1 = append_common(envin, content1)
     content2 = compose_libconfig(pbbam=False)
     update(content1, content2)
 
-def configure_nopbbam_skip_hdf():
+def configure_nopbbam_skip_hdf(envin):
     """Fetch HDF5 headers.
     We lack HDF5 libs, so we cannot build our hdf/ subdir.
     But the others are fine.
     """
     HDF_HEADERS = fetch_hdf5_headers()
     content1 = compose_defines_with_hdf_headers(HDF_HEADERS)
-    content1 = append_common(os.environ, content1)
+    content1 = append_common(envin, content1)
     content2 = compose_libconfig(pbbam=False)
     update(content1, content2)
 
-def configure_nopbbam_nohdf5():
+def configure_nopbbam_nohdf5(envin):
     content1 = compose_defines()
-    content1 = append_common(os.environ, content1)
+    content1 = append_common(envin, content1)
     content2 = compose_libconfig(pbbam=False)
     update(content1, content2)
 
@@ -298,25 +311,26 @@ update_env_for_os = {
 }
 
 def main(prog, *args):
-    """We are still deciding what env-vars to use, if any.
+    """Include shell environ plus KEY=VAL pairs in args.
     """
     ost = getOsType()
-    update_env_for_os[ost](os.environ)
-    if 'NOPBBAM' in os.environ:
-        if 'NOHDF' in os.environ:
-            configure_nopbbam_nohdf5()
+    envin = get_make_style_env(os.environ, args)
+    update_env_for_os[ost](envin)
+    if 'NOPBBAM' in envin:
+        if 'NOHDF' in envin:
+            configure_nopbbam_nohdf5(envin)
         else:
-            if 'HDF5_LIB' in os.environ:
-                assert 'HDF5_INC' in os.environ or 'HDF5_INCLUDE' in os.environ, 'Hey! You have HDF5_LIB but not HDF5_INCLUDE!'
-                if 'HDF5_INC' not in os.environ:
-                    print "NOT1"
-                if 'HDF5_INCLUDE' not in os.environ:
-                    print "NOT2"
-                configure_nopbbam()
+            if 'HDF5_LIB' in envin:
+                if 'HDF5_INCLUDE' in envin:
+                    if 'HDF5_INC' not in envin:
+                        envin['HDF5_INC'] = envin['HDF5_INCLUDE']
+                    else:
+                        print("WARNING: Found both HDF5_INC and HDF5_INCLUDE in environ!")
+                assert 'HDF5_INC' in envin, 'Hey! You have HDF5_LIB but not HDF5_INC!'
+                configure_nopbbam(envin)
             else:
-                configure_nopbbam_skip_hdf()
+                configure_nopbbam_skip_hdf(envin)
     else:
-        envin = get_make_style_env(os.environ, args)
         configure_pacbio(envin)
 
 

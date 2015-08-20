@@ -5,6 +5,8 @@ THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include ${THISDIR}/../rules.mk
 
 CXXOPTS  += -std=c++11 -pedantic -MMD -MP
+# CURDIR should have libconfig.h
+INCLUDES += ${CURDIR}
 INCLUDES += ${THISDIR} matrix reads qvs metagenome saf utils
 INCLUDES += ${LIBBLASR_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
 LIBS     += ${PBBAM_LIB} ${HTSLIB_LIB}
