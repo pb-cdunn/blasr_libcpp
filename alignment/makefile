@@ -37,7 +37,7 @@ vpath %.cpp ${paths}
 libblasr.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
-libblasr.so: $(shared_objects)
+libblasr${SH_LIB_EXT}: $(shared_objects)
 
 clean: 
 	rm -f libblasr.a libblasr.so *.o *.d
