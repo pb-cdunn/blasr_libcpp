@@ -9,6 +9,7 @@ all:
 	${MAKE} libpbihdf
 	${MAKE} libblasr
 libpbdata:
+	${MAKE} -C ${THISDIR}/pbdata libconfig.h
 	${MAKE} -C ${THISDIR}/pbdata all
 libpbihdf:
 	${MAKE} -C ${THISDIR}/hdf all
