@@ -143,7 +143,7 @@ def append_common(env, content):
 CPPFLAGS      += -I%s
 """%os.getcwd()
     # Some extra defs.
-    reqs = ['SH_LIB_EXT',]
+    reqs = ['SH_LIB_EXT', 'EXTRA_LDFLAGS']
     vals = ['%-20s := %s' %(k, v) for k,v in env.items() if k in reqs]
     return content + '\n'.join([''] + vals + [''])
 def compose_defines_pacbio(envin):
@@ -277,6 +277,9 @@ def update_env_for_linux(env):
 def update_env_for_darwin(env):
     env['SET_LIB_NAME'] = '-install_name'
     env['SH_LIB_EXT'] = '.dylib'
+    env['EXTRA_LDFLAGS'] = '-flat_namespace'
+    # -flat_namespace makes BSD ld act like Linux ld, finding
+    # shared libs recursively.
 def update_env_for_unknown(env):
     env['SET_LIB_NAME'] = '-soname'
     env['SH_LIB_EXT'] = '.so'
