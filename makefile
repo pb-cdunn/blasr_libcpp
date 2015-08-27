@@ -4,7 +4,10 @@ THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 .PHONY: all libpbdata libhdf libblasr gtest clean cleanall
 
-all: libpbdata libhdf libblasr
+all:
+	${MAKE} libpbdata
+	${MAKE} libhdf
+	${MAKE} libblasr
 libpbdata:
 	${MAKE} -C ${THISDIR}/pbdata all
 libhdf:

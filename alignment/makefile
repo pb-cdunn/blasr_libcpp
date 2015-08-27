@@ -8,7 +8,11 @@ CXXOPTS  := -std=c++11 -pedantic -MMD -MP -Wno-long-long
 INCLUDES += ${THISDIR} ${LIBPBDATA_INC} ${LIBPBIHDF_INC} ${HDF5_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
 LIBS     += ${LIBPBDATA_LIB} ${LIBPBIHDF_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
 LDFLAGS  += $(patsubst %,-L%,${LIBS})
-LDLIBS += -lpbdata -lpbihdf -lhdf5 -lhdf5_cpp
+LDLIBS += -lpbdata
+
+ifeq (${nohdf},)
+  LDLIBS+= -lpbihdf #-lhdf5 -lhdf5_cpp
+endif
 # We might also need some -l* for pbbam, etc.
 
 all: libblasr.a libblasr${SH_LIB_EXT}
