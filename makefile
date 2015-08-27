@@ -6,11 +6,11 @@ THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 all:
 	${MAKE} libpbdata
-	${MAKE} libhdf
+	${MAKE} libpbihdf
 	${MAKE} libblasr
 libpbdata:
 	${MAKE} -C ${THISDIR}/pbdata all
-libhdf:
+libpbihdf:
 	${MAKE} -C ${THISDIR}/hdf all
 libblasr:
 	${MAKE} -C ${THISDIR}/alignment all

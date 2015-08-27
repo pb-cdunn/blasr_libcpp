@@ -23,7 +23,7 @@ vpath %.cpp ${paths}
 libpbihdf.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
-libpbihdf.so: $(shared_objects)
+libpbihdf${SH_LIB_EXT}: $(shared_objects)
 
 clean: 
 	rm -f libpbihdf.a libpbihdf.so *.o *.d

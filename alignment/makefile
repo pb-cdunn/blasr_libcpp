@@ -11,7 +11,8 @@ LDFLAGS  += $(patsubst %,-L%,${LIBS})
 LDLIBS += -lpbdata
 
 ifeq (${nohdf},)
-  LDLIBS+= -lpbihdf #-lhdf5 -lhdf5_cpp
+  LDLIBS+= -lpbihdf
+  #LDFLAGS+= -flat_namespace # so we do not need LDLIBS+= -lhdf5 -lhdf5_cpp
 endif
 # We might also need some -l* for pbbam, etc.
 
@@ -37,7 +38,7 @@ vpath %.cpp ${paths}
 libblasr.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
-libblasr.so: $(shared_objects)
+libblasr${SH_LIB_EXT}: $(shared_objects)
 
 clean: 
 	rm -f libblasr.a libblasr.so *.o *.d

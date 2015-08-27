@@ -25,7 +25,7 @@ vpath %.cpp ${paths}
 libpbdata.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^
 
-libpbdata.so: $(shared_objects)
+libpbdata${SH_LIB_EXT}: $(shared_objects)
 
 clean: 
 	rm -f libpbdata.a  libpbdata.so *.o *.d
