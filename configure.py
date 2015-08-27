@@ -57,9 +57,9 @@ HDF5_LIB:=%(HDF5_LIB)s
 LIBPBDATA_INC     ?=../pbdata
 LIBPBIHDF_INC     ?=../hdf
 LIBBLASR_INC      ?=../alignment
-LIBPBDATA_LIB     ?=../pbdata/libpbdata.so
-LIBPBIHDF_LIB     ?=../hdf/libpbihdf.so
-LIBBLASR_LIB      ?=../alignment/libblasr.so
+LIBPBDATA_LIB     ?=../pbdata
+LIBPBIHDF_LIB     ?=../hdf
+LIBBLASR_LIB      ?=../alignment
 """%(dict(
     thisdir=thisdir,
     HDF5_INC=HDF5_INC,
