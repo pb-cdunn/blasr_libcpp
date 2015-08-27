@@ -27,6 +27,9 @@ libpbdata.a: $(objects)
 
 libpbdata${SH_LIB_EXT}: $(shared_objects)
 
+libconfig.h:
+	cp -af ${LIBCONFIG_H} $@
+
 clean: 
 	rm -f libpbdata.a  libpbdata.so *.o *.d
 

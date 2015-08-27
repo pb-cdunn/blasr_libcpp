@@ -138,12 +138,16 @@ def compose_defs_env(env):
 def append_common(env, content):
     """Dumb way to do this, but this whole thing is evolving.
     """
-    # Look into original configure dir for libconfig.h always.
+    # This is the original libconfig.h. However, in case somebody (like
+    # pbdagcon) builds libpbdata in-place, we need to drop a copy of
+    # libconfig.h wherever pbdata is actually built, which we will not
+    # know until later. This can all be cleared up later, when we are
+    # more clear about where things are built.
     content += """
-CPPFLAGS      += -I%s
+#CPPFLAGS      += -I%s
 """%os.getcwd()
     # Some extra defs.
-    reqs = ['SH_LIB_EXT', 'EXTRA_LDFLAGS']
+    reqs = ['SH_LIB_EXT', 'EXTRA_LDFLAGS', 'LIB_CONFIG_H']
     vals = ['%-20s := %s' %(k, v) for k,v in env.items() if k in reqs]
     return content + '\n'.join([''] + vals + [''])
 def compose_defines_pacbio(envin):
@@ -199,11 +203,15 @@ def fetch_hdf5_headers():
 
 def update(content_defines_mk, content_libconfig_h):
     """ Write these relative to the same directory as *this* file.
+
+    Unfortunately, we need to record the exact path of libconfig.h
+    in defines.mk, so we know how to copy it.
     """
-    fn_defines_mk = 'defines.mk'
-    update_content(fn_defines_mk, content_defines_mk)
     fn_libconfig_h = os.path.join('.', 'libconfig.h')
     update_content(fn_libconfig_h, content_libconfig_h)
+    content_defines_mk += 'LIBCONFIG_H:=%s\n' %os.path.abspath(fn_libconfig_h)
+    fn_defines_mk = 'defines.mk'
+    update_content(fn_defines_mk, content_defines_mk)
     if thisdir == os.path.abspath('.'):
         # This was run in the root directory, so symlink defines.mk
         # in sub-dirs, which now include defines.mk from CURDIR
