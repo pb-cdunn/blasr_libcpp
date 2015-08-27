@@ -45,24 +45,24 @@ def compose_libconfig(pbbam=False):
 """
     return content
 
-def compose_defines_with_hdf(HDF5_INCLUDE, HDF5_LIB):
+def compose_defines_with_hdf(HDF5_INC, HDF5_LIB):
     """We have to use := for HDF5_LIB b/c blasr
     is using it to mean the directory, not the file,
     and it's in the environment.
     """
     return """
-HDF5_INCLUDE:=%(HDF5_INCLUDE)s
+HDF5_INC:=%(HDF5_INC)s
 HDF5_LIB:=%(HDF5_LIB)s
 #CPPFLAGS+= -I../pbdata -I../hdf -I../alignment
-LIBPBDATA_INCLUDE     ?=../pbdata
-LIBPBIHDF_INCLUDE     ?=../hdf
-LIBBLASR_INCLUDE      ?=../alignment
-LIBPBDATA_LIB     ?=../pbdata/libpbdata.so
-LIBPBIHDF_LIB     ?=../hdf/libpbihdf.so
-LIBBLASR_LIB      ?=../alignment/libblasr.so
+LIBPBDATA_INC     ?=../pbdata
+LIBPBIHDF_INC     ?=../hdf
+LIBBLASR_INC      ?=../alignment
+LIBPBDATA_LIB     ?=../pbdata
+LIBPBIHDF_LIB     ?=../hdf
+LIBBLASR_LIB      ?=../alignment
 """%(dict(
     thisdir=thisdir,
-    HDF5_INCLUDE=HDF5_INCLUDE,
+    HDF5_INC=HDF5_INC,
     HDF5_LIB=HDF5_LIB))
 
 
@@ -217,11 +217,11 @@ def configure_nopbbam():
     """Use HDF5 from env-vars.
     This is the path used by blasr in a GitHub build, for now.
     """
-    HDF5_INCLUDE = os.environ.get('HDF5_INCLUDE')
-    if not HDF5_INCLUDE:
-        HDF5_INCLUDE = os.environ['HDF5_INC']
+    HDF5_INC = os.environ.get('HDF5_INC')
+    if not HDF5_INC:
+        HDF5_INC = os.environ['HDF5_INCLUDE']
     HDF5_LIB = os.environ['HDF5_LIB']
-    content1 = compose_defines_with_hdf(HDF5_INCLUDE, HDF5_LIB)
+    content1 = compose_defines_with_hdf(HDF5_INC, HDF5_LIB)
     content1 = append_common(os.environ, content1)
     content2 = compose_libconfig(pbbam=False)
     update(content1, content2)
