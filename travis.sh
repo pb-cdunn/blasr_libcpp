@@ -3,5 +3,7 @@ ls /usr/include/hdf*
 ls /usr/lib/libhdf*
 set -ex
 NOPBBAM=1 ./configure.py
-make -j4 all
+make -j4 libpbdata
+make -j4 -C hdf libhdf.a
+make -j4 libblasr
 # make -j4 gtest
