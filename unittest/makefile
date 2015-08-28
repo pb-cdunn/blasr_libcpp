@@ -79,7 +79,7 @@ LIBS+= \
 ldlibs     := -lblasr -lpbihdf -lpbdata -lpbbam -lhts -lhdf5_cpp -lhdf5 -lz
 sys_ldlibs := -lpthread -ldl -lrt
 
-cxxopts  := -std=c++11 -Wno-div-by-zero 
+cxxopts  := -std=c++0x -Wno-div-by-zero
 cxxflags := -O3
 cppflags := $(patsubst %,-I%,${includes})
 ldflags  := $(patsubst %,-L%,${LIBS}) $(sys_ldflags)
