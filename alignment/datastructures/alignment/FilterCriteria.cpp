@@ -18,6 +18,8 @@
 
 #include "FilterCriteria.hpp"
 
+constexpr float Score::errorunit;
+
 Score::Score(const float & value, const ScoreSign & sign)
     : _value(value)
     , _sign(sign)
