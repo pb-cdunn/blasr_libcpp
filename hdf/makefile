@@ -13,12 +13,16 @@ LDLIBS += -lpbdata -lhdf5 -lhdf5_cpp
 all: libpbihdf.a libpbihdf${SH_LIB_EXT}
 
 paths := ${THISDIR}
-ignore_files := ${THISDIR}HDFWriterBase.cpp \
-                ${THISDIR}HDFBaxWriter.cpp \
-                ${THISDIR}HDFBaseCallsWriter.cpp \
-				${THISDIR}HDFZMWMetricsWriter.cpp \
-				${THISDIR}HDFZMWWriter.cpp \
-				${THISDIR}HDFRegionsWriter.cpp
+ifeq (${BOOST_INC},)
+	ignore_files:= ${THISDIR}HDFWriterBase.cpp \
+	               ${THISDIR}HDFBaxWriter.cpp \
+	               ${THISDIR}HDFBaseCallsWriter.cpp \
+	               ${THISDIR}HDFZMWMetricsWriter.cpp \
+	               ${THISDIR}HDFZMWWriter.cpp \
+	               ${THISDIR}HDFRegionsWriter.cpp
+else
+	ignore_files:=
+endif
 sources := $(filter-out $(ignore_files), $(wildcard ${THISDIR}*.cpp))
 objects := $(sources:.cpp=.o)
 shared_objects := $(sources:.cpp=.shared.o)
