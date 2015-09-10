@@ -14,6 +14,7 @@ all: libpbihdf.a libpbihdf${SH_LIB_EXT}
 
 paths := ${THISDIR}
 sources := $(wildcard ${THISDIR}*.cpp)
+sources := $(notdir ${sources})
 objects := $(sources:.cpp=.o)
 shared_objects := $(sources:.cpp=.shared.o)
 dependencies := $(objects:.o=.d) $(shared_objects:.o=.d)
