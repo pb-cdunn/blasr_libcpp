@@ -17,6 +17,7 @@
  */
 
 #include "gtest/gtest.h"
+#define private public
 #include "HDFScanDataWriter.hpp"
 #include "HDFFile.hpp"
 #include "reads/ScanData.hpp"
@@ -24,6 +25,7 @@
 TEST(HDFScanDataWriter, Write) {
     ScanData sd;
     sd.frameRate = 100;
+    sd.BaseMap("ATGC");
 
     HDFFile outFile;
     outFile.Open("scandata.h5", H5F_ACC_TRUNC);
