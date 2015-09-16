@@ -1,5 +1,6 @@
 #ifndef _BLASR_COMPRESSED_SEQUENCES_IMPL_HPP_
 #define _BLASR_COMPRESSED_SEQUENCES_IMPL_HPP_
+#include "utils.hpp"
 
 template<typename T_Sequence>
 void CompressedSequence<T_Sequence>::CopyConfiguration(CompressedSequence<T_Sequence> &rhs) {
@@ -54,13 +55,13 @@ char* CompressedSequence<T_Sequence>::GetName() {
 
 template<typename T_Sequence>
 void CompressedSequence<T_Sequence>::Copy(FASTASequence &rhs) {
-    seq = new CompressedNucleotide[rhs.length];
+    seq = ProtectedNew<CompressedNucleotide>(rhs.length);
     memcpy(seq, rhs.seq, rhs.length);
     length = rhs.length;
     if (title != NULL) {
         delete[] title;
     }
-    title = new char[rhs.titleLength+1];
+    title = ProtectedNew<char>(rhs.titleLength+1);
     memcpy(title, rhs.title, rhs.titleLength);
     titleLength = rhs.titleLength;
     title[titleLength] = '\0';
@@ -140,14 +141,14 @@ void CompressedSequence<T_Sequence>::Read(std::string inFileName) {
     if (hasTitle) {
         int inTitleLength;
         in.read((char*) &inTitleLength, sizeof(int));
-        char * inTitle = new char[inTitleLength+1];
+        char * inTitle = ProtectedNew<char>(inTitleLength+1);
         in.read((char*) inTitle, inTitleLength);
         inTitle[titleLength] = '\0';
         CopyTitle(inTitle, inTitleLength);
         delete [] inTitle;
     }
     in.read((char*) &length, sizeof(DNALength));
-    seq = new Nucleotide[length];
+    seq = ProtectedNew<Nucleotide>(length);
     in.read((char*) seq, length * sizeof(Nucleotide));
     if (hasIndex) {
         index.Read(in);
@@ -190,7 +191,7 @@ int CompressedSequence<T_Sequence>::BuildReverseIndex(int maxRun, int binSize) {
     //
     index.Free();
     index.indexLength = hpi/index.binSize + 1;
-    index.index = new int[index.indexLength];
+    index.index = ProtectedNew<int>(index.indexLength);
     hpi = 0;
     int ii = 0;
     for (i = 0; i < length; i++) { 
@@ -307,7 +308,7 @@ DNALength CompressedSequence<T_Sequence>::FourBitDecompressHomopolymers(int star
         count >>= 4;
         decompSeq.length += count;
     }
-    decompSeq.seq = new Nucleotide[decompSeq.length];
+    decompSeq.seq = ProtectedNew<Nucleotide>(decompSeq.length);
 
     //
     // Now store the actual decompressed seq.

@@ -233,6 +233,7 @@ public:
         for (refSeqIndex = 0; refSeqIndex < cmpFile.refGroup.path.size(); refSeqIndex++) {
             HDFCmpRefAlignmentGroup* refAlignGroup;
             refAlignGroup = new HDFCmpRefAlignmentGroup;
+            if (refAlignGroup == nullptr) {cout << "ERROR, unable to allocate memory for HDFCmpReader." << endl; exit(1);}
             refAlignGroup->Initialize(rootGroup.rootGroup.group, cmpFile.refGroup.path[refSeqIndex]);
             int refAlignGroupIndex = refAlignGroups.size();
             refAlignGroups.push_back(refAlignGroup);

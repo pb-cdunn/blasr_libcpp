@@ -270,7 +270,7 @@ void FASTQSequence::AllocateMergeQVSpace(DNALength len) {
 
 void FASTQSequence::AllocateDeletionTagSpace(DNALength qualLength) {
     if (deletionTag != NULL) delete[] deletionTag;
-    deletionTag = new Nucleotide[qualLength];
+    deletionTag = ProtectedNew<Nucleotide>(qualLength);
 }
 
 void FASTQSequence::AllocatePreBaseDeletionQVSpace(DNALength qualLength) {
@@ -287,7 +287,7 @@ void FASTQSequence::AllocateSubstitutionQVSpace(DNALength qualLength ){
 
 void FASTQSequence::AllocateSubstitutionTagSpace(DNALength qualLength ){ 
     if (substitutionTag != NULL) delete[] substitutionTag;
-    substitutionTag = new Nucleotide[qualLength];
+    substitutionTag = ProtectedNew<Nucleotide>(qualLength);
 }
 
 void FASTQSequence::AllocateRichQualityValues(DNALength qualLength) {

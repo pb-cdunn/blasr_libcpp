@@ -1,3 +1,4 @@
+#include "utils.hpp"
 #include "LightweightSuffixArray.hpp"
 
 UInt DiffMod(UInt a, UInt b, UInt d) {
@@ -60,7 +61,7 @@ DiffCoverMu::~DiffCoverMu() {
 }
 
 void DiffCoverMu::Initialize(UInt diffCoverP[], UInt diffCoverLengthP, UInt diffCoverSizeP, UInt textSizeP) {
-    diffCoverReverseLookup = new UInt[diffCoverSizeP];
+    diffCoverReverseLookup = ProtectedNew<UInt>(diffCoverSizeP);
     diffCoverLength = diffCoverLengthP;
     textSize        = textSizeP;
     diffCoverSize   = diffCoverSizeP;
@@ -100,7 +101,7 @@ void BuildDiffCoverLookup(UInt diffCover[], UInt diffCoverLength, UInt v, UInt d
 }
 
 void DiffCoverDelta::Initialize(UInt diffCoverP[], UInt diffCoverLengthP, UInt diffCoverSizeP) {
-    diffCoverLookup = new UInt[diffCoverSizeP];
+    diffCoverLookup = ProtectedNew<UInt>(diffCoverSizeP);
     diffCoverSize   = diffCoverSizeP;
     BuildDiffCoverLookup(diffCoverP, diffCoverLengthP, diffCoverSizeP, diffCoverLookup);
 }
@@ -299,11 +300,7 @@ bool LightweightSuffixSort(unsigned char text[], UInt textLength, UInt *index, i
     // by setting s^\prime[\mu(i)] = l^v(i)
     //
     UInt *lexVNaming;
-    lexVNaming = new UInt[dSetSize+1];
-    if (lexVNaming == NULL) {
-        std::cout << "Could not initialize welterweight order structure." << std::endl;
-        exit(1);
-    }
+    lexVNaming = ProtectedNew<UInt>(dSetSize+1);
     DiffCoverMu mu;
     mu.Initialize(diffCover, diffCoverLength, diffCoverSize, textLength);
     UInt largestLexName;

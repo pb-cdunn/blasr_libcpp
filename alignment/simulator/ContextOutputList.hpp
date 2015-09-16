@@ -68,7 +68,7 @@ public:
             int e;
             i = 0;
             if (outputMap.find(context) == outputMap.end()) {
-                outputMap[context] = new OutputList;
+                outputMap[context] = ProtectedNew<OutputList>();
             }
 
             while(i < outputsLine.size()) {

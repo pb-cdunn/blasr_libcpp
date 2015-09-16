@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <cassert>
+#include "utils.hpp"
 
 template<typename T>
 BufferedHDF2DArray<T>::BufferedHDF2DArray(H5::CommonFG *_container, 
@@ -104,7 +105,7 @@ int BufferedHDF2DArray<T>::Initialize(HDFGroup &group, std::string datasetName,
             if (dimSize) {
                 delete [] dimSize;
             }
-            dimSize = new hsize_t[nDims];
+            dimSize = ProtectedNew<hsize_t>(nDims);
             dataspace.getSimpleExtentDims(dimSize);
             rowLength = dimSize[0];
             colLength = dimSize[1];
@@ -185,7 +186,7 @@ void BufferedHDF2DArray<T>::Create(H5::CommonFG *_container, string _datasetName
             assert(this->writeBuffer != NULL);
             delete[] this->writeBuffer;
         }
-        this->writeBuffer = new T[rowLength];
+        this->writeBuffer = ProtectedNew<T>(rowLength);
         this->bufferSize = rowLength;
     }
 

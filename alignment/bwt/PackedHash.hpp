@@ -71,8 +71,8 @@ public:
         Free();
 
         tableLength = CeilOfFraction(sequenceLength, (DNALength) BinSize);
-        table  = new uint32_t[tableLength];
-        values = new uint64_t[tableLength];
+        table  = ProtectedNew<uint32_t>(tableLength);
+        values = ProtectedNew<uint64_t>(tableLength);
         std::fill(&table[0], &table[tableLength], 0);
         std::fill(&values[0], &values[tableLength], 0);
         hashLengths.resize(tableLength);
@@ -122,7 +122,7 @@ public:
         DNALength v0, v1;
         v0 = ((DNALength)storage);
         v1 = ((DNALength)(storage >> 32));
-        DNALength *storagePtr = new DNALength[3];
+        DNALength *storagePtr = ProtectedNew<DNALength>(3);
         storage = (uint64_t) storagePtr;
 
         //
@@ -149,7 +149,7 @@ public:
          * and inserts the new value into its position that maintains
          * sorted order in the list.
          */
-        DNALength *newListPtr = new DNALength[curStorageLength + 1];
+        DNALength *newListPtr = ProtectedNew<DNALength>(curStorageLength + 1);
         //
         // Copy the values from the old list making space for the new
         // value.
@@ -331,15 +331,15 @@ public:
         Free();
         in.read((char*)&tableLength, sizeof(tableLength));
         if (tableLength > 0) {
-            table  = new uint32_t[tableLength];
-            values = new uint64_t[tableLength];
+            table  = ProtectedNew<uint32_t>(tableLength);
+            values = ProtectedNew<uint64_t>(tableLength);
             in.read((char*)table, sizeof(uint32_t)*tableLength);
             in.read((char*)values, sizeof(uint64_t)*tableLength);
             DNALength tablePos;
             for (tablePos = 0; tablePos < tableLength; tablePos++) {
                 int nSetBits = CountBits(table[tablePos]);
                 if (nSetBits > 2) {
-                    values[tablePos] = (uint64_t) new uint32_t[nSetBits];
+                    values[tablePos] = (uint64_t)(ProtectedNew<uint32_t>(nSetBits));
                     in.read((char*)values[tablePos], nSetBits * sizeof(uint32_t));
                 }
             }

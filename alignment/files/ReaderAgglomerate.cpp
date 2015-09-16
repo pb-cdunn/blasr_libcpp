@@ -202,12 +202,14 @@ int ReaderAgglomerate::Initialize() {
             RESET_PBBAM_PTRS();
             try {
                 bamFilePtr = new PacBio::BAM::BamFile(fileName);
+                assert(bamFilePtr != nullptr);
             } catch (std::exception e) {
                 cout << "ERROR! Failed to open " << fileName 
                      << ": " << e.what() << endl;
                 return 0;
             }
             entireFileQueryPtr = new PacBio::BAM::EntireFileQuery(*bamFilePtr);
+            assert(entireFileQueryPtr != nullptr);
             bamIterator = entireFileQueryPtr->begin();
             break;
 #endif

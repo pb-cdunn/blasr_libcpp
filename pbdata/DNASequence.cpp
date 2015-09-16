@@ -33,7 +33,7 @@ void DNASequence::Append(const DNASequence &rhs, DNALength appendPos) {
     //
     if (appendPos == 0) {
         DNALength  newSeqLength = length + rhs.length;
-        newSeq = new Nucleotide[newSeqLength];
+        newSeq = ProtectedNew<Nucleotide>(newSeqLength);
         memcpy(newSeq, seq, length);
         memcpy(&newSeq[length], rhs.seq, rhs.length);
 
@@ -53,7 +53,7 @@ void DNASequence::Append(const DNASequence &rhs, DNALength appendPos) {
             length = appendPos;
             DNALength newSeqLength;
             newSeqLength = length + rhs.length;
-            newSeq = new Nucleotide[newSeqLength];
+            newSeq = ProtectedNew<Nucleotide>(newSeqLength);
             memcpy(newSeq, seq, length);
             memcpy(&newSeq[length], rhs.seq, rhs.length);
             if (deleteOnExit and lengthCopy != 0) {
@@ -114,7 +114,7 @@ DNASequence& DNASequence::Copy(const DNASequence &rhs, DNALength rhsPos, DNALeng
         seq = NULL;
     }
     else {
-        seq = new Nucleotide [rhsLength];
+        seq = ProtectedNew<Nucleotide>(rhsLength);
         memcpy(seq, &rhs.seq[rhsPos], rhsLength);
     }
     length = rhsLength;
@@ -181,8 +181,7 @@ void DNASequence::PrintSeq(std::ostream &out, int lineLength) {
 
 void DNASequence::Allocate(DNALength plength) {
     DNASequence::Free();
-
-    seq = new Nucleotide [plength];
+    seq = ProtectedNew<Nucleotide> (plength);
     length = plength;
     deleteOnExit = true;
 }
@@ -266,12 +265,12 @@ void DNASequence::Assign(DNASequence &ref, DNALength start, DNALength plength) {
     
     if (plength) {
         length = plength;
-        seq = new Nucleotide[length];
+        seq = ProtectedNew<Nucleotide> (length);
         memcpy(seq, &ref.seq[start], length);
     }
     else if (start) {
         length = ref.length - start;
-        seq = new Nucleotide[length];
+        seq = ProtectedNew<Nucleotide> (length);
         memcpy(seq, &ref.seq[start], length);
     }
     else {
@@ -298,7 +297,7 @@ void DNASequence::Concatenate(const Nucleotide *moreSeq, DNALength moreSeqLength
     DNALength prevLength = length;
     length += moreSeqLength;
     Nucleotide *prev = seq;
-    seq = new Nucleotide[length];
+    seq = ProtectedNew<Nucleotide> (length);
     if (prev != NULL) {
         memcpy(seq, prev, prevLength);
         delete[] prev;
@@ -385,7 +384,7 @@ void DNASequence::Free() {
 
 void DNASequence::Resize(DNALength newLength) {
     DNASequence::Free();
-    seq = new Nucleotide[newLength];
+    seq = ProtectedNew<Nucleotide>(newLength);
     length = newLength;
     deleteOnExit = true;
 }
@@ -399,4 +398,5 @@ DNASequence & DNASequence::Copy(const PacBio::BAM::BamRecord & record) {
     return DNASequence::Copy(record.Sequence());
 }
 #endif
+
 

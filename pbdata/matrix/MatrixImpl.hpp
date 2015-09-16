@@ -5,13 +5,14 @@
 #include <iostream>
 #include <fstream>
 #include <stdint.h>
+#include "utils.hpp"
 #include "Types.h"
 
 template<typename T>
 void CreateMatrix(int rows, int cols, std::vector<T*> matrix) {
 	matrix.resize(rows);
     if (matrix[0]) {delete [] matrix[0]; matrix[0] = NULL;}
-	matrix[0] = new T[rows*cols];
+	matrix[0] = ProtectedNew<T>(rows*cols);
 	VectorIndex r = 1;
 	for (r = 1; r < rows; r++) {
 		matrix[r] = &matrix[cols * r];
@@ -56,14 +57,14 @@ void Matrix<T>::Resize(VectorIndex nRowsP, VectorIndex nColsP) {
             }
         }
         if (matrix == NULL) {
-            matrix = new T*[nRows];
+            matrix = ProtectedNew<T*>(nRows);
         }
         else {
             if (matrix[0] != NULL) {
                 delete[] matrix[0]; matrix[0] = NULL;
             }
         }
-        matrix[0] = new T[matrixBufferSize];
+        matrix[0] = ProtectedNew<T>(matrixBufferSize);
         VectorIndex rowIndex;
         for (rowIndex = 1; rowIndex < nRows; rowIndex++ ){
             matrix[rowIndex] = &matrix[0][nCols * rowIndex];

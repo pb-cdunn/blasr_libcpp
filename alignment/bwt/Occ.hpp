@@ -203,7 +203,7 @@ public:
             DNALength bwtSeqLength;
             in.read((char*)&bwtSeqLength, sizeof(bwtSeqLength));
             if (full.matrix) {delete [] full.matrix;}
-            full.matrix = new DNALength[bwtSeqLength *AlphabetSize];
+            full.matrix = ProtectedNew<DNALength>(bwtSeqLength *AlphabetSize);
             full.nRows = bwtSeqLength;
             full.nCols = AlphabetSize;
             in.read((char*)&full.matrix[0], sizeof(DNALength)* bwtSeqLength * AlphabetSize);

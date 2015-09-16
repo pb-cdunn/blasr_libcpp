@@ -3,6 +3,7 @@
 
 #include <map>
 #include <fstream>
+#include "utils.hpp"
 
 template <typename T>
 class LCPTable {
@@ -38,8 +39,8 @@ class LCPTable {
     void Init(T* data, unsigned int pTableLength, unsigned int *index) {
         tableLength = pTableLength;
         maxPrefixLength = (PrefixLength) (SignedPrefixLength(-1));
-        llcp = new PrefixLength[tableLength];
-        rlcp = new PrefixLength[tableLength];
+        llcp = ProtectedNew<PrefixLength>(tableLength);
+        rlcp = ProtectedNew<PrefixLength>(tableLength);
         std::fill(llcp, llcp + tableLength, 0);
         std::fill(rlcp, rlcp + tableLength, 0);
         FillTable(data, index);
@@ -94,14 +95,14 @@ class LCPTable {
 
 
     ~LCPTable() {
-        /*
-           if (llcp != NULL) 
-           delete[] llcp;
-           llcp = NULL;
-           if (rlcp != NULL)
-           delete[] rlcp;
-           rlcp = NULL;
-           */
+        if (llcp != NULL) {
+            delete[] llcp;
+            llcp = NULL;
+        }
+        if (rlcp != NULL) {
+            delete[] rlcp;
+            rlcp = NULL;
+        }
         // the two maps automatically go away.
     }
 

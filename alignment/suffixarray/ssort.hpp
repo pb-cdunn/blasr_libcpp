@@ -234,6 +234,7 @@ Bad input
 */
 
 #include <stdlib.h>
+#include "utils.hpp"
 
 enum {
 	ORIG = ~(~0u>>1),			/* sign bit */
@@ -262,8 +263,7 @@ ssort(SAIndex a[], SAIndex s[])
             j = a[n];		/* and max element */
     if(a[n++]<0 || j>=n)
         finish(2);
-    //	p = malloc(n*sizeof(int));
-    p = new SAIndex[n];
+    p = ProtectedNew<SAIndex>(n);
     if(p == 0)
         finish(1);
 
@@ -272,7 +272,7 @@ ssort(SAIndex a[], SAIndex s[])
 
     if(s) {					/* shared lengths */
         //		q = malloc(n*sizeof(int));
-        q = new SAIndex[n];
+        q = ProtectedNew<SAIndex>(n);
         if(q == 0)
             finish(1);
     }

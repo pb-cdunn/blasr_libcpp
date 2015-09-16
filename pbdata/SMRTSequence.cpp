@@ -79,12 +79,12 @@ void SMRTSequence::Allocate(DNALength length) {
     }
 
     FASTQSequence::AllocateRichQualityValues(length);
-    seq           = new Nucleotide[length];
+    seq           = ProtectedNew<Nucleotide>(length);
     this->length  = length;
     qual.Allocate(length);
-    preBaseFrames = new HalfWord[length];
-    widthInFrames = new HalfWord[length];
-    pulseIndex    = new int[length];
+    preBaseFrames = ProtectedNew<HalfWord>(length);
+    widthInFrames = ProtectedNew<HalfWord>(length);
+    pulseIndex    = ProtectedNew<int>(length);
     subreadEnd    = length;
     deleteOnExit  = true;
 }
@@ -166,15 +166,15 @@ void SMRTSequence::Copy(const SMRTSequence &rhs, int rhsPos, int rhsLength) {
 
         // Copy SMRT QVs
         if (rhs.preBaseFrames != NULL) {
-            preBaseFrames = new HalfWord[length];
+            preBaseFrames = ProtectedNew<HalfWord>(length);
             memcpy(preBaseFrames, rhs.preBaseFrames, length*sizeof(HalfWord));
         }
         if (rhs.widthInFrames != NULL) {
-            widthInFrames = new HalfWord[length];
+            widthInFrames = ProtectedNew<HalfWord>(length);
             memcpy(widthInFrames, rhs.widthInFrames, length*sizeof(HalfWord));
         }
         if (rhs.pulseIndex != NULL) {
-            pulseIndex = new int[length];
+            pulseIndex = ProtectedNew <int>(length);
             memcpy(pulseIndex, rhs.pulseIndex, sizeof(int) * length);
         }
     }
@@ -310,7 +310,7 @@ void SMRTSequence::Copy(const PacBio::BAM::BamRecord & record,
         if (record.HasPreBaseFrames()) {
             std::vector<uint16_t> qvs = record.PreBaseFrames().DataRaw();
             assert(preBaseFrames == nullptr);
-            preBaseFrames = new HalfWord[qvs.size()];
+            preBaseFrames = ProtectedNew<HalfWord>(qvs.size());
             std::memcpy(preBaseFrames, &qvs[0], qvs.size() * sizeof(HalfWord));
         }
     }

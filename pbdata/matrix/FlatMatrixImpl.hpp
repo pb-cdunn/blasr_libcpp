@@ -3,6 +3,7 @@
 #include <iostream>
 #include <assert.h>
 #include "Types.h"
+#include "utils.hpp"
 #include "FlatMatrix.hpp"
 
 template<typename T>
@@ -61,7 +62,7 @@ void FlatMatrix2D<T>::Resize(unsigned int _totalSize) {
     if (matrix != NULL) {
         delete[] matrix;
     }
-    matrix = new T[_totalSize];
+    matrix = ProtectedNew<T>(_totalSize);
     totalSize = _totalSize;
 }
 
@@ -87,7 +88,7 @@ void FlatMatrix2D<T>::Grow(int _nRows, int _nCols) {
         if (totalSize != 0 && matrix)
             delete[] matrix;
         totalSize = nRows * nCols;
-        matrix = new T[totalSize];
+        matrix = ProtectedNew<T>(totalSize);
     }
 }
 
@@ -115,7 +116,7 @@ template<typename T>
 void FlatMatrix2D<T>::Allocate(UInt _nRows, UInt _nCols) {
     nRows = _nRows;
     nCols = _nCols;
-    matrix = new T[nRows * nCols];
+    matrix = ProtectedNew<T>(nRows * nCols);
 }
 
 template<typename T>
@@ -163,7 +164,7 @@ void FlatMatrix3D<T>::Grow(int _nx, int _ny, int _nz) {
             delete[] matrix;
         }
         totalSize = nx*ny*nz;
-        matrix = new T[totalSize];
+        matrix = ProtectedNew<T>(totalSize);
     }
     xy = nx*ny;
 }

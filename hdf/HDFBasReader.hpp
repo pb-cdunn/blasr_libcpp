@@ -899,7 +899,7 @@ public:
             delete [] seq.widthInFrames;
             seq.widthInFrames = NULL;
         }
-        seq.widthInFrames = new HalfWord[seq.length];
+        seq.widthInFrames = ProtectedNew<HalfWord>(seq.length);
         basWidthInFramesArray.Read((int)curBasePos, (int) curBasePos + seq.length, (HalfWord*) seq.widthInFrames);
         return seq.length;
     }
@@ -910,7 +910,7 @@ public:
             delete [] seq.preBaseFrames;
             seq.preBaseFrames = NULL;
         }
-        seq.preBaseFrames = new HalfWord[seq.length];
+        seq.preBaseFrames = ProtectedNew<HalfWord>(seq.length);
         preBaseFramesArray.Read((int)curBasePos, (int) curBasePos + seq.length, (HalfWord*) seq.preBaseFrames);
         return seq.length;
     }
@@ -920,7 +920,7 @@ public:
             delete [] seq.pulseIndex;
             seq.pulseIndex = NULL;
         }
-        seq.pulseIndex = new int[seq.length];
+        seq.pulseIndex = ProtectedNew<int>(seq.length);
         pulseIndexArray.Read((int)curBasePos, (int) curBasePos + seq.length, (int*) seq.pulseIndex);
         return seq.length;
     }

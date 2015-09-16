@@ -56,6 +56,7 @@ class HDFCmpRefAlignmentGroup {
     //
     int newReadGroupIndex = readGroups.size();
     HDFCmpExperimentGroup* readGroupPtr = new HDFCmpExperimentGroup;
+    if (readGroupPtr == nullptr) {cout << "ERROR, failed to allocate memory for HDFCmpExperimentGroup!" << endl; exit(1);}
     readGroups.push_back(readGroupPtr);
     experimentNameToIndex[readGroupName] = newReadGroupIndex;
 
@@ -77,7 +78,7 @@ class HDFCmpRefAlignmentGroup {
 	HDFCmpExperimentGroup* InitializeExperimentGroup(string experimentGroupName, set<string> &includedFields) {
 		if (refGroup.ContainsObject(experimentGroupName)) {
 			HDFCmpExperimentGroup* newGroup = new HDFCmpExperimentGroup;
-
+            if (newGroup == nullptr) {cout << "ERROR, failed to allocate memory for HDFCmpExperimentGroup!" << endl; exit(1);}
 			if (newGroup->Initialize(refGroup, experimentGroupName, includedFields) == 0) {
 				cout << "ERROR, could not initialize the exp group." << endl;
 				exit(1);

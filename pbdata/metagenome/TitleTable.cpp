@@ -11,12 +11,12 @@ TitleTable::~TitleTable() {
 
 void TitleTable::Copy(char **src, int nSrc) {
     Free(); //Free before copy
-    table = new char*[nSrc];
+    table = ProtectedNew<char*>(nSrc);
     tableLength = nSrc;
     int i;
     for (i = 0; i < nSrc; i++ ){
         int lenStrI = strlen(src[i]);
-        table[i] = new char[lenStrI+1];
+        table[i] = ProtectedNew<char>(lenStrI+1);
         memcpy(table[i], src[i], lenStrI);
         table[i][lenStrI] = '\0';
     }
@@ -44,10 +44,10 @@ void TitleTable::Read(std::string &inFileName) {
 void TitleTable::CopyFromVector(std::vector<std::string> &titles) {
     Free(); //Free before copy.
     tableLength = titles.size();
-    table = new char*[tableLength];
+    table = ProtectedNew<char*>(tableLength);
     int i;
     for (i = 0; i < tableLength; i++) {
-        table[i] = new char[titles[i].size() + 1];
+        table[i] = ProtectedNew<char>(titles[i].size() + 1);
         memcpy(table[i], titles[i].c_str(), titles[i].size());
         table[i][titles[i].size()] = '\0';
     }
@@ -101,7 +101,7 @@ void TitleTable::ResetTableToIntegers(char **table,
         namestrm << i;
         std::string name;
         name = namestrm.str();
-        table[i] = new char[name.size()+1];
+        table[i] = ProtectedNew<char>(name.size()+1);
         memcpy( table[i], name.c_str(), name.size());
         table[i][name.size()] = '\0';
         tableLengths[i] = (int) name.size() + 1;

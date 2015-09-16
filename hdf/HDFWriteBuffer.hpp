@@ -2,6 +2,7 @@
 #define _BLASR_HDF_WRITE_BUFFER_HPP_
 
 #include <cstddef>
+#include "utils.hpp"
 
 template<typename T>
 class HDFWriteBuffer {
@@ -20,7 +21,7 @@ public:
         Free(); // Free before reusing the buffer.
         bufferSize = pBufferSize;
         if (bufferSize > 0) {
-            writeBuffer = new T[bufferSize];
+            writeBuffer = ProtectedNew<T>(bufferSize);
         }
         else {
             writeBuffer = NULL;
