@@ -84,7 +84,6 @@ void HDFAtom<std::string>::Read(std::string &value) {
 	else {
 		hsize_t stsize = attribute.getStorageSize();
 		value.resize(stsize);
-		//		char *valueStr = new char[stsize+1];
 		attribute.read(stringType, &value[0]);
 		if (stsize > 0 and value[stsize-1] == '\0') {
 			value.resize(stsize-1);

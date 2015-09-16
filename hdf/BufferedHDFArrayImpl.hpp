@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
+#include "utils.hpp"
 #include "BufferedHDFArray.hpp"
 
 template<typename T>
@@ -311,7 +312,7 @@ int BufferedHDFArray<T>::UpdateH5Dataspace() {
             delete [] dimSize;
             dimSize = NULL;
         }
-        dimSize = new hsize_t[nDims];
+        dimSize = ProtectedNew<hsize_t>(nDims);
 
         dataspace.getSimpleExtentDims(dimSize);
         arrayLength = dimSize[0];

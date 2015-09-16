@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "format/SAMHeaderPrinter.hpp"
 
 const std::string SAMVERSION("1.5");
@@ -309,6 +310,7 @@ SAMHeaderRGs SAMHeaderPrinter::MakeRGs(const std::vector<std::string> & readsFil
 
     if (fileType != PBBAM) {
         ReaderAgglomerate * reader = new ReaderAgglomerate();
+        assert(reader != nullptr);
         std::vector<std::string>::const_iterator rfit;
         for(rfit = readsFiles.begin(); rfit != readsFiles.end(); rfit++) {
             std::string rf(*rfit);

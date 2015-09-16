@@ -29,7 +29,7 @@ class CompressedDNASequence: public DNASequence {
 	CompressedDNASequence() {
 		const char t[] = "Compressed sequence\0";
 		titleLength = strlen(t);
-		title = new char[titleLength+1];
+		title = ProtectedNew<char>(titleLength+1);
 		strcpy(title, t);
 		title[titleLength] = '\0';
 	}
@@ -62,13 +62,13 @@ class CompressedDNASequence: public DNASequence {
 	}
 	
 	void Copy(FASTASequence &rhs) {
-		seq = new CompressedNucleotide[rhs.length];
+		seq = ProtectedNew<CompressedNucleotide>(rhs.length);
 		memcpy(seq, rhs.seq, rhs.length);
 		length = rhs.length;
 		if (title != NULL) {
 			delete[] title;
 		}
-		title = new char[rhs.titleLength+1];
+		title = ProtectedNew<char>(rhs.titleLength+1);
 		memcpy(title, rhs.title, rhs.titleLength);
 		titleLength = rhs.titleLength;
 		title[titleLength] = '\0';

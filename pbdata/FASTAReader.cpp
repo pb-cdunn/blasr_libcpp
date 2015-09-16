@@ -81,7 +81,7 @@ int FASTAReader::Init(string &seqInName, int passive) {
     }
     SetFileSize();
     filePtr = (char*) mmap(0, fileSize, PROT_READ, MAP_PRIVATE, fileDes, 0);
-    if (filePtr == NULL) {
+    if (filePtr == MAP_FAILED) {
         cout << "ERROR, Fail to load FASTA file " << seqInName 
              << " to virtual memory." << endl;
         exit(1);
@@ -233,7 +233,10 @@ void FASTAReader::ReadTitle(long &p, char *&title, int &titleLength) {
     titleLength = p - curPos;
     if (titleLength > 0) {
         if (title) {delete [] title; title = NULL;}
-        title = new char[titleLength+1];
+        title = ProtectedNew<char> (titleLength + 1);
+        if (title == nullptr) {
+            cout << "ERROR, unable to read FASTA file to memory. " << endl; exit(1);
+        }
         int t = 0;
         for (p = curPos; p < curPos + titleLength; p++, t++) {
             title[t] = filePtr[p];
@@ -294,7 +297,7 @@ int FASTAReader::GetNext(FASTASequence &seq) {
     seq.length = 0;
     if (seqLength > 0) {
         seq.length = seqLength;
-        seq.seq = new Nucleotide[seqLength+padding+1];
+        seq.seq = ProtectedNew <Nucleotide>(seqLength+padding+1);
         p = curPos;
         seq.deleteOnExit = true;
         long s = 0;

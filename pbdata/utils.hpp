@@ -13,7 +13,10 @@ template<typename T_Int>
 T_Int CeilOfFraction(T_Int num, T_Int denom);
 
 template<typename T>
-T* ProtectedNew(unsigned long size); 
+inline T* ProtectedNew(unsigned long size); 
+
+template<typename T>
+inline T* ProtectedNew(void); 
 
 #include "utilsImpl.hpp"
 

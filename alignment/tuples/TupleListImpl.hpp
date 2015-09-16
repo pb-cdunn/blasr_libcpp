@@ -43,7 +43,6 @@ int TupleList<T>::InitFromFile(std::string &fileName) {
     listIn.read((char*) &listLength, sizeof(int));
     listIn.read((char*) &tm.tupleSize, sizeof(int));
     tm.InitializeMask();
-    //list = new T[listLength];
     tupleList.resize(listLength);
     listIn.read((char*) &tupleList[0], sizeof(T) * listLength);
     return 1;

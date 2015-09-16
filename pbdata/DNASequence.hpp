@@ -8,6 +8,7 @@
 #include <cassert>
 #include "Types.h"
 #include "NucConversion.hpp"
+#include "utils.hpp"
 #include "libconfig.h"
 
 #ifdef USE_PBBAM
@@ -174,7 +175,7 @@ template<typename T>
 DNALength ResizeSequence(T &dnaseq, DNALength newLength) {
     assert(newLength > 0);
     ((T&)dnaseq).Free();
-    dnaseq.seq = new Nucleotide[newLength];
+    dnaseq.seq = ProtectedNew<Nucleotide>(newLength);
     dnaseq.length = newLength;
     dnaseq.deleteOnExit = true;
     return newLength;

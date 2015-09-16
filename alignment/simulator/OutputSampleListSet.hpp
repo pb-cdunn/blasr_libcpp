@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include "utils.hpp"
 #include "OutputSampleList.hpp"
 
 
@@ -67,7 +68,7 @@ class OutputSampleListSet {
     in.read((char*) &keyLength, sizeof(int));
 
     if (keyLength == 0 or setSize == 0) { return; }
-    char *key = new char[keyLength+1];
+    char *key = ProtectedNew<char>(keyLength+1);
     key[keyLength] = '\0';
     int i;
     for (i = 0; i < setSize; i++) {

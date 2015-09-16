@@ -21,13 +21,13 @@ void ContextSampleMap::Read(std::ifstream &in) {
     int numContext;
     in.read((char*)&numContext, sizeof(numContext));
     int i;
-    char *context = new char[contextLength+1];
+    char *context = ProtectedNew<char>(contextLength+1);
     context[contextLength] = '\0';
     for (i = 0; i < numContext; i++) {
         in.read(context, contextLength);
         std::string contextString = context;
         // Allocate the context
-        (*this)[contextString] = new ContextSample;
+        (*this)[contextString] = ProtectedNew<ContextSample>();
         (*this)[contextString]->Read(in);
     }
     delete[] context;

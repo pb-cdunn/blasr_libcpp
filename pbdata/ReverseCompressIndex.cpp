@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include "utils.hpp"
 #include "ReverseCompressIndex.hpp"
 
 ReverseCompressIndex::ReverseCompressIndex() {
@@ -27,7 +28,7 @@ void ReverseCompressIndex::Read(std::ifstream &in) {
     in.read((char*) &indexLength, sizeof(int));
     in.read((char*) &binSize, sizeof(int));
     in.read((char*) &maxRun, sizeof(int));
-    index = new int[indexLength];
+    index = ProtectedNew<int>(indexLength);
     in.read((char*) index, sizeof(int) *indexLength);
 } 
 

@@ -19,11 +19,21 @@ T_Int CeilOfFraction(T_Int num, T_Int denom) {
 }
 
 template<typename T>
-T* ProtectedNew(unsigned long size) {
+inline T* ProtectedNew(unsigned long size) {
     T* ptr;
     ptr = new T[size];
     if (ptr == NULL) {
         std::cout << "ERROR, allocating " << size * sizeof(T) << " bytes.";
+        exit(1);
+    }
+    return ptr;
+}
+
+template<typename T>
+inline T* ProtectedNew(void) {
+    T * ptr = new T;
+    if (ptr == nullptr) {
+        std::cout << "ERROR, allocating " << sizeof(T) << " bytes.";
         exit(1);
     }
     return ptr;

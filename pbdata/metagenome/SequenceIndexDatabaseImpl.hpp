@@ -191,25 +191,25 @@ ReadDatabase(std::ifstream &in) {
 
     in.read((char*) &nSeqPos, sizeof(int));
     assert(seqStartPos == NULL);
-    seqStartPos = new DNALength[nSeqPos];
+    seqStartPos = ProtectedNew<DNALength>(nSeqPos);
     deleteSeqStartPos = true;
     in.read((char*) seqStartPos, sizeof(DNALength) * nSeqPos);
     int nSeq = nSeqPos - 1;
 
     // Get the lengths of the strings to read.
     assert(nameLengths == NULL);
-    nameLengths = new int[nSeq];
+    nameLengths = ProtectedNew<int>(nSeq);
     deleteNameLengths = true;
     in.read((char*)nameLengths, sizeof(int) * nSeq);
 
     // Get the titles of the sequences.
     assert(names == NULL); // Otherwise need to delete names; 
-    names = new char*[nSeq];
+    names = ProtectedNew<char*>(nSeq);
     deleteNames = true;
     char *namePtr;
     int i;
     for (i = 0; i < nSeq; i++) { 
-        namePtr = new char[nameLengths[i]];
+        namePtr = ProtectedNew<char>(nameLengths[i]);
         if (nameLengths[i] > 0) {
             in.read(namePtr, nameLengths[i]);
         }
@@ -227,7 +227,7 @@ SequenceTitleLinesToNames() {
         std::string tmpName;
         AssignUntilFirstSpace(names[seqIndex], nameLengths[seqIndex], tmpName);
         if (names[seqIndex]) {delete[] names[seqIndex];}
-        names[seqIndex] = new char[tmpName.size()+1];
+        names[seqIndex] = ProtectedNew<char>(tmpName.size()+1);
         strcpy(names[seqIndex], tmpName.c_str());
         names[seqIndex][tmpName.size()] = '\0';
         nameLengths[seqIndex] = tmpName.size();
@@ -267,14 +267,14 @@ Finalize() {
     int nSeq = nSeqPos - 1;
 
     assert(names==NULL);
-    names = new char*[nSeq];
+    names = ProtectedNew<char*>(nSeq);
     deleteNames = true;
     unsigned int i;
     if (nameLengths) {delete [] nameLengths; nameLengths = NULL;}
-    nameLengths = new int[nSeq];
+    nameLengths = ProtectedNew<int>(nSeq);
     deleteNameLengths = true;
     for (i = 0; i < nSeq; i++) {
-        names[i] = new char[growableName[i].size() + 1];
+        names[i] = ProtectedNew<char>(growableName[i].size() + 1);
 
         memcpy((char*) names[i], (char*) growableName[i].c_str(), 
             growableName[i].size());

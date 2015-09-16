@@ -45,7 +45,7 @@ int FASTQReader::GetNext(FASTQSequence &seq) {
     seq.length = p2 - p;
     long seqPos;
     if (seq.length > 0) {
-        seq.seq = new Nucleotide[seq.length];
+        seq.seq = ProtectedNew<Nucleotide>(seq.length);
         p2 = p;
         seqPos = 0;
         while(p2 < fileSize and filePtr[p2] != '\n') { seq.seq[seqPos] = filePtr[p2]; p2++; seqPos++;}

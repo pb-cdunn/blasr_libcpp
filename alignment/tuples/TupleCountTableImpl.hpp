@@ -1,5 +1,6 @@
 #ifndef _BLASR_TUPLE_COUNT_TABLE_IMPL_HPP_
 #define _BLASR_TUPLE_COUNT_TABLE_IMPL_HPP_
+#include "utils.hpp"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ void TupleCountTable<TSequence, TTuple>::InitCountTable(TupleMetrics &ptm) {
     countTableLength = countTableLength << ((tm.tupleSize - 1)*2);
 
     assert(countTableLength > 0);
-    countTable = new int[countTableLength];
+    countTable = ProtectedNew<int>(countTableLength);
     deleteStructures = true;
     fill(&countTable[0], &countTable[countTableLength], 0);
     nTuples = 0;
@@ -93,7 +94,7 @@ void TupleCountTable<TSequence, TTuple>::Read(ifstream &in) {
     in.read((char*) &nTuples, sizeof(int));
     in.read((char*) &tm.tupleSize, sizeof(int));
     tm.InitializeMask();
-    countTable = new int[countTableLength];
+    countTable = ProtectedNew<int>(countTableLength);
     deleteStructures = true;
     in.read((char*) countTable, sizeof(int) * countTableLength);
 }

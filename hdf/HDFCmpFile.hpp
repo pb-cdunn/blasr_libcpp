@@ -182,6 +182,10 @@ public:
 
         // 2.
         HDFCmpRefAlignmentGroup *newGroup = new HDFCmpRefAlignmentGroup;
+        if (newGroup == nullptr) { 
+            cout << "ERROR, unable to allocate memory for cmp.h5 file." << endl; 
+            exit(1);
+        }
         newGroup->Create(rootGroup.rootGroup, refGroupName);
         refAlignGroups.push_back(newGroup);
         unsigned int id = refAlignGroups.size();
@@ -362,6 +366,10 @@ public:
         for (refSeqIndex = 0; refSeqIndex < cmpFile.refGroup.path.size(); refSeqIndex++) {
             HDFCmpRefAlignmentGroup* refAlignGroup;
             refAlignGroup = new HDFCmpRefAlignmentGroup;
+            if (refAlignGroup == nullptr) { 
+                cout << "ERROR, unable to allocate memory for cmp.h5 file." << endl; 
+                exit(1);
+            }
             refAlignGroup->Initialize(rootGroup.rootGroup.group, cmpFile.refGroup.path[refSeqIndex]);
             int refAlignGroupIndex = refAlignGroups.size();
             refAlignGroups.push_back(refAlignGroup);
@@ -814,6 +822,10 @@ public:
         
         // 2.
         HDFCmpRefAlignmentGroup *newGroup = new HDFCmpRefAlignmentGroup;
+        if (newGroup == nullptr) { 
+            cout << "ERROR, unable to allocate memory for cmp.h5 file." << endl; 
+            exit(1);
+        }
         newGroup->Create(rootGroup.rootGroup, refGroupName);
         refAlignGroups.push_back(newGroup);
 

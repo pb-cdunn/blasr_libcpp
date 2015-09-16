@@ -1,4 +1,5 @@
 #include <cstring>
+#include "utils.hpp"
 #include "DifferenceCovers.hpp"
 
 int InitializeDifferenceCover(int diffCoverSize, UInt &diffCoverLength, UInt *&diffCover) {
@@ -6,7 +7,7 @@ int InitializeDifferenceCover(int diffCoverSize, UInt &diffCoverLength, UInt *&d
 	for (index = 0; index < N_COVERS; index++) {
 		if (diffCovers[index][0] == diffCoverSize) {
 			diffCoverLength = diffCovers[index][1];
-			diffCover = new UInt[diffCoverLength];
+			diffCover = ProtectedNew<UInt>(diffCoverLength);
 			memcpy(diffCover, &diffCovers[index][2], sizeof(UInt)*diffCoverLength);
 			return 1;
 		}

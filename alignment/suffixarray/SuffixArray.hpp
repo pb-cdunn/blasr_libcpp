@@ -309,7 +309,6 @@ public:
         std::fill(count.begin(), count.end(), 0);
         assert(index == NULL or not deleteStructures);
         index = ProtectedNew<SAIndex>(targetLength);
-        //index = new SAIndex[targetLength];
         deleteStructures = true;
         for (a = 0; a < alphabet.size(); a++ ) {
             bucket[a] = -1;

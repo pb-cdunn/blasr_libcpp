@@ -117,7 +117,7 @@ void MediankeyBoundedQuicksort(unsigned char text[], UInt index[], UInt length,
                 maxChar = c;
             }
         }
-        freq = new UInt[maxChar+1];
+        freq = ProtectedNew<UInt>(maxChar+1);
         deleteFreq = true;
     }
 

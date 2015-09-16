@@ -1,5 +1,6 @@
 #ifndef _BLASR_QSUFSORT_HPP_
 #define _BLASR_QSUFSORT_HPP_
+#include "utils.hpp"
 #include <assert.h>
 
 void suffixsort(int *x, int *p, int n, int k, int l);
@@ -204,8 +205,8 @@ suffix sorting algorithm.
             assert(pi - p == pi - I);
             //			boundaries[pi-p] = 0;
         }
-        int *buckets = new int[k];
-        T_Index *starts  = new T_Index[k];
+        int *buckets = ProtectedNew<int>(k);
+        T_Index *starts  = ProtectedNew<T_Index>(k);
         /*MC+1*/
         for (i = 0; i < k; i++ ){
             buckets[i] = -1;
