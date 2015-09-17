@@ -74,6 +74,7 @@ namespace GroupNames {
     ///PulseData/BaseCalls/ZMWMetrics/HQRegionSNR
     static const std::string hqregionsnr      = "HQRegionSNR";
     static const std::string readscore        = "ReadScore";
+    static const std::string productivity     = "Productivity";
 
     static const std::vector<std::string> BaxQVNames ({
             deletionqv, 
@@ -153,8 +154,15 @@ namespace AttributeValues {
     }
 
     namespace ZMWMetrics {
-        static const std::string hqregionsnrdescription = "HQRegion average signal to noise ratio";
-        static const std::string readscoredescription = "Read raw accuracy prediction";
+        namespace HQRegionSNR {
+            static const std::string description = "HQRegion average signal to noise ratio";
+        }
+        namespace ReadScore {
+            static const std::string description = "Read raw accuracy prediction";
+        }
+        namespace Productivity {
+            static const std::string description = "ZMW productivity classification";
+        }
     } // ZMWMetrics
 
     namespace ScanData {
