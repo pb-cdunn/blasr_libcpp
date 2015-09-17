@@ -53,6 +53,13 @@ bool HDFWriterBase::AddChildGroup(HDFGroup & parentGroup,
 
 bool HDFWriterBase::AddAttribute(HDFData & group, 
                                  const std::string & attributeName, 
+                                 const std::string & attributeValue)
+{
+    return this->AddAttribute(group, attributeName, std::vector<std::string>({attributeValue}));
+}
+
+bool HDFWriterBase::AddAttribute(HDFData & group, 
+                                 const std::string & attributeName, 
                                  const std::vector<std::string> & attributeValues)
 {
     try {

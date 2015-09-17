@@ -57,6 +57,7 @@ HDFZMWWriter::HDFZMWWriter(const std::string & filename,
 }
 
 HDFZMWWriter::~HDFZMWWriter() {
+    this->_WriteAttributes();
     this->Close();
 }
 
@@ -122,5 +123,21 @@ bool HDFZMWWriter::InitializeChildHDFGroups(void) {
     }
 
     return OK;
+}
+
+void HDFZMWWriter::_WriteAttributes(void)
+{
+    if (holeNumberArray_.IsInitialized() and holeNumberArray_.size() > 0) {
+        AddAttribute(holeNumberArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleNumber::description);
+    }
+
+    if (holeStatusArray_.IsInitialized() and holeStatusArray_.size() > 0) {
+        AddAttribute(holeStatusArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleStatus::description);
+        AddAttribute(holeStatusArray_, PacBio::AttributeNames::ZMW::HoleStatus::lookuptable, PacBio::AttributeValues::ZMW::HoleStatus::lookuptable);
+    }
+
+    if (holeXYArray_.IsInitialized()) {
+        AddAttribute(holeXYArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleXY::description);
+    }
 }
 

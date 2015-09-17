@@ -126,8 +126,6 @@ int BufferedHDF2DArray<T>::Initialize(HDFGroup &group, std::string datasetName,
 
 template<typename T>
 int BufferedHDF2DArray<T>::size() {
-    // Why assert nDims == 1 for 2D Array?
-    assert(nDims == 1);
     dataspace.getSimpleExtentDims(dimSize);
     return dimSize[0];
 }

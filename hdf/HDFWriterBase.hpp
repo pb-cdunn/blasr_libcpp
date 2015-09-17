@@ -68,6 +68,10 @@ protected:
 
     bool AddAttribute(HDFData & group, 
                       const std::string & attributeName, 
+                      const std::string & attributeValue);
+
+    bool AddAttribute(HDFData & group, 
+                      const std::string & attributeName, 
                       const std::vector<std::string> & attributeValues);
     
     void AddErrorMessage(const std::string & errmsg);

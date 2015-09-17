@@ -117,11 +117,11 @@ bool HDFZMWMetricsWriter::WriteAttributes(void) {
         bool OK = 
         AddAttribute(hqRegionSNRArray_, 
                      PacBio::AttributeNames::Common::description,
-                     {PacBio::AttributeValues::ZMWMetrics::hqregionsnrdescription})
+                     PacBio::AttributeValues::ZMWMetrics::hqregionsnrdescription)
         and 
         AddAttribute(readScoreArray_,
                      PacBio::AttributeNames::Common::description, 
-                     {PacBio::AttributeValues::ZMWMetrics::readscoredescription});
+                     PacBio::AttributeValues::ZMWMetrics::readscoredescription);
         return OK;
     } else {
         AddErrorMessage("Could not write attributes when ZMWMetrics group is empty.");
