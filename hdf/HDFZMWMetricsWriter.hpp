@@ -63,6 +63,9 @@ private:
     /// HDFArray for writing read raw accuracy prediction.
    	BufferedHDFArray<float> readScoreArray_;
 
+    /// HDFArray for writing Productivity
+    BufferedHDFArray<unsigned char> productivityArray_;
+
     /// Map bases (e.g., ACGT) to indices
     std::map<char, size_t> baseMap_;
 

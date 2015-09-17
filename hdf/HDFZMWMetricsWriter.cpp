@@ -74,9 +74,10 @@ bool HDFZMWMetricsWriter::WriteOneZmw(const SMRTSequence & read) {
         }
         hqRegionSNRArray_.WriteRow(snrs, SNRNCOLS);
         readScoreArray_.Write(&read.readScore, 1);
+        productivityArray_.Write(&read.zmwData.holeStatus, 1);
     }
     catch (H5::Exception & e) {
-        AddErrorMessage("Failed to write HQRegionSNR or ReadScore.");
+        AddErrorMessage("Failed to write HQRegionSNR or ReadScore or Productivity.");
         return false;
     }
     ++curRow_;
@@ -87,11 +88,13 @@ bool HDFZMWMetricsWriter::WriteOneZmw(const SMRTSequence & read) {
 void HDFZMWMetricsWriter::Flush(void) {
     hqRegionSNRArray_.Flush();
     readScoreArray_.Flush();
+    productivityArray_.Flush();
 }
 
 void HDFZMWMetricsWriter::Close(void) {
     hqRegionSNRArray_.Close();
     readScoreArray_.Close();
+    productivityArray_.Close();
 
     zmwMetricsGroup_.Close();
 }
@@ -109,6 +112,11 @@ bool HDFZMWMetricsWriter::InitializeChildHDFGroups(void) {
         OK = false;
     }
 
+    if (productivityArray_.Initialize(zmwMetricsGroup_, PacBio::GroupNames::productivity) == 0) {
+        FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::productivity);
+        OK = false;
+    }
+
     return OK;
 }
 
@@ -117,11 +125,15 @@ bool HDFZMWMetricsWriter::WriteAttributes(void) {
         bool OK = 
         AddAttribute(hqRegionSNRArray_, 
                      PacBio::AttributeNames::Common::description,
-                     {PacBio::AttributeValues::ZMWMetrics::hqregionsnrdescription})
+                     PacBio::AttributeValues::ZMWMetrics::HQRegionSNR::description)
         and 
         AddAttribute(readScoreArray_,
                      PacBio::AttributeNames::Common::description, 
-                     {PacBio::AttributeValues::ZMWMetrics::readscoredescription});
+                     PacBio::AttributeValues::ZMWMetrics::ReadScore::description)
+        and 
+        AddAttribute(productivityArray_,
+                     PacBio::AttributeNames::Common::description, 
+                     PacBio::AttributeValues::ZMWMetrics::Productivity::description);
         return OK;
     } else {
         AddErrorMessage("Could not write attributes when ZMWMetrics group is empty.");

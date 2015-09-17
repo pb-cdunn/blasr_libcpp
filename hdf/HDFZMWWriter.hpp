@@ -108,6 +108,9 @@ private:
     /// \reutrns bool, whether or not child hdf groups successfully initialized.
     bool InitializeChildHDFGroups(void);
 
+    /// \name Add attributes to HoleNumber, HoleXY, HoleStatus.
+    void _WriteAttributes(void);
+
     /// \}
 };
 

@@ -74,6 +74,7 @@ namespace GroupNames {
     ///PulseData/BaseCalls/ZMWMetrics/HQRegionSNR
     static const std::string hqregionsnr      = "HQRegionSNR";
     static const std::string readscore        = "ReadScore";
+    static const std::string productivity     = "Productivity";
 
     static const std::vector<std::string> BaxQVNames ({
             deletionqv, 
@@ -94,6 +95,12 @@ namespace AttributeNames {
         static const std::string description        = "Description";
     } // Common
 
+    namespace ZMW {
+        namespace HoleStatus {
+            static const std::string lookuptable    = "LookupTable";
+        }
+    }
+
     namespace Regions {
         static const std::string columnnames        = "ColumnNames";
         static const std::string regiontypes        = "RegionTypes";
@@ -111,22 +118,51 @@ namespace AttributeNames {
 } // namespace AttributeNames 
 
 namespace AttributeValues {
+
+    namespace ZMW {
+        namespace HoleNumber {
+            static const std::string description     = "Hole number on chip array";
+        } //namespace HoleNumber
+
+        namespace HoleStatus {
+            static const std::string description     = "Type of data coming from ZMW";
+            static const std::vector<std::string> lookuptable    =
+            {"SEQUENCING", "ANTIHOLE", "FIDUCIAL", "SUSPECT", 
+             "ANTIMIRROR", "FDZMW",    "FBZMW",    "ANTIBEAMLET", "OUTSIDEFOV"};
+
+            static const unsigned char sequencingzmw = 0; // not '0'
+            static const unsigned char outsidefov    = 8; // not '8'
+        } // namespace HoleStatus
+
+        namespace HoleXY {
+            static const std::string description     = "Coordinates of ZMW on Chip";
+        } // namespace HoleXY
+
+    } // namespace ZMW
+
     namespace Regions {
-        static const std::vector<std::string> columnnames  = 
-        {"HoleNumber", "Region type index", "Region start in bases", 
-            "Region end in bases", "Region score"};
+        static const std::vector<std::string> columnnames        =
+        {"HoleNumber", "Region type index", "Region start in bases",
+         "Region end in bases", "Region score"};
         static const std::vector<std::string> regiontypes        =
         {"Adapter", "Insert", "HQRegion"};
-        static const std::vector<std::string> regiondescriptions = 
+        static const std::vector<std::string> regiondescriptions =
         {"Adapter Hit", "Insert Region",
-            "High Quality bases region. Score is 1000 * predicted accuracy, where predicted accuary is 0 to 1.0"};
-        static const std::vector<std::string> regionsources    = 
+         "High Quality bases region. Score is 1000 * predicted accuracy, where predicted accuary is 0 to 1.0"};
+        static const std::vector<std::string> regionsources      =
         {"AdapterFinding", "AdapterFinding", "PulseToBase Region classifer"};
     }
 
     namespace ZMWMetrics {
-        static const std::string hqregionsnrdescription = "HQRegion average signal to noise ratio";
-        static const std::string readscoredescription = "Read raw accuracy prediction";
+        namespace HQRegionSNR {
+            static const std::string description = "HQRegion average signal to noise ratio";
+        }
+        namespace ReadScore {
+            static const std::string description = "Read raw accuracy prediction";
+        }
+        namespace Productivity {
+            static const std::string description = "ZMW productivity classification";
+        }
     } // ZMWMetrics
 
     namespace ScanData {
