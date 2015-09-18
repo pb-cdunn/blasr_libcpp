@@ -1,5 +1,6 @@
 #ifndef _BLASR_UTIL_IMPL_HPP_
 #define _BLASR_UTIL_IMPL_HPP_
+#include <stdlib.h>
 
 template<typename t_file>
 void CrucialOpen(std::string &fileName, t_file &file, std::ios_base::openmode mode) {
@@ -20,21 +21,26 @@ T_Int CeilOfFraction(T_Int num, T_Int denom) {
 
 template<typename T>
 inline T* ProtectedNew(unsigned long size) {
-    T* ptr;
-    ptr = new T[size];
-    if (ptr == NULL) {
-        std::cout << "ERROR, allocating " << size * sizeof(T) << " bytes.";
-        exit(1);
+    T * ptr = nullptr;
+    try {
+        ptr = new T[size];
+    } catch (std::bad_alloc & ba) {
+        std::cout << "ERROR, allocating " << size * sizeof(T) << " bytes."
+                  << ba.what() << std::endl;
+        abort();
     }
     return ptr;
 }
 
 template<typename T>
 inline T* ProtectedNew(void) {
-    T * ptr = new T;
-    if (ptr == nullptr) {
-        std::cout << "ERROR, allocating " << sizeof(T) << " bytes.";
-        exit(1);
+    T * ptr = nullptr;
+    try {
+       ptr = new T;
+    } catch (std::bad_alloc & ba) {
+        std::cout << "ERROR, allocating " << sizeof(T) << " bytes."
+                  << ba.what() << std::endl;
+        abort();
     }
     return ptr;
 }
