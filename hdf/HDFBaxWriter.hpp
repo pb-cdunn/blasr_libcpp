@@ -86,6 +86,9 @@ public:
     /// \brief Flushes buffered data.
     void Flush(void);
 
+    /// \returns all errors from all writers.
+    std::vector<std::string> Errors(void);
+
     /// \}
 
 private:

@@ -51,7 +51,8 @@ public:
     HDFBaseCallsWriter(const std::string & filename,
                        HDFGroup & parentGroup,
                        const std::map<char, size_t> & baseMap,
-                       const std::vector<std::string> & qvsToWrite = {});
+                       const std::vector<std::string> & qvsToWrite = {},
+                       const bool fakeQualityValue = true);
 
     ~HDFBaseCallsWriter(void);
 
@@ -78,6 +79,12 @@ public:
     /// \returns Whether or not a QV is not included in sepcification.
     bool SanityCheckQVs(const std::vector<std::string> & qvsToWrite);
 
+    /// \returns true if FakeQualityValue() and qualityValueArray_ 
+    ///          has been initialized
+    inline bool HasQualityValue(void) const;
+
+    /// \returns true if has DeletionQV dataset and deletionQVArray_
+    ///          has been initialized.
     inline bool HasDeletionQV(void) const;
     inline bool HasDeletionTag(void) const;
     inline bool HasInsertionQV(void) const;
@@ -91,10 +98,23 @@ public:
 
     std::vector<std::string> Errors(void) const;
 
+public: 
+    /// \returns whether or not to fake QualityValue.
+    bool FakeQualityValue() const;
+
+private:
+    bool fakeQualityValue_;
+
+
 private:
     inline bool _HasQV(const std::string & qvToQuery) const;
 
     bool _WriteBasecall(const SMRTSequence & read);
+
+    /// Write fake values to the 'QualityValue' dataset.
+    bool _WriteQualityValue(const SMRTSequence & read);
+
+    /// Write real data in the following.
     bool _WriteDeletionQV(const SMRTSequence & read);
     bool _WriteDeletionTag(const SMRTSequence & read);
     bool _WriteInsertionQV(const SMRTSequence & read);
@@ -123,6 +143,10 @@ private:
     /// BaseCalls/Basecall group
 	BufferedHDFArray<unsigned char> basecallArray_;
 
+    /// This is a mandatory dataset for 2.3, whose existence is 
+    /// to ensure bam2bax to generate 2.3 compatible bax.h5 files.
+	BufferedHDFArray<unsigned char> qualityValueArray_;
+
 	/// \brief Define arrays for rich quality values.
     ///        DeletionQV         dq --> BaseCalls/DeletionQV
     ///        DeletionTag        dt --> BaseCalls/DeletionTag
@@ -140,14 +164,19 @@ private:
 	BufferedHDFArray<unsigned char> substitutionTagArray_;
 	BufferedHDFArray<HalfWord> preBaseFramesArray_;
 	BufferedHDFArray<HalfWord> widthInFramesArray_;
-    /// \}
 
+    /// \}
 };
 
 inline
 bool HDFBaseCallsWriter::_HasQV(const std::string & qvToQuery) const {
     return (std::find(qvsToWrite_.begin(), qvsToWrite_.end(), qvToQuery) != qvsToWrite_.end());
 }
+
+inline
+bool HDFBaseCallsWriter::HasQualityValue(void) const
+{return (FakeQualityValue() and 
+        qualityValueArray_.IsInitialized());}
 
 inline
 bool HDFBaseCallsWriter::HasDeletionQV(void) const
@@ -196,4 +225,9 @@ bool HDFBaseCallsWriter::HasWidthInFrames(void) const
 inline
 bool HDFBaseCallsWriter::HasPulseWidth(void) const
 {return this->HasWidthInFrames();}
+
+inline
+bool HDFBaseCallsWriter::FakeQualityValue(void) const
+{return this->fakeQualityValue_;}
+
 #endif

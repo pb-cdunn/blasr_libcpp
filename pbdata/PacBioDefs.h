@@ -52,6 +52,8 @@ namespace GroupNames {
 
     ///PulseData/BaseCalls/BaseCall
     static const std::string basecall         = "Basecall";
+
+    static const std::string qualityvalue     = "QualityValue";
     static const std::string deletionqv       = "DeletionQV";
     static const std::string deletiontag      = "DeletionTag";
     static const std::string insertionqv      = "InsertionQV";

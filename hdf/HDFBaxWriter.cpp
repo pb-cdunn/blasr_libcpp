@@ -81,6 +81,21 @@ void HDFBaxWriter::Flush(void) {
     regionsWriter_->Flush();
 }
 
+std::vector<std::string> HDFBaxWriter::Errors(void) {
+    std::vector<std::string> errors = errors_;
+
+    //for (auto error: scandataWriter_->Errors())
+    //    errors.emplace_back(error);
+
+    for (auto error: basecallsWriter_->Errors())
+        errors.emplace_back(error);
+
+    for (auto error: regionsWriter_->Errors())
+        errors.emplace_back(error);
+
+    return errors;
+}
+
 void HDFBaxWriter::Close(void) {
     basecallsWriter_->Close();
     scandataWriter_->Close();
