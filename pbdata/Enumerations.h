@@ -52,8 +52,8 @@ typedef enum T_FileType {Fasta,
 typedef enum T_Strand {Forward, Reverse} Strand;
 
 typedef enum T_PlatformType {
-    Springfield,
-    Astro,
+    Astro=1,
+    Springfield=2,
     NoPlatform
 } PlatformId;
 
