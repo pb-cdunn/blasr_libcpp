@@ -306,6 +306,16 @@ void SMRTSequence::Copy(const PacBio::BAM::BamRecord & record,
     // Do NOT copy other SMRTQVs such as startFrame, meanSignal...
     (static_cast<FASTQSequence*>(this))->Copy(record);
 
+    // Set subread start, subread end in coordinate of zmw.
+    if (record.Type() != PacBio::BAM::RecordType::CCS) { 
+        subreadStart = static_cast<int>(record.QueryStart());
+        subreadEnd = static_cast<int>(record.QueryEnd());
+    } else {
+        subreadStart = 0;
+        subreadEnd =  static_cast<int>(record.Sequence().length());;
+    }
+
+    // Shall we copy all pulse QVs including ipd and pw?
     if (copyAllQVs) {
         if (record.HasPreBaseFrames()) {
             std::vector<uint16_t> qvs = record.PreBaseFrames().DataRaw();
