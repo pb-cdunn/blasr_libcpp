@@ -49,15 +49,10 @@ public:
 
     void ReadTable(RegionTable &table);
 
-    void Close(); 
-
+    void Close();
 
 private:
     int GetNext(RegionAnnotation &annotation);
-
-    void RegionTypesToMap(RegionTable &table);
-
-    int ReadTableAttributes(RegionTable &table);
 };
 
 
