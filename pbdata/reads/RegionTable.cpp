@@ -43,42 +43,6 @@
 
 using namespace std;
 
-std::string RegionTypeMap::ToString(RegionType rt) {
-    assert(RegionTypeToString.find(rt) != RegionTypeToString.end());
-    return RegionTypeToString.find(rt)->second;
-}
-
-RegionType RegionTypeMap::ToRegionType(const std::string & str) {
-    if (StringToRegionType.find(str) == StringToRegionType.end()) {
-        std::cout << "Unsupported RegionType " << str << std::endl;
-        assert(false);
-    }
-    return StringToRegionType.find(str)->second;
-}
-
-const std::map<RegionType, std::string> RegionTypeMap::RegionTypeToString = {
-    {Adapter,  "Adapter"},
-    {Insert,   "Insert"},
-    {HQRegion, "HQRegion"},
-    {BarCode,  "Barcode"}
-};
-
-const std::map<std::string, RegionType> RegionTypeMap::StringToRegionType = {
-    {"Adapter",  Adapter},
-    {"Insert",   Insert},
-    {"HQRegion", HQRegion}, 
-    {"Barcode",  BarCode},
-};
-
-std::ostream & operator << (std::ostream & os, const RegionAnnotation& ra) {
-    os << "ZMW " << ra.GetHoleNumber() 
-       << ", region type index " << ra.GetTypeIndex() 
-       << " [" << ra.GetStart() 
-       << ", " << ra.GetEnd()
-       << "), " << ra.GetScore();
-    return os;
-}
-
 int RegionTable::LookupRegionsByHoleNumber(int holeNumber, int &low, int &high) const {
     std::vector<RegionAnnotation>::const_iterator lowIt, highIt;
     lowIt  = std::lower_bound(table.begin(), table.end(), holeNumber);
@@ -88,15 +52,6 @@ int RegionTable::LookupRegionsByHoleNumber(int holeNumber, int &low, int &high) 
     return high-low;
 }
 
-//
-// Define a bunch of accessor functions.
-//
-
-//
-// Different region tables have different ways of encoding regions.
-// This maps from the way they are encoded in the rgn table to a
-// standard encoding.
-//
 
 RegionType RegionTable::GetType(int regionIndex) const {
     assert(regionIndex < table.size());
@@ -152,8 +107,19 @@ void RegionTable::SetScore(int regionIndex, int score) {
     table[regionIndex].SetScore(score);//.row[RegionAnnotationColumn::RegionScore] = score;
 }
 
-void RegionTable::SortTableByHoleNumber() {
+RegionTable & RegionTable::SortTableByHoleNumber() {
     std::stable_sort(table.begin(), table.end());
+    return *this;
+}
+
+RegionTable & RegionTable::Reset() {
+    table.clear();
+    columnNames.clear();
+    regionTypes.clear();
+    regionDescriptions.clear();
+    regionSources.clear();
+    regionTypeEnums.clear();
+    return *this;
 }
 
 std::vector<RegionType> RegionTable::DefaultRegionTypes(void) {
@@ -164,19 +130,28 @@ std::vector<RegionType> RegionTable::DefaultRegionTypes(void) {
     return ret;
 }
 
-void RegionTable::Reset() {
-    table.clear();
-    columnNames.clear();
-    regionTypes.clear();
-    regionDescriptions.clear();
-    regionSources.clear();
-    regionTypeEnums.clear();
+RegionTable & RegionTable::RegionTypes(const std::vector<std::string> & regionTypeStrs) {
+    regionTypes = regionTypeStrs;
+    for (std::string regionTypeString: regionTypeStrs) {
+        regionTypeEnums.push_back(RegionTypeMap::ToRegionType(regionTypeString));
+    }
+    return *this;
 }
 
-void RegionTable::CreateDefaultAttributes() {
-    columnNames        = PacBio::AttributeValues::Regions::columnnames;
-    regionTypes        = PacBio::AttributeValues::Regions::regiontypes;
-    regionDescriptions = PacBio::AttributeValues::Regions::regiondescriptions;
-    regionSources      = PacBio::AttributeValues::Regions::regionsources;
-    regionTypeEnums    = DefaultRegionTypes();
-}
+std::vector<std::string> RegionTable::ColumnNames(void) const
+{ return columnNames; }
+
+std::vector<std::string> RegionTable::RegionDescriptions(void) const
+{ return regionDescriptions; }
+
+std::vector<std::string> RegionTable::RegionSources(void) const
+{ return regionSources;}
+
+RegionTable & RegionTable::ColumnNames(const std::vector<std::string> & in)
+{ columnNames = in; return *this; }
+
+RegionTable & RegionTable::RegionDescriptions(const std::vector<std::string> & in)
+{ regionDescriptions = in; return *this; }
+
+RegionTable & RegionTable::RegionSources(const std::vector<std::string> & in)
+{ regionSources = in; return *this; }
