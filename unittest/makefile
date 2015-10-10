@@ -114,6 +114,6 @@ gtest: test-runner
 	$(COMPILE.cc) -o $@ $<
 
 clean:
-        $(RM) -r $(OUTDIR) *.o test-runner
+	$(RM) -r $(OUTDIR) *.o test-runner
 
--include ${depfiles}
+#-include ${depfiles}

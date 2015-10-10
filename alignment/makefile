@@ -43,4 +43,4 @@ libblasr${SH_LIB_EXT}: $(shared_objects)
 clean: 
 	rm -f libblasr.a libblasr.so *.o *.d
 
--include $(dependencies)
+#-include $(dependencies)

@@ -35,4 +35,4 @@ libconfig.h:
 clean: 
 	rm -f libpbdata.a  libpbdata.so *.o *.d
 
--include $(dependencies)
+#-include $(dependencies)
