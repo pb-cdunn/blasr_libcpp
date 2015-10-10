@@ -21,7 +21,7 @@ clean:
 	${MAKE} -C ${THISDIR}/pbdata clean
 	${MAKE} -C ${THISDIR}/hdf clean
 	${MAKE} -C ${THISDIR}/alignment clean
-	#@${MAKE} -C ${THISDIR}/unittest clean
+	${MAKE} -C ${THISDIR}/unittest clean
 cleanall: clean
 
 # Note: hdf/ will not build if nohdf=1 is configured.
