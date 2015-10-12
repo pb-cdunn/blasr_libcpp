@@ -28,14 +28,14 @@ private:
 
     bool isInitialized_; // whether or not this reader is initialized.
 
-    bool fileContainsRegionTable;
-
     int nRows;
+
+    bool fileContainsRegionTable;
 
 public:
 
     HDFRegionTableReader(void)
-    : curRow(0), nRows(0), isInitialized_(false)
+    : curRow(0), isInitialized_(false), nRows(0) 
     , fileContainsRegionTable(false) {}
 
     int Initialize(std::string &regionTableFileName, 
