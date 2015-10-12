@@ -19,7 +19,7 @@
 #ifdef USE_PBBAM
 #include "pbbam/BamFile.h"
 #include "pbbam/EntireFileQuery.h"
-#include "pbbam/GroupQuery.h"
+#include "pbbam/QNameQuery.h"
 #include "pbbam/BamRecord.h"
 #endif
 
