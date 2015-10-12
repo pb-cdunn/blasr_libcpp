@@ -10,11 +10,6 @@
 // A CCS Sequence is both a SMRTSequence itself, and contains a list of SMRTSequences.
 //
 class CCSSequence : public SMRTSequence {
-private:
-    void UNDEFINED(const std::string & msg) const {
-        std::cout << msg  << " is not defined in CCSSequence." << std::endl; exit(1);
-    }
-
 public:
 	UInt numPasses;
 	UInt numConsensusBases;
@@ -36,12 +31,6 @@ public:
     UInt HoleNumber(void) const;
 
     CCSSequence & HoleNumber(const UInt holeNumber);
-
-    DNALength SubreadStart(void) const {UNDEFINED("SubreadStart");}
-
-    DNALength SubreadEnd(void) const {UNDEFINED("SubreadEnd");}
-
-    DNALength SubreadLength(void) const {UNDEFINED("SubreadLength");}
 
 	int GetStorageSize(); 
 
