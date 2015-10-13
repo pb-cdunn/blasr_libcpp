@@ -36,8 +36,9 @@
 // Author: Yuan Li
 
 
-#include <algorithm>
 #include "RegionAnnotations.hpp"
+#include <algorithm>
+#include <cassert>
 
 
 RegionAnnotations::RegionAnnotations(const UInt holeNumber,
@@ -50,7 +51,7 @@ RegionAnnotations::RegionAnnotations(const UInt holeNumber,
     for (auto annotation: annotations) {
         // Only allow RegionAnnotations of a single ZMW
         if (holeNumber_ != annotation.GetHoleNumber()) {
-            assert(false == "RegionAnnotations must contain regions from a single ZMW");
+            assert(false && "RegionAnnotations must contain regions from a single ZMW");
         }
     }
 
@@ -101,7 +102,7 @@ RegionAnnotations::TheHQRegion() const {
         return RegionAnnotation(holeNumber_, RegionTypeMap::ToIndex(HQRegion, types_), 0, 0, 0);
     else if (hqs_.size() == 1)
         return hqs_[0];
-    else assert(false == "Zmw has more than one HQRegion.");
+    else assert(false && "Zmw has more than one HQRegion.");
 }
 
 DNALength RegionAnnotations::HQStart() const {

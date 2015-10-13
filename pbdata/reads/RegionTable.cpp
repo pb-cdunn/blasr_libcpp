@@ -130,7 +130,7 @@ bool RegionTable::HasHoleNumber(const UInt holeNumber) const {
 
 RegionAnnotations RegionTable::operator [] (const UInt holeNumber) const {
     // Must check whether a zmw exists or not first.
-    assert (HasHoleNumber(holeNumber) or
-            false == "Could not find zmw in region table.");
+    assert (HasHoleNumber(holeNumber)
+            && "Could not find zmw in region table.");
     return map_.find(holeNumber)->second;
 }
