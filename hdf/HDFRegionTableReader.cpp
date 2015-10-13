@@ -54,12 +54,12 @@ bool HDFRegionTableReader::IsInitialized(void) const {
 }
 
 bool HDFRegionTableReader::HasRegionTable(void) const {
-    assert(IsInitialized() or false == "HDFRegionTable is not initialize!");
+    assert(IsInitialized() && "HDFRegionTable is not initialize!");
     return fileContainsRegionTable;
 }
 
 int HDFRegionTableReader::GetNext(RegionAnnotation &annotation) {
-    assert(IsInitialized() or false == "HDFRegionTable is not initialize!");
+    assert(IsInitialized() && "HDFRegionTable is not initialize!");
     //
     // Bail with no-op if this is the last row.
     //
@@ -94,7 +94,7 @@ void HDFRegionTableReader::Close() {
 // `Regions` in order to traverse zmws in order.
 // (2) region table of a million zmws is approximately 5M.
 void HDFRegionTableReader::ReadTable(RegionTable & table) {
-    assert(IsInitialized() or false == "HDFRegionTable is not initialize!");
+    assert(IsInitialized() && "HDFRegionTable is not initialize!");
     table.Reset();
 
     if (fileContainsRegionTable) {
@@ -127,7 +127,7 @@ void HDFRegionTableReader::ReadTable(RegionTable & table) {
 
 void HDFRegionTableReader::GetMinMaxHoleNumber(UInt &minHole,
                                                UInt &maxHole) {
-    assert(IsInitialized() or false == "HDFRegionTable is not initialize!");
+    assert(IsInitialized() && "HDFRegionTable is not initialize!");
     // Hole numbers may not be sorted ascendingly, so do not
     // return the first and last hole numbers as the min and max.
     UInt saveCurRow = curRow;
