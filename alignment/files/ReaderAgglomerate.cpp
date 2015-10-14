@@ -449,6 +449,15 @@ int ReaderAgglomerate::GetNext(CCSSequence &seq) {
     }
 
     switch(fileType) {
+        case Fasta:
+            // This just reads in the fasta sequence as if it were a ccs sequence
+            numRecords = fastaReader.GetNext(seq);
+            seq.SubreadStart(0).SubreadEnd(0);
+            break;
+        case Fastq:
+            numRecords = fastqReader.GetNext(seq);
+            seq.SubreadStart(0).SubreadEnd(0);
+            break;
         case HDFPulse:
         case HDFBase:
             numRecords = hdfBasReader.GetNext(seq);
@@ -461,8 +470,6 @@ int ReaderAgglomerate::GetNext(CCSSequence &seq) {
 #ifdef USE_PBBAM
             cout << "ERROR! Could not read BamRecord as CCSSequence" << endl;
 #endif
-        case Fasta:
-        case Fastq:
         case Fourbit:
         case None:
             UNREACHABLE();
