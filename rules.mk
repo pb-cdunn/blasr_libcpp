@@ -7,7 +7,7 @@ LDFLAGS         += ${EXTRA_LDFLAGS}
 
 
 %.a:
-	${AR} $(ARFLAGS) $@ $^
+	${AR} ${ARFLAGS} $@ $^
 
 %.so:
 	${CXX} -shared ${LDFLAGS} -o $@ -Wl,-soname,$@ $^ ${LDLIBS}
@@ -16,7 +16,10 @@ LDFLAGS         += ${EXTRA_LDFLAGS}
 	${CXX} -dynamiclib ${LDFLAGS} -o $@ -Wl,-install_name,$@ $^ ${LDLIBS}
 
 %.o: %.cpp
-	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(CPPFLAGS) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
+	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} -c $< -o $@
+
+%.d: %.cpp
+	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} -MM $< -o $@
 
 %.shared.o: %.cpp
-	$(CXX) $(CXXOPTS) $(CXXFLAGS) $(LEGACY) $(CPPFLAGS) $(CXX_SHAREDFLAGS) -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.o) $(@:%.o=%.d)" -c $< -o $@
+	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} ${CXX_SHAREDFLAGS} -c $< -o $@

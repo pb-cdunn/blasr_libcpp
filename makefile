@@ -10,6 +10,8 @@ all:
 	${MAKE} libblasr
 all-debug:
 	${MAKE} CXXFLAGS=-g all
+all-opt:
+	${MAKE} CXXFLAGS=-O3 all
 libpbdata:
 	${MAKE} -C ${THISDIR}/pbdata libconfig.h
 	${MAKE} -C ${THISDIR}/pbdata all
