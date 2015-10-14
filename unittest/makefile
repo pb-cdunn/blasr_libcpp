@@ -49,7 +49,7 @@ sources   := $(notdir ${sources})
 objects   := $(patsubst %.cc,%.o,$(filter %.cc,$(sources))) \
              $(patsubst %.cpp,%.o,$(filter %.cpp,$(sources))) \
              $(null)
-depfiles  := $(objects:%.o=%.d)
+dependencies:=$(objects:%.o=%.d)
 
 
 INCLUDES+= \
@@ -116,4 +116,5 @@ gtest: test-runner
 clean:
 	$(RM) -r $(OUTDIR) *.o test-runner
 
-#-include ${depfiles}
+-include ${dependencies}
+depend: $(dependencies:.d=.depend)

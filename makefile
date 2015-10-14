@@ -12,6 +12,8 @@ all-debug:
 	${MAKE} CXXFLAGS=-g all
 all-opt:
 	${MAKE} CXXFLAGS=-O3 all
+all-depend:
+	${MAKE} -C ${THISDIR}/pbdata depend
 libpbdata:
 	${MAKE} -C ${THISDIR}/pbdata libconfig.h
 	${MAKE} -C ${THISDIR}/pbdata all

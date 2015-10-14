@@ -29,4 +29,5 @@ libpbihdf${SH_LIB_EXT}: $(shared_objects)
 clean: 
 	rm -f libpbihdf.a libpbihdf.so *.o *.d
 
-#-include $(dependencies)
+-include $(dependencies)
+depend: $(dependencies:.d=.depend)

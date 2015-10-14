@@ -18,8 +18,11 @@ LDFLAGS         += ${EXTRA_LDFLAGS}
 %.o: %.cpp
 	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} -c $< -o $@
 
-%.d: %.cpp
-	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} -MM $< -o $@
-
 %.shared.o: %.cpp
 	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} ${CXX_SHAREDFLAGS} -c $< -o $@
+
+%.depend: %.cpp
+	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} -MM -MP -MG -MT $(@:.depend=.o) -MF $(@:.depend=.d) $<
+
+%.shared.depend: %.cpp
+	${CXX} ${CXXOPTS} ${CXXFLAGS} ${CPPFLAGS} -MM -MP -MG -MT $(@:.depend=.o) -MF $(@:.depend=.d) $<
