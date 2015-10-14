@@ -217,7 +217,7 @@ void FASTAReader::ReadTitle(long &p, FASTASequence & seq) {
     int seqTitleLen; 
     ReadTitle(p, seqTitle, seqTitleLen);
     seq.CopyTitle(seqTitle, seqTitleLen);
-    if (seqTitle) {delete seqTitle;}
+    if (seqTitle) {delete [] seqTitle;}
 }
 
 void FASTAReader::ReadTitle(long &p, char *&title, int &titleLength) {

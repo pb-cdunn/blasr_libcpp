@@ -257,7 +257,7 @@ TEST_F(DNASequenceTest, ReferenceSubstring) {
     EXPECT_FALSE(dnaTwo.deleteOnExit);
 
 //    EXPECT_DEATH_IF_SUPPORTED(dnaTwo.ReferenceSubstring(dnaOne, 100), "");
-    delete dnaOne.seq;
+    delete [] dnaOne.seq;
 }
 /*
 TEST_F(DNASequenceTest, CopyFromString) {
