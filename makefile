@@ -8,6 +8,12 @@ all:
 	${MAKE} libpbdata
 	${MAKE} libpbihdf
 	${MAKE} libblasr
+all-debug:
+	${MAKE} CXXFLAGS=-g all
+all-opt:
+	${MAKE} CXXFLAGS=-O3 all
+all-depend:
+	${MAKE} -C ${THISDIR}/pbdata depend
 libpbdata:
 	${MAKE} -C ${THISDIR}/pbdata libconfig.h
 	${MAKE} -C ${THISDIR}/pbdata all
@@ -21,7 +27,5 @@ clean:
 	${MAKE} -C ${THISDIR}/pbdata clean
 	${MAKE} -C ${THISDIR}/hdf clean
 	${MAKE} -C ${THISDIR}/alignment clean
-	#@${MAKE} -C ${THISDIR}/unittest clean
+	${MAKE} -C ${THISDIR}/unittest clean
 cleanall: clean
-
-# Note: hdf/ will not build if nohdf=1 is configured.

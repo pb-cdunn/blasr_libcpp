@@ -157,6 +157,7 @@ LIBS          += ${PREFIX_LIB}
         setenv(env, 'PREFIX_INC', os.path.join(PREFIX, 'include'))
         setenv(env, 'PREFIX_LIB', os.path.join(PREFIX, 'lib'))
     poss = [
+        'CXXFLAGS',
         'SH_LIB_EXT',
         'EXTRA_LDFLAGS',
         'PREFIX_LIB', 'PREFIX_INC',

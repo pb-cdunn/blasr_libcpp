@@ -49,7 +49,7 @@ sources   := $(notdir ${sources})
 objects   := $(patsubst %.cc,%.o,$(filter %.cc,$(sources))) \
              $(patsubst %.cpp,%.o,$(filter %.cpp,$(sources))) \
              $(null)
-depfiles  := $(objects:%.o=%.d)
+dependencies:=$(objects:%.o=%.d)
 
 
 INCLUDES+= \
@@ -86,10 +86,10 @@ ldflags  := $(patsubst %,-L%,${LIBS}) $(sys_ldflags)
 
 
 
-CPPFLAGS += $(cppflags) $(EXTRA_CPPFLAGS)
-CXXFLAGS += $(cxxflags) $(cxxopts) $(EXTRA_CXXFLAGS)
-LDLIBS   += $(ldlibs) $(sys_ldlibs)
-LDFLAGS  += $(ldflags)
+override CPPFLAGS := $(cppflags) $(CPPFLAGS)
+override CXXFLAGS := $(cxxflags) $(cxxopts) $(CXXFLAGS)
+override LDLIBS   := $(ldlibs) $(sys_ldlibs) $(LDLIBS)
+override LDFLAGS  := $(ldflags) $(LDFLAGS)
 
 COMPILE.cpp   = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 COMPILE.cc    = $(COMPILE.cpp)
@@ -114,6 +114,7 @@ gtest: test-runner
 	$(COMPILE.cc) -o $@ $<
 
 clean:
-	$(RM) -r $(OUTDIR)
+	$(RM) -r $(OUTDIR) *.o test-runner
 
--include ${depfiles}
+-include ${dependencies}
+depend: $(dependencies:.d=.depend)

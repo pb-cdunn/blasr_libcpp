@@ -4,7 +4,7 @@ THISDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 -include ${CURDIR}/defines.mk
 include ${THISDIR}/../rules.mk
 
-CXXOPTS  := -std=c++11 -pedantic -MMD -MP -Wno-long-long
+CXXOPTS  := -std=c++11 -pedantic -Wno-long-long
 INCLUDES += ${THISDIR} ${LIBPBDATA_INC} ${LIBPBIHDF_INC} ${HDF5_INC} ${PBBAM_INC} ${HTSLIB_INC} ${BOOST_INC}
 LIBS     += ${LIBPBDATA_LIB} ${LIBPBIHDF_LIB} ${HDF5_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${ZLIB_LIB}
 LDFLAGS  += $(patsubst %,-L%,${LIBS})
@@ -44,3 +44,4 @@ clean:
 	rm -f libblasr.a libblasr.so *.o *.d
 
 -include $(dependencies)
+depend: $(dependencies:.d=.depend)
