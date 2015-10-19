@@ -46,6 +46,7 @@ typedef enum T_FileType {Fasta,
     HDFCCS,
     HDFCCSONLY,
     PBBAM,
+    PBDATASET,
     None
 } FileType;
 

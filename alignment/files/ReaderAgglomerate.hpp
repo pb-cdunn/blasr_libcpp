@@ -17,9 +17,12 @@
 #include "HDFCCSReader.hpp"
 
 #ifdef USE_PBBAM
-#include "pbbam/BamFile.h"
+#include "pbbam/DataSet.h"
 #include "pbbam/EntireFileQuery.h"
-#include "pbbam/QNameQuery.h"
+#include "pbbam/PbiFilter.h"
+#include "pbbam/PbiFilterQuery.h"
+#include "pbbam/SequentialZmwGroupQuery.h"
+#include "pbbam/PbiFilterZmwGroupQuery.h"
 #include "pbbam/BamRecord.h"
 #endif
 
@@ -120,11 +123,15 @@ public:
 #ifdef USE_PBBAM
 public:
   // Define reader to fetch sequences from bam.
-  PacBio::BAM::BamFile * bamFilePtr;
+  PacBio::BAM::DataSet * dataSetPtr;
   PacBio::BAM::EntireFileQuery * entireFileQueryPtr;
-  PacBio::BAM::EntireFileQuery::iterator bamIterator;
-  PacBio::BAM::QNameQuery * zmwGroupQueryPtr;
-  PacBio::BAM::QNameQuery::iterator zmwGroupIterator;
+  PacBio::BAM::EntireFileQuery::iterator entireFileIterator;
+  PacBio::BAM::PbiFilterQuery * pbiFilterQueryPtr;
+  PacBio::BAM::PbiFilterQuery::iterator pbiFilterIterator;
+  PacBio::BAM::SequentialZmwGroupQuery * sequentialZmwQueryPtr;
+  PacBio::BAM::SequentialZmwGroupQuery::iterator sequentialZmwIterator;
+  PacBio::BAM::PbiFilterZmwGroupQuery * pbiFilterZmwQueryPtr;
+  PacBio::BAM::PbiFilterZmwGroupQuery::iterator pbiFilterZmwIterator;
 #endif
 };
 

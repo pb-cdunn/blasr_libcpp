@@ -13,9 +13,11 @@ void ReaderAgglomerate::InitializeParameters() {
     ignoreCCS = true;
     readType = ReadType::SUBREAD;
 #ifdef USE_PBBAM
-    bamFilePtr = NULL;
-    entireFileQueryPtr = NULL;
-    zmwGroupQueryPtr = NULL;
+    dataSetPtr = nullptr;
+    entireFileQueryPtr = nullptr;
+    pbiFilterQueryPtr = nullptr;
+    sequentialZmwQueryPtr = nullptr;
+    pbiFilterZmwQueryPtr = nullptr;
 #endif
 }
 
@@ -49,7 +51,7 @@ void ReaderAgglomerate::GetMovieName(string &movieName) {
     else if (fileType == HDFCCS || fileType == HDFCCSONLY) {
         movieName = hdfCcsReader.GetMovieName();
     }
-    else if (fileType == PBBAM) {
+    else if (fileType == PBBAM  || fileType == PBDATASET) {
 #ifdef USE_PBBAM
         assert("Reading movie name from BAM using ReaderAgglomerate is not supported." == 0);
 #endif 
@@ -64,7 +66,7 @@ void ReaderAgglomerate::GetChemistryTriple(string & bindingKit,
     else if (fileType == HDFCCS || fileType == HDFCCSONLY) {
         hdfCcsReader.GetChemistryTriple(bindingKit, sequencingKit, baseCallerVersion);
     }
-    else if (fileType == PBBAM) {
+    else if (fileType == PBBAM || fileType == PBDATASET) {
 #ifdef USE_PBBAM
         assert("Reading chemistry triple from BAM using ReaderAgglomerate is not supported." == 0);
 #endif
@@ -152,13 +154,19 @@ bool ReaderAgglomerate::HasRegionTable() {
 #ifdef USE_PBBAM
 
 #define GET_NEXT_FROM_BAM() \
-    numRecords = (bamIterator == entireFileQueryPtr->end())?0:1;\
-    if (numRecords != 0) {seq.Copy(*bamIterator); bamIterator++;} 
+    numRecords = (entireFileIterator == entireFileQueryPtr->end())?0:1;\
+    if (numRecords != 0) {seq.Copy(*entireFileIterator); entireFileIterator++;} 
+
+#define GET_NEXT_FROM_DATASET() \
+    numRecords = (pbiFilterIterator == pbiFilterQueryPtr->end())?0:1;\
+    if (numRecords != 0) {seq.Copy(*pbiFilterIterator); pbiFilterIterator++;}
 
 #define RESET_PBBAM_PTRS() \
-    if (bamFilePtr != NULL) {delete bamFilePtr; bamFilePtr = NULL;} \
-    if (zmwGroupQueryPtr != NULL) {delete zmwGroupQueryPtr; zmwGroupQueryPtr = NULL;} \
-    if (entireFileQueryPtr != NULL) {delete entireFileQueryPtr; entireFileQueryPtr = NULL;}
+    if (dataSetPtr != nullptr) {delete dataSetPtr; dataSetPtr = nullptr;} \
+    if (entireFileQueryPtr) {delete entireFileQueryPtr; entireFileQueryPtr = nullptr;} \
+    if (pbiFilterQueryPtr) {delete pbiFilterQueryPtr; pbiFilterQueryPtr = nullptr;} \
+    if (sequentialZmwQueryPtr) {delete sequentialZmwQueryPtr; sequentialZmwQueryPtr = nullptr;} \
+    if (pbiFilterZmwQueryPtr) {delete pbiFilterZmwQueryPtr; pbiFilterZmwQueryPtr = nullptr;}
 
 #endif
 
@@ -200,22 +208,39 @@ int ReaderAgglomerate::Initialize() {
             }
             break;
         case PBBAM: 
+        case PBDATASET: 
 #ifdef USE_PBBAM
             RESET_PBBAM_PTRS();
             try {
-                bamFilePtr = new PacBio::BAM::BamFile(fileName);
-                assert(bamFilePtr != nullptr);
+                dataSetPtr = new PacBio::BAM::DataSet(fileName);
             } catch (std::exception e) {
-                cout << "ERROR! Failed to open " << fileName 
+                cout << "ERROR! Failed to open " << fileName
                      << ": " << e.what() << endl;
                 return 0;
             }
-            entireFileQueryPtr = new PacBio::BAM::EntireFileQuery(*bamFilePtr);
-            assert(entireFileQueryPtr != nullptr);
-            bamIterator = entireFileQueryPtr->begin();
-            zmwGroupQueryPtr = new PacBio::BAM::QNameQuery(*bamFilePtr);
-            assert(zmwGroupQueryPtr != nullptr);
-            zmwGroupIterator = zmwGroupQueryPtr->begin();
+            if (fileType == PBBAM) {
+                entireFileQueryPtr = new PacBio::BAM::EntireFileQuery(*dataSetPtr);
+                assert(entireFileQueryPtr != nullptr);
+                entireFileIterator = entireFileQueryPtr->begin();
+
+                sequentialZmwQueryPtr = new PacBio::BAM::SequentialZmwGroupQuery(*dataSetPtr);
+                assert(sequentialZmwQueryPtr != nullptr);
+                sequentialZmwIterator = sequentialZmwQueryPtr->begin();
+            } else if (fileType == PBDATASET) {
+                    // It is necessary to construct a default filter which does not 
+                    // filter any records, because an empty filter throws away all records.
+                    PacBio::BAM::PbiFilter filter{ PacBio::BAM::PbiQueryLengthFilter{ 0 , PacBio::BAM::Compare::GREATER_THAN } };
+                if (dataSetPtr->Filters().Size() != 0) {
+                    filter = PacBio::BAM::PbiFilter::FromDataSet(*dataSetPtr);
+                }
+                pbiFilterQueryPtr = new PacBio::BAM::PbiFilterQuery(filter, *dataSetPtr);
+                assert(pbiFilterQueryPtr != nullptr);
+                pbiFilterIterator = pbiFilterQueryPtr->begin();
+ 
+                pbiFilterZmwQueryPtr = new PacBio::BAM::PbiFilterZmwGroupQuery(filter, *dataSetPtr);
+                assert(pbiFilterZmwQueryPtr != nullptr);
+                pbiFilterZmwIterator = pbiFilterZmwQueryPtr->begin();
+            }
             break;
 #endif
         case HDFCCS:
@@ -228,7 +253,7 @@ int ReaderAgglomerate::Initialize() {
     if (init == 0 || (start > 0 && Advance(start) == 0) ){
         return 0;
     };
-    if (fileType != PBBAM) {
+    if (fileType != PBBAM and fileType != PBDATASET) {
         // All reads from a non-PBBAM file must have the same read group id. 
         // Reads from a PABBAM file may come from different read groups.
         // We have sync reader.readGroupId and SMRTSequence.readGroupId everytime
@@ -272,6 +297,11 @@ int ReaderAgglomerate::GetNext(FASTASequence &seq) {
             cout << "ERROR! Reading CCS into a structure that cannot handle it." << endl;
             assert(0);
             break;
+        case PBDATASET:
+#ifdef USE_PBBAM
+            GET_NEXT_FROM_DATASET();
+            break;
+#endif
         case PBBAM:
 #ifdef USE_PBBAM
             GET_NEXT_FROM_BAM();
@@ -302,6 +332,11 @@ int ReaderAgglomerate::GetNext(FASTQSequence &seq) {
         case HDFBase:
             numRecords = hdfBasReader.GetNext(seq);
             break;
+        case PBDATASET:
+#ifdef USE_PBBAM
+            GET_NEXT_FROM_DATASET();
+            break;
+#endif
         case PBBAM:
 #ifdef USE_PBBAM
             GET_NEXT_FROM_BAM();
@@ -331,14 +366,26 @@ int ReaderAgglomerate::GetNext(vector<SMRTSequence> & reads) {
     }
     if (fileType == PBBAM) {
 #ifdef USE_PBBAM
-        if (zmwGroupIterator != zmwGroupQueryPtr->end()) {
-            const vector<PacBio::BAM::BamRecord> & records = *zmwGroupIterator;
+        if (sequentialZmwIterator != sequentialZmwQueryPtr->end()) {
+            const vector<PacBio::BAM::BamRecord> & records = *sequentialZmwIterator;
             numRecords = records.size();
             reads.resize(numRecords);
             for (size_t i=0; i < records.size(); i++) {
                 reads[i].Copy(records[i]);
             }
-            zmwGroupIterator++;
+            sequentialZmwIterator++;
+        }
+#endif
+    } else if (fileType == PBDATASET) {
+#ifdef USE_PBBAM
+        if (pbiFilterZmwIterator != pbiFilterZmwQueryPtr->end()) {
+            const vector<PacBio::BAM::BamRecord> & records = *pbiFilterZmwIterator;
+            numRecords = records.size();
+            reads.resize(numRecords);
+            for (size_t i=0; i < records.size(); i++) {
+                reads[i].Copy(records[i]);
+            }
+            pbiFilterZmwIterator++;
         }
 #endif
     } else {
@@ -374,6 +421,11 @@ int ReaderAgglomerate::GetNext(SMRTSequence &seq) {
             assert(hdfBasReader.readBasesFromCCS == true);
             numRecords = hdfBasReader.GetNext(seq);
             break;
+        case PBDATASET:
+#ifdef USE_PBBAM
+            GET_NEXT_FROM_DATASET();
+            break;
+#endif
         case PBBAM:
 #ifdef USE_PBBAM
             GET_NEXT_FROM_BAM();
@@ -388,7 +440,7 @@ int ReaderAgglomerate::GetNext(SMRTSequence &seq) {
     // and should be empty, use this->readGroupId instead. Otherwise, 
     // read group id should be loaded from BamRecord to SMRTSequence, 
     // update this->readGroupId accordingly.
-    if (fileType != PBBAM) seq.ReadGroupId(readGroupId);
+    if (fileType != PBBAM and fileType != PBDATASET) seq.ReadGroupId(readGroupId);
     else readGroupId = seq.ReadGroupId();
 
     if (stride > 1)
@@ -425,6 +477,7 @@ int ReaderAgglomerate::GetNextBases(SMRTSequence &seq, bool readQVs) {
             assert(0);
             break;
         case PBBAM:
+        case PBDATASET:
 #ifdef USE_PBBAM
             cout << "ERROR! Can not GetNextBases from a BAM File." << endl;
 #endif
@@ -434,7 +487,7 @@ int ReaderAgglomerate::GetNextBases(SMRTSequence &seq, bool readQVs) {
             break;
     }
 
-    if (fileType != PBBAM) seq.ReadGroupId(readGroupId);
+    if (fileType != PBBAM and fileType != PBDATASET) seq.ReadGroupId(readGroupId);
     else readGroupId = seq.ReadGroupId();
 
     if (stride > 1)
@@ -467,6 +520,7 @@ int ReaderAgglomerate::GetNext(CCSSequence &seq) {
             numRecords = hdfCcsReader.GetNext(seq);
             break;
         case PBBAM:
+        case PBDATASET:
 #ifdef USE_PBBAM
             cout << "ERROR! Could not read BamRecord as CCSSequence" << endl;
 #endif
@@ -476,7 +530,7 @@ int ReaderAgglomerate::GetNext(CCSSequence &seq) {
             break;
     }
 
-    if (fileType != PBBAM) seq.ReadGroupId(readGroupId);
+    if (fileType != PBBAM and fileType != PBDATASET) seq.ReadGroupId(readGroupId);
     else readGroupId = seq.ReadGroupId();
 
     if (stride > 1)
@@ -524,6 +578,7 @@ void ReaderAgglomerate::Close() {
             hdfCcsReader.Close();
             break;
         case PBBAM:
+        case PBDATASET:
 #ifdef USE_PBBAM
             RESET_PBBAM_PTRS();
             break;

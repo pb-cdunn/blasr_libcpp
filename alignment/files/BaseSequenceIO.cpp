@@ -63,6 +63,10 @@ int BaseSequenceIO::DetermineFileTypeByExtension(string &fileName,
             type = PBBAM;
             return 1;
         }
+        else if (extension == "xml") {
+            type = PBDATASET;
+            return 1;
+        }
         else {
             type = None;
             if (exitOnFailure) {
