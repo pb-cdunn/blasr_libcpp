@@ -15,12 +15,12 @@
  * =====================================================================================
  */
 
-#include <algorithm>
-#include <stdio.h>
-#include <string.h>
 #include "files/ReaderAgglomerate.hpp"
 #include "pbdata/testdata.h"
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
 using namespace std;
 
 class ReaderAgglomerateTest: public testing::Test {
@@ -118,9 +118,9 @@ TEST_F(ReaderAgglomerateTest, ReadFromBam) {
     EXPECT_EQ(reader->Initialize(), 1);
 
     SMRTSequence seq;
-    int ret, count=0;
+    int count=0;
     while (true) {
-        ret = reader->GetNext(seq);
+        int ret = reader->GetNext(seq);
         if (ret == 0) break;
         count++;
     }
@@ -137,11 +137,10 @@ TEST_F(ReaderAgglomerateTest, ReadsFromBam) {
 
     vector<SMRTSequence> seqs;
     vector<size_t> counts;
-    int ret = 0;
     size_t count=0;
 
     while (true) {
-        ret = reader->GetNext(seqs);
+        int ret = reader->GetNext(seqs);
         if (ret == 0) break;
         count += seqs.size();
         counts.push_back(seqs.size());
@@ -160,11 +159,10 @@ TEST_F(ReaderAgglomerateTest, ReadFromXml) {
     EXPECT_EQ(reader->Initialize(), 1);
 
     SMRTSequence seq;
-    int ret = 0;
     size_t count=0;
 
     while (true) {
-        ret = reader->GetNext(seq);
+        int ret = reader->GetNext(seq);
         if (ret == 0) break;
         count ++;
     }
@@ -180,9 +178,8 @@ TEST_F(ReaderAgglomerateTest, ReadByZmwFromXml) {
 
     vector<SMRTSequence> seqs;
     vector<size_t> counts;
-    int ret = 0;
     while (true) {
-        ret = reader->GetNext(seqs);
+        int ret = reader->GetNext(seqs);
         if (ret == 0) break;
         counts.push_back(seqs.size());
     }
@@ -201,9 +198,8 @@ TEST_F(ReaderAgglomerateTest, ReadByZmwFromXmlNoFilter) {
 
     vector<SMRTSequence> seqs;
     vector<size_t> counts;
-    int ret = 0;
     while (true) {
-        ret = reader->GetNext(seqs);
+        int ret = reader->GetNext(seqs);
         if (ret == 0) break;
         counts.push_back(seqs.size());
     }
