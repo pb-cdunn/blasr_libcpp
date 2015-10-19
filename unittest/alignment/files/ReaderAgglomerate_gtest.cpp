@@ -119,11 +119,13 @@ TEST_F(ReaderAgglomerateTest, ReadFromBam) {
 
     SMRTSequence seq;
     int ret, count=0;
-    while (ret = reader->GetNext(seq) and ret != 0) { 
+    while (true) {
+        ret = reader->GetNext(seq);
+        if (ret == 0) break;
         count++;
     }
 
-    EXPECT_EQ(count, 116);
+    EXPECT_EQ(count, 117);
 
     reader->Close();
 }
@@ -134,12 +136,82 @@ TEST_F(ReaderAgglomerateTest, ReadsFromBam) {
     EXPECT_EQ(reader->Initialize(), 1);
 
     vector<SMRTSequence> seqs;
-    int ret, count=0;
-    while (ret = reader->GetNext(seqs) and ret != 0) {
-        count+ = seqs.size();
+    vector<size_t> counts;
+    int ret = 0;
+    size_t count=0;
+
+    while (true) {
+        ret = reader->GetNext(seqs);
+        if (ret == 0) break;
+        count += seqs.size();
+        counts.push_back(seqs.size());
+    }
+    vector<size_t> expected({2, 2, 10, 2, 3, 1, 2, 2, 3, 4, 1, 3, 1, 1, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 3, 8, 1, 3, 2, 1, 15, 2, 1, 3, 1, 2, 2, 1, 3, 3, 2, 2, 1, 2, 2, 1, 1, 1});
+
+    EXPECT_EQ(count, 117);
+    EXPECT_EQ(counts, expected);
+
+    reader->Close();
+}
+
+TEST_F(ReaderAgglomerateTest, ReadFromXml) {
+    string fn (xmlFile1);
+    reader->SetReadFileName(fn);
+    EXPECT_EQ(reader->Initialize(), 1);
+
+    SMRTSequence seq;
+    int ret = 0;
+    size_t count=0;
+
+    while (true) {
+        ret = reader->GetNext(seq);
+        if (ret == 0) break;
+        count ++;
     }
 
-    EXPECT_EQ(count, 116);
+    EXPECT_EQ(count, 150);
+    reader->Close();
+}
+
+TEST_F(ReaderAgglomerateTest, ReadByZmwFromXml) {
+    string fn (xmlFile1);
+    reader->SetReadFileName(fn);
+    EXPECT_EQ(reader->Initialize(), 1);
+
+    vector<SMRTSequence> seqs;
+    vector<size_t> counts;
+    int ret = 0;
+    while (true) {
+        ret = reader->GetNext(seqs);
+        if (ret == 0) break;
+        counts.push_back(seqs.size());
+    }
+
+    // The filter in dataset xml must be honored.
+    vector<size_t> expected({2,21,13,1,5,13,1,34,12,2,20,5,3,7,11});
+    EXPECT_EQ(counts, expected);
+
+    reader->Close();
+}
+
+TEST_F(ReaderAgglomerateTest, ReadByZmwFromXmlNoFilter) {
+    string fn (xmlFile2);
+    reader->SetReadFileName(fn);
+    EXPECT_EQ(reader->Initialize(), 1);
+
+    vector<SMRTSequence> seqs;
+    vector<size_t> counts;
+    int ret = 0;
+    while (true) {
+        ret = reader->GetNext(seqs);
+        if (ret == 0) break;
+        counts.push_back(seqs.size());
+    }
+
+    // no filter in dataset.xml, all bam records should pass
+    vector<size_t> expected({2,21,13,1,5,13,1,34,12,2,20,5,3,7,11,14,6,8,23,53,17,21,7,5,35,3,26,6,21,37,26,59,2,6,30,34,32,2,14,3,24,1,15,1,12,26,6,3,1,9,3,21,12,10,24,3,6,1,6,17,34,11,24,4,11,1,10,8,10,20,3,4,6,27,5,2,21,3,14,1,9,5,30,37,6,1,26,7,7,32});
+
+    EXPECT_EQ(counts, expected);
 
     reader->Close();
 }
