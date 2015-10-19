@@ -11,53 +11,10 @@ using namespace std;
 #include "pbbam/BamFile.h"
 
 template<typename T_Sequence>
-void BAMOutput::CreateCIGARString(T_AlignmentCandidate &alignment,
-        T_Sequence &read, std::string &cigarString, const bool cigarUseSeqMatch)
-{
-    cigarString = "";
-    // All cigarString use the no clipping core
-    std::vector<int> opSize;
-    std::vector<char> opChar;
-
-    SAMOutput::CreateNoClippingCigarOps(alignment, opSize, opChar, cigarUseSeqMatch);
-
-    // Clipping needs to be added
-    DNALength prefixSoftClip = alignment.QAlignStart() - read.SubreadStart();
-    DNALength suffixSoftClip = read.SubreadEnd() - alignment.QAlignEnd();
-
-    if (alignment.tStrand == 1) {
-        std::swap(prefixSoftClip, suffixSoftClip);
-    }
-    if (prefixSoftClip > 0) {
-        opSize.insert(opSize.begin(), prefixSoftClip);
-        opChar.insert(opChar.begin(), 'S');
-    }
-    if (suffixSoftClip > 0) {
-        opSize.push_back(suffixSoftClip);
-        opChar.push_back('S');
-    }
-    SAMOutput::CigarOpsToString(opSize, opChar, cigarString);
-}
-
-template<typename T_Sequence>
-void BAMOutput::SetAlignedSequence(T_AlignmentCandidate &alignment, T_Sequence &read,
-        T_Sequence &alignedSeq) {
-    if (alignment.tStrand == 0) {
-        alignedSeq.ReferenceSubstring(read);
-    }
-    else {
-        T_Sequence subSeq;
-        subSeq.ReferenceSubstring(read);
-        subSeq.MakeRC(alignedSeq);
-    }
-}
-
-template<typename T_Sequence>
-void BAMOutput::AlignmentToBamRecord(T_AlignmentCandidate & alignment,
-        T_Sequence & read, PacBio::BAM::BamRecord & bamRecord,
+void AlignmentToBamRecord(T_AlignmentCandidate & alignment, 
+        T_Sequence & read, T_Sequence & subread, PacBio::BAM::BamRecord & bamRecord,
         AlignmentContext & context, SupplementalQVList & qvList,
         Clipping clipping, bool cigarUseSeqMatch) {
-    // soft clipping and subread clipping are identical for BAM
     assert(clipping == SAMOutput::soft or clipping == SAMOutput::subread);
 
     // Build from scratch if input reads are not from pbbam files.
@@ -68,18 +25,22 @@ void BAMOutput::AlignmentToBamRecord(T_AlignmentCandidate & alignment,
         //not SMRTSequence 
         buildFromScratch = true;
     } else { //is SMRTSequence, but not copied from bam.
-        if (not read.copiedFromBam) {
+        if (not subread.copiedFromBam) {
             buildFromScratch = true;
         }
     }
 
     // build cigar string.
     string cigarString;
-    BAMOutput::CreateCIGARString(alignment, read, cigarString, cigarUseSeqMatch);
-    PacBio::BAM::Cigar cigar = PacBio::BAM::Cigar::FromStdString(cigarString);
-
     T_Sequence alignedSequence;
-    BAMOutput::SetAlignedSequence(alignment, read, alignedSequence);
+    DNALength prefixSoftClip = 0, suffixSoftClip = 0;
+    DNALength prefixHardClip = 0, suffixHardClip = 0;
+    CreateCIGARString(alignment, read, cigarString, clipping,
+                      prefixSoftClip, suffixSoftClip, 
+                      prefixHardClip, suffixHardClip,
+                      cigarUseSeqMatch);
+    SetAlignedSequence(alignment, read, alignedSequence, clipping);
+    PacBio::BAM::Cigar cigar = PacBio::BAM::Cigar::FromStdString(cigarString);
  
     // build flag
     uint16_t flag;
@@ -177,7 +138,7 @@ void BAMOutput::AlignmentToBamRecord(T_AlignmentCandidate & alignment,
         // bamRecord = PacBio::BAM::BamRecord::Clipped(read.bamRecord, 
         //                PacBio::BAM::ClipType::CLIP_TO_QUERY,
         //                clipStart, clipEnd).
-        bamRecord = PacBio::BAM::BamRecord::Mapped(read.bamRecord,
+        bamRecord = PacBio::BAM::BamRecord::Mapped(subread.bamRecord,
                         static_cast<int32_t>(alignment.tIndex),
                         static_cast<PacBio::BAM::Position>(pos),
                         strand, cigar, 
@@ -190,15 +151,16 @@ void BAMOutput::AlignmentToBamRecord(T_AlignmentCandidate & alignment,
 
     // Set Flag 
     bamRecord.Impl().Flag(static_cast<uint32_t>(flag));
+
 }
 
 template<typename T_Sequence>
-void BAMOutput::PrintAlignment(T_AlignmentCandidate &alignment, T_Sequence &read,
+void BAMOutput::PrintAlignment(T_AlignmentCandidate &alignment, T_Sequence &read, T_Sequence & subread,
         PacBio::BAM::BamWriter &bamWriter, AlignmentContext &context, 
         SupplementalQVList & qvList, Clipping clipping, bool cigarUseSeqMatch) {
 
     PacBio::BAM::BamRecord bamRecord;
-    BAMOutput::AlignmentToBamRecord(alignment, read, bamRecord, context, qvList, clipping, cigarUseSeqMatch);
+    AlignmentToBamRecord(alignment, read, subread, bamRecord, context, qvList, clipping, cigarUseSeqMatch);
     bamWriter.Write(bamRecord);
 }
 #endif
