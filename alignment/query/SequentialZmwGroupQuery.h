@@ -34,6 +34,7 @@
 // SUCH DAMAGE.
 
 // Author: Yuan Li
+#include "libconfig.h"
 #ifdef USE_PBBAM
 #ifndef SEQUENTIAL_ZMWGROUPQUERY_H
 #define SEQUENTIAL_ZMWGROUPQUERY_H
