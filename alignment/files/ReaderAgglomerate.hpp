@@ -21,8 +21,8 @@
 #include "pbbam/EntireFileQuery.h"
 #include "pbbam/PbiFilter.h"
 #include "pbbam/PbiFilterQuery.h"
-#include "pbbam/SequentialZmwGroupQuery.h"
-#include "pbbam/PbiFilterZmwGroupQuery.h"
+#include "query/SequentialZmwGroupQuery.h"
+#include "query/PbiFilterZmwGroupQuery.h"
 #include "pbbam/BamRecord.h"
 #endif
 

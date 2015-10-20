@@ -34,6 +34,7 @@
 // SUCH DAMAGE.
 
 // Author: Yuan Li
+#include "libconfig.h"
 #ifdef USE_PBBAM
 #ifndef PBIFILTER_ZMWGROUPQUERY_H 
 #define PBIFILTER_ZMWGROUPQUERY_H

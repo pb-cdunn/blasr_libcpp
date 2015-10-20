@@ -35,9 +35,10 @@
 
 // Author: Yuan Li
 
+#include "libconfig.h"
 #ifdef USE_PBBAM
-#include "pbbam/SequentialZmwGroupQuery.h"
-#include "CompositeBamReader.h"
+#include "SequentialZmwGroupQuery.h"
+#include "pbbam/CompositeBamReader.h"
 #include <boost/optional.hpp>
 #include <cassert>
 using namespace PacBio;
