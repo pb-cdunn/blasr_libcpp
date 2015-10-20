@@ -66,9 +66,10 @@ const string bamFile1 =
     ("/mnt/secondary-siv/testdata/BlasrTestData/ctest/data/test_bam/"
      "m140905_042212_sidney_c100564852550000001823085912221377_s1_X0.1.subreads.bam");
 
-// FIXME: move to /mnt/secondary-siv/testdata/ when disck quota problem fixed.
 const string xmlFile1 = 
-    ("/home/UNIXHOME/yli/data/test_dataset/chunking.subreadset.xml");
+    ("/mnt/secondary-siv/testdata/BlasrTestData/ctest/data/test_dataset/"
+     "chunking.subreadset.xml");
 
 const string xmlFile2 = 
-    ("/home/UNIXHOME/yli/data/test_dataset/nofilter.subreadset.xml");
+    ("/mnt/secondary-siv/testdata/BlasrTestData/ctest/data/test_dataset/"
+     "nofilter.subreadset.xml");
