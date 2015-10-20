@@ -308,7 +308,7 @@ SAMHeaderRGs SAMHeaderPrinter::MakeRGs(const std::vector<std::string> & readsFil
         const SupplementalQVList & samQVs) {
     SAMHeaderRGs rgs;
 
-    if (fileType != PBBAM) {
+    if (fileType != PBBAM and fileType != PBDATASET) {
         ReaderAgglomerate * reader = new ReaderAgglomerate();
         assert(reader != nullptr);
         std::vector<std::string>::const_iterator rfit;
@@ -345,6 +345,7 @@ SAMHeaderRGs SAMHeaderPrinter::MakeRGs(const std::vector<std::string> & readsFil
         delete reader;
     } else {
 #ifdef USE_PBBAM
+        if (fileType == PBBAM) {
         // TODO: use Derek's API to merge bamHeaders from different files when 
         // it is in place. Use the following code for now. 
         std::vector<std::string>::const_iterator rfit;
@@ -361,6 +362,14 @@ SAMHeaderRGs SAMHeaderPrinter::MakeRGs(const std::vector<std::string> & readsFil
             } catch (std::exception e) {
                 cout << "ERROR, unable to open bam file " << (*rfit) << endl;
                 exit(1);
+            }
+        }
+        } else if (fileType == PBDATASET) {
+            for (auto xmlfn: readsFiles) {
+                for (auto bamFile: PacBio::BAM::DataSet(xmlfn).BamFiles()) {
+                    for (auto rg: bamFile.Header().ReadGroups())
+                        rgs.Add(SAMHeaderRG(rg.ToSam()));
+                }
             }
         }
 #else
