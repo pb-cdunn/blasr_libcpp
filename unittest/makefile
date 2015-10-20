@@ -30,6 +30,7 @@ test_sources   := $(wildcard ${SRCDIR}/pbdata/*.cpp) \
                   \
                   $(wildcard ${SRCDIR}/alignment/*.cpp) \
                   $(wildcard ${SRCDIR}/alignment/utils/*.cpp) \
+                  $(wildcard ${SRCDIR}/alignment/query/*.cpp) \
                   $(wildcard ${SRCDIR}/alignment/datastructures/alignment/*.cpp) \
                   $(wildcard ${SRCDIR}/alignment/files/*.cpp) \
                   $(wildcard ${SRCDIR}/alignment/format/*.cpp) \
@@ -40,7 +41,7 @@ test_sources   := $(filter-out $(broken_test_sources),$(test_sources))
 
 paths := alignment alignment/files alignment/datastructures/alignment alignment/utils alignment/format \
 	pbdata pbdata/utils pbdata/metagenome pbdata/saf pbdata/reads pbdata/qvs \
-	hdf
+	hdf alignment/query
 paths := $(patsubst %,${SRCDIR}%,${paths}) ${GTEST_SRCDIR}/gtest
 sources   := $(gtest_sources) $(test_sources)
 sources   := $(notdir ${sources})
