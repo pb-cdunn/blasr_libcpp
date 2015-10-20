@@ -1,5 +1,5 @@
-#ifndef _BLASR_HDF_BAX_WRITER_HPP_
-#define _BLASR_HDF_BAX_WRITER_HPP_
+#ifndef _BLASR_HDF_PULSE_WRITER_HPP_
+#define _BLASR_HDF_PULSE_WRITER_HPP_
 #include "libconfig.h"
 #ifdef USE_PBBAM
 
@@ -11,13 +11,15 @@
 #include "HDFWriterBase.hpp"
 #include "HDFScanDataWriter.hpp"
 #include "HDFBaseCallsWriter.hpp"
+#include "HDFPulseCallsWriter.hpp"
 #include "HDFRegionsWriter.hpp"
 
 using namespace H5;
 using namespace std;
 
-class HDFBaxWriter : public HDFWriterBase {
+class HDFPulseWriter : public HDFWriterBase {
 public:
+
     /// \name Constructor & Related Methods
     /// \{
     /// \brief Sets output h5 file name, scan data, base caller version
@@ -28,14 +30,14 @@ public:
     /// \param[in] qvsToWrite Quality values to include in output h5 file. 
     /// \param[in] regionTypes, regionTypes as /Regions/RegionTypes
     /// \param[in] fileAccPropList H5 file access property list
-    HDFBaxWriter(const std::string & filename,
+    HDFPulseWriter(const std::string & filename,
                  const ScanData & sd,
                  const std::string & basecallerVersion,
                  const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
                  const std::vector<std::string> & regionTypes = PacBio::AttributeValues::Regions::regiontypes,
                  const H5::FileAccPropList & fileAccPropList = H5::FileAccPropList::DEFAULT);
 
-	~HDFBaxWriter(void);
+	~HDFPulseWriter(void);
 
     /// \brief Write one zmw sequence to output h5 file. 
     /// \param[in] seq, the SMRTSequence to write
@@ -71,7 +73,26 @@ private:
     std::unique_ptr<HDFBaseCallsWriter> basecallsWriter_;
     /// Points to region table writer.
     std::unique_ptr<HDFRegionsWriter>   regionsWriter_;
+    /// Points to pulse calls writer.
+    std::unique_ptr<HDFPulseCallsWriter> pulsecallsWriter_;
     /// \}
+
+public:
+    /*
+    /// \name Which QV will be written.
+    /// \{
+    inline bool HasDeletionQV(void) const;
+    inline bool HasDeletionTag(void) const;
+    inline bool HasInsertionQV(void) const;
+    inline bool HasSubstitutionTag(void) const;
+    inline bool HasSubstitutionQV(void) const;
+    inline bool HasMergeQV(void) const;
+    inline bool HasPreBaseFrames(void) const;
+    inline bool HasIPD(void) const;
+    inline bool HasWidthInFrames(void) const;
+    inline bool HasPulseWidth(void) const;
+    /// \}
+    */
 
 private:
     /// \name Private Methods.
@@ -84,11 +105,10 @@ private:
                               const std::string & sequencingKit,
                               const std::string & basecallerVersion);
 
-    /// \brief Closes HDFBaxWriter.
+    /// \brief Closes HDFPulseWriter.
     void Close(void);
     /// \}
 };
 
-#endif // end of #ifdef USE_PBBAM
-
-#endif // end of #ifdef _BLASR_HDF_BAX_WRITER_HPP_
+#endif
+#endif

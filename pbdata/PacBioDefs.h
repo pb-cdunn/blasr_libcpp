@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 
+
 namespace PacBio {
 namespace GroupNames {
     ///PulseData
@@ -72,24 +73,27 @@ namespace GroupNames {
     static const std::string holestatus       = "HoleStatus";
     static const std::string holexy           = "HoleXY";
     static const std::string numevent         = "NumEvent";
+    static const std::string baselinesigma    = "BaseLineSigma";
 
     ///PulseData/BaseCalls/ZMWMetrics/HQRegionSNR
     static const std::string hqregionsnr      = "HQRegionSNR";
     static const std::string readscore        = "ReadScore";
     static const std::string productivity     = "Productivity";
 
-    static const std::vector<std::string> BaxQVNames ({
-            deletionqv, 
-            deletiontag, 
-            insertionqv,
-            mergeqv,
-            substitutionqv,
-            substitutiontag,
-            prebaseframes,
-            widthinframes,
-            hqregionsnr,
-            readscore});
-} // namespace GroupNames
+    ///PulseData/PulseCalls/*
+    static const std::string pulsecalls       = "PulseCalls";
+
+    static const std::string channel          = "Channel";
+    static const std::string ispulse          = "IsPulse";
+    static const std::string labelqv          = "LabelQV";
+    static const std::string meansignal       = "MeanSignal";
+    static const std::string midsignal        = "MidSignal";
+    static const std::string startframe       = "StartFrame";
+    static const std::string altlabel         = "AltLabel";
+    static const std::string altlabelqv       = "AltLabelQV";
+
+} // namespace Group
+
 
 namespace AttributeNames {
     namespace Common {
@@ -139,6 +143,10 @@ namespace AttributeValues {
         namespace HoleXY {
             static const std::string description     = "Coordinates of ZMW on Chip";
         } // namespace HoleXY
+
+        namespace BaseLineSigma {
+            static const std::string description     = "Estimated baseline sigma (std dev) over trace";
+        } // namespace BaseLineSigma
 
     } // namespace ZMW
 

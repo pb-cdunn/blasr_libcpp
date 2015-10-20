@@ -50,7 +50,7 @@ public:
     : filename_(filename)
     {}
 
-    ~HDFWriterBase() {}
+    virtual ~HDFWriterBase(void) = 0;
 
 public:
     /// \returns Target H5 filename.

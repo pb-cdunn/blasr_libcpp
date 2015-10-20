@@ -36,6 +36,10 @@
 
 #include "HDFWriterBase.hpp"
 
+
+HDFWriterBase::~HDFWriterBase(void) 
+{ }
+
 std::vector<std::string> HDFWriterBase::Errors(void) const {
     return errors_;
 }

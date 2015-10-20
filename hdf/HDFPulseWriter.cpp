@@ -1,8 +1,8 @@
 #include "libconfig.h"
 #ifdef USE_PBBAM
-#include "HDFBaxWriter.hpp"
+#include "HDFPulseWriter.hpp"
 
-HDFBaxWriter::HDFBaxWriter(const std::string & filename,
+HDFPulseWriter::HDFPulseWriter(const std::string & filename,
                            const ScanData & sd,
                            const std::string & basecallerVersion,
                            const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
@@ -12,6 +12,7 @@ HDFBaxWriter::HDFBaxWriter(const std::string & filename,
     , fileaccproplist_(fileAccPropList)
     , scandataWriter_(nullptr)
     , basecallsWriter_(nullptr) 
+    , pulsecallsWriter_(nullptr)
     , regionsWriter_(nullptr)
 {
     // sanity check chemistry meta data. 
@@ -33,23 +34,33 @@ HDFBaxWriter::HDFBaxWriter(const std::string & filename,
     basecallsWriter_.reset(new HDFBaseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), qvsToWrite));
     basecallsWriter_->WriteBaseCallerVersion(basecallerVersion);
 
+    // Create a PulseCalls writer
+    pulsecallsWriter_.reset(new HDFPulseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), qvsToWrite));
+
     // Create a Regions writer.
     regionsWriter_.reset(new HDFRegionsWriter(filename_, pulseDataGroup_, regionTypes));
 }
 
-HDFBaxWriter::~HDFBaxWriter(void) {
+HDFPulseWriter::~HDFPulseWriter(void) {
     this->Close();
 }
 
-void HDFBaxWriter::Flush(void) {
+void HDFPulseWriter::Flush(void) {
     basecallsWriter_->Flush();
+    pulsecallsWriter_->Flush();
     regionsWriter_->Flush();
 }
 
-std::vector<std::string> HDFBaxWriter::Errors(void) {
+std::vector<std::string> HDFPulseWriter::Errors(void) {
     std::vector<std::string> errors = errors_;
 
+    //for (auto error: scandataWriter_->Errors())
+    //    errors.emplace_back(error);
+
     for (auto error: basecallsWriter_->Errors())
+        errors.emplace_back(error);
+
+    for (auto error: pulsecallsWriter_->Errors())
         errors.emplace_back(error);
 
     for (auto error: regionsWriter_->Errors())
@@ -58,14 +69,15 @@ std::vector<std::string> HDFBaxWriter::Errors(void) {
     return errors;
 }
 
-void HDFBaxWriter::Close(void) {
+void HDFPulseWriter::Close(void) {
     basecallsWriter_->Close();
+    pulsecallsWriter_->Close();
     scandataWriter_->Close();
     regionsWriter_->Close();
     outfile_.Close();
 }
 
-bool HDFBaxWriter::SanityCheckChemistry(const std::string & bindingKit,
+bool HDFPulseWriter::SanityCheckChemistry(const std::string & bindingKit,
                                         const std::string & sequencingKit,
                                         const std::string & basecallerVersion)
 {
@@ -85,12 +97,14 @@ bool HDFBaxWriter::SanityCheckChemistry(const std::string & bindingKit,
     return OK;
 }
 
-bool HDFBaxWriter::WriteOneZmw(const SMRTSequence & seq) {
-    return basecallsWriter_->WriteOneZmw(seq);
+bool HDFPulseWriter::WriteOneZmw(const SMRTSequence & seq) {
+    bool OK = basecallsWriter_->WriteOneZmw(seq);
+    OK = OK and pulsecallsWriter_->WriteOneZmw(seq);
+    return OK;
 }
 
-bool HDFBaxWriter::WriteOneZmw(const SMRTSequence & seq, 
-                               const std::vector<RegionAnnotation> & regions) {
+bool HDFPulseWriter::WriteOneZmw(const SMRTSequence & seq, 
+                                 const std::vector<RegionAnnotation> & regions) {
     if (not this->WriteOneZmw(seq)) {
         return false;
     }
@@ -100,6 +114,5 @@ bool HDFBaxWriter::WriteOneZmw(const SMRTSequence & seq,
     } else {
         return regionsWriter_->Write(regions);
     }
-}
-
-#endif // end of ifdef USE_PBBAM
+} 
+#endif // ifndef USE_PBBAM
