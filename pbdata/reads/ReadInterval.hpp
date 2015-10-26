@@ -30,6 +30,14 @@ public:
                 end   == rhs.end   and
                 score == rhs.score);
     }
+
+    inline friend std::ostream & operator<<(std::ostream &, const ReadInterval &);
+   
+    int Length(void) const {return end - start;}
 };
 
+inline std::ostream & operator<<(std::ostream & ss, const ReadInterval & interval) {
+    ss << interval.start << "_" << interval.end;
+    return ss;
+}
 #endif
