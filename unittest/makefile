@@ -53,6 +53,7 @@ dependencies:=$(objects:%.o=%.d)
 
 INCLUDES+= \
     ${SRCDIR} \
+    ${SRCDIR}/../alignment \
     $(GTEST_INC) \
     $(LIBBLASR_INC) \
     $(LIBPBIHDF_INC) \
@@ -80,7 +81,7 @@ sys_ldlibs := -lpthread -ldl -lrt
 
 cxxopts  := -std=c++11 -Wno-div-by-zero 
 cxxflags := -O3
-cppflags := $(patsubst %,-I%,${includes})
+#cppflags := $(patsubst %,-I%,${includes})
 ldflags  := $(patsubst %,-L%,${LIBS}) $(sys_ldflags)
 
 
