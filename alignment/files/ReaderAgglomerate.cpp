@@ -227,12 +227,7 @@ int ReaderAgglomerate::Initialize() {
                 assert(sequentialZmwQueryPtr != nullptr);
                 sequentialZmwIterator = sequentialZmwQueryPtr->begin();
             } else if (fileType == PBDATASET) {
-                    // It is necessary to construct a default filter which does not 
-                    // filter any records, because an empty filter throws away all records.
-                    PacBio::BAM::PbiFilter filter{ PacBio::BAM::PbiQueryLengthFilter{ 0 , PacBio::BAM::Compare::GREATER_THAN } };
-                if (dataSetPtr->Filters().Size() != 0) {
-                    filter = PacBio::BAM::PbiFilter::FromDataSet(*dataSetPtr);
-                }
+                const PacBio::BAM::PbiFilter filter = PacBio::BAM::PbiFilter::FromDataSet(*dataSetPtr);
                 pbiFilterQueryPtr = new PacBio::BAM::PbiFilterQuery(filter, *dataSetPtr);
                 assert(pbiFilterQueryPtr != nullptr);
                 pbiFilterIterator = pbiFilterQueryPtr->begin();

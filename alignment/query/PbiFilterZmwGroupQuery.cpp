@@ -62,10 +62,7 @@ public:
 
 PbiFilterZmwGroupQuery::PbiFilterZmwGroupQuery(const DataSet& dataset)
     : internal::IGroupQuery()
-    , d_(new PbiFilterZmwGroupQueryPrivate(  (dataset.Filters().Size() == 0) 
-                                           ? (PbiFilter{PbiQueryLengthFilter{ 0 , Compare::GREATER_THAN } })
-                                           : (PbiFilter::FromDataSet(dataset))
-                                           , dataset))
+    , d_(new PbiFilterZmwGroupQueryPrivate(PbiFilter::FromDataSet(dataset),dataset)) 
 { }
 
 PbiFilterZmwGroupQuery::PbiFilterZmwGroupQuery(const PbiFilter& filter, const DataSet& dataset)
