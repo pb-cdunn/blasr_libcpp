@@ -97,12 +97,12 @@ LINK.o        = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 vpath %.cpp ${paths}
 vpath %.cc ${paths}
 
-all: test-runner
+all: libblasr-test-runner
 
-test-runner: $(objects)
+libblasr-test-runner: $(objects)
 	$(LINK.o) $^ $(LDLIBS) -o $@
 
-gtest: test-runner
+gtest: libblasr-test-runner
 	LD_LIBRARY_PATH=$(subst $(space),:,$(strip $(LIBS))) ./$< --gtest_output=xml:./xml/all.xml
 
 # Build objects
@@ -113,7 +113,7 @@ gtest: test-runner
 	$(COMPILE.cc) -o $@ $<
 
 clean:
-	$(RM) -r $(OUTDIR) *.o test-runner
+	$(RM) -r $(OUTDIR) *.o libblasr-test-runner
 
 -include ${dependencies}
 depend: $(dependencies:.d=.depend)
