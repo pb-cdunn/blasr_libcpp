@@ -227,7 +227,7 @@ int ReaderAgglomerate::Initialize() {
                 assert(sequentialZmwQueryPtr != nullptr);
                 sequentialZmwIterator = sequentialZmwQueryPtr->begin();
             } else if (fileType == PBDATASET) {
-		const PacBio::BAM::PbiFilter filter = PacBio::BAM::PbiFilter::FromDataSet(*dataSetPtr);
+                const PacBio::BAM::PbiFilter filter = PacBio::BAM::PbiFilter::FromDataSet(*dataSetPtr);
                 pbiFilterQueryPtr = new PacBio::BAM::PbiFilterQuery(filter, *dataSetPtr);
                 assert(pbiFilterQueryPtr != nullptr);
                 pbiFilterIterator = pbiFilterQueryPtr->begin();
