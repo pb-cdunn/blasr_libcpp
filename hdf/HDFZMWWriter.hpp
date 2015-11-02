@@ -1,95 +1,58 @@
-// Copyright (c) 2014-2015, Pacific Biosciences of California, Inc.
-//
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted (subject to the limitations in the
-// disclaimer below) provided that the following conditions are met:
-//
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//
-//  * Neither the name of Pacific Biosciences nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-// NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
-// GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY PACIFIC
-// BIOSCIENCES AND ITS CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-// WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL PACIFIC BIOSCIENCES OR ITS
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-// USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-// OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-// SUCH DAMAGE.
-
-// Author: Yuan Li
-
-
 #ifndef _BLASR_HDF_HDFZMWWriter_HPP_
 #define _BLASR_HDF_HDFZMWWriter_HPP_
+
+#include "libconfig.h"
+#ifdef USE_PBBAM
 
 #include "HDFWriterBase.hpp"
 #include "BufferedHDFArray.hpp"
 #include "BufferedHDF2DArray.hpp"
 #include "SMRTSequence.hpp"
+#include <pbbam/BamRecord.h>
 
 class HDFBaseCallerWriter;
+class HDFPulseCallerWriter;
 
 class HDFZMWWriter: public HDFWriterBase {
 
 friend class HDFBaseCallerWriter;
-
-private:
-    /// ZMW/NumEvent
-   	BufferedHDFArray<int> numEventArray_;
-
-    // ZMW/HoleNumber
-	BufferedHDFArray<unsigned int> holeNumberArray_; 
-
-    // ZMW/HoleStatus
-	BufferedHDFArray<unsigned char> holeStatusArray_;
-
-    // ZMW/HoleXY
-	BufferedHDF2DArray<int16_t> holeXYArray_;
-
-private:
-	HDFGroup zmwGroup_;
-    HDFGroup & parentGroup_;
-    bool hasHoleXY_;
+friend class HDFPulseCallerWriter;
 
 public:
     /// \name Constructors and Destructors
     /// \{
     HDFZMWWriter(const std::string & filename, 
-                 HDFGroup & parentGroup, 
-                 bool hasHoleXY = true);
+                 HDFGroup & parentGroup);
 
-    ~HDFZMWWriter() ;
+    /// \params[in] filename
+    /// \params[in] parentGroup
+    /// \params[in] inPulseCalls, true if this ZMW is within PulseCalls. 
+    /// \params[in] baseMap, base to channel index in H5.
+    HDFZMWWriter(const std::string & filename, 
+                 HDFGroup & parentGroup,
+                 const bool inPulseCalls,
+                 const std::map<char, size_t> & baseMap);
+
+    ~HDFZMWWriter(void);
     /// \}
 
     /// \name Public Methods
     /// \{
+    /// \returns true if this ZMW is within PulseCalls.
+    bool InPulseCalls(void) const;
+
+    /// \returns Whether or not to write BaseLineSigma
+    bool HasBaseLineSigma(void) const;
     
     /// \note Write info of a SMRTSequence to ZMW,
-    ///       (1) add length (UInt) of the sequence to NumEvent,
+    ///       (1) add number of pulses to NumEvent if InPulseCalls();
+    ///           otherwise, add number of bases
     ///       (2) add zmw hole number (UInt) of the sequence as a UInt to HoleNumber,
     ///       (3) add hole status (unsigned char) to HoleStatus,
     ///       (4) add hole coordinate xy as (int16_t, int16_t) to HoleXY
-    bool WriteOneZmw(const SMRTSequence & read);
+    bool WriteOneZmw(const PacBio::BAM::BamRecord & read);
 
-    /// \returns Whether or not ZMW contains the HoleXY dataset.
-    inline bool HasHoleXY(void) const;
+    bool WriteOneZmw(const SMRTSequence & read);
 
     /// \note Flushes all data from cache to disc.
     void Flush(void);
@@ -100,21 +63,59 @@ public:
     /// \}
 
 private:
+    /// \name Private Data 
+    /// ZMW/NumEvent
+    BufferedHDFArray<int>           numEventArray_;
+    /// ZMW/HoleNumber
+    BufferedHDFArray<unsigned int>  holeNumberArray_;
+    /// ZMW/HoleStatus
+    BufferedHDFArray<unsigned char> holeStatusArray_;
+    /// ZMW/HoleXY
+    BufferedHDF2DArray<int16_t>     holeXYArray_;
+    /// ZMW/BaseLineSigma
+    BufferedHDF2DArray<float>       baseLineSigmaArray_;
+
+    /// ZMW group
+    HDFGroup zmwGroup_;
+    /// Parent group PulseCalls or BaseCalls
+    HDFGroup & parentGroup_;
+    /// Map 'ACGT' to channel indices, defined in /ScanData/RunInfo/BaseMap
+    std::map<char, size_t> baseMap_;
+    /// true if parent gropu is PulseCalls.
+    bool inPulseCalls_;
+    /// \}
+
+private:
     /// \name Private Methods
     /// \{
     
     /// \note Initialize child hdf groups under ZMW, including
-    ///       NumEvent, HoleNumber, HoleStatus, HoleXY
+    ///       NumEvent, HoleNumber, HoleStatus, HoleXY, and BaseLineSigma
     /// \reutrns bool, whether or not child hdf groups successfully initialized.
     bool InitializeChildHDFGroups(void);
 
-    /// \name Add attributes to HoleNumber, HoleXY, HoleStatus.
+    /// \note Write number of bases to ZMW/NumEvent if not InPulseCalls();
+    ///       Otherwise, write number of pulses.
+    bool _WriteNumEvent(const uint32_t numEvent);
+
+    /// \note Write HoleNumber
+    bool _WriteHoleNumber(const uint32_t holeNumber);
+
+    /// \note Write HoleXY
+    bool _WriteHoleXY(const int16_t holeX, const int16_t holeY);
+
+    /// \note Always write 'SEQUENCINGZMW' to HoleStatus
+    bool _WriteHoleStatus(const unsigned char holeStatus);
+
+    /// \note Write BaseLineSigma if it is required to write and exists in read
+    bool _WriteBaseLineSigma(const PacBio::BAM::BamRecord & read);
+
+    /// \note Add attributes to HoleNumber, HoleXY, HoleStatus, HoleXY and BaseLineSigma
     void _WriteAttributes(void);
 
     /// \}
 };
 
-inline bool HDFZMWWriter::HasHoleXY(void) const 
-{return hasHoleXY_;}
+#endif // end of #ifdef USE_PBBAM
 
-#endif
+#endif // end of #ifndef _BLASR_HDF_HDFZMWWriter_HPP_

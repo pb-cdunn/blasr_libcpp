@@ -1,53 +1,21 @@
-// Copyright (c) 2014-2015, Pacific Biosciences of California, Inc.
-//
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted (subject to the limitations in the
-// disclaimer below) provided that the following conditions are met:
-//
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//
-//  * Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//
-//  * Neither the name of Pacific Biosciences nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-// NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
-// GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY PACIFIC
-// BIOSCIENCES AND ITS CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-// WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL PACIFIC BIOSCIENCES OR ITS
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-// USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-// OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-// SUCH DAMAGE.
-
-// Author: Yuan Li
+#include "libconfig.h"
+#ifdef USE_PBBAM
 
 #include "HDFZMWWriter.hpp"
 
 HDFZMWWriter::HDFZMWWriter(const std::string & filename, 
-        HDFGroup & parentGroup, 
-        bool hasHoleXY)
+                           HDFGroup & parentGroup,
+                           const bool inPulseCalls,
+                           const std::map<char, size_t> & baseMap)
     : HDFWriterBase(filename)
     , parentGroup_(parentGroup)
-    , hasHoleXY_(hasHoleXY)
-{
+    , inPulseCalls_(inPulseCalls)
+    , baseMap_(baseMap)
+{ 
     if (not parentGroup.groupIsInitialized)
         PARENT_GROUP_NOT_INITIALIZED_ERROR(PacBio::GroupNames::zmw);
     else {
-        parentGroup_.AddGroup(PacBio::GroupNames::zmw); 
+        parentGroup_.AddGroup(PacBio::GroupNames::zmw);
 
         if (zmwGroup_.Initialize(parentGroup_, PacBio::GroupNames::zmw) == 0)
             FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::zmw);
@@ -56,78 +24,150 @@ HDFZMWWriter::HDFZMWWriter(const std::string & filename,
     }
 }
 
-HDFZMWWriter::~HDFZMWWriter() {
+HDFZMWWriter::HDFZMWWriter(const std::string & filename, 
+                           HDFGroup & parentGroup) 
+    : HDFZMWWriter(filename, parentGroup, false, {})
+{ }
+
+HDFZMWWriter::~HDFZMWWriter(void) {
     this->_WriteAttributes();
     this->Close();
 }
 
+bool HDFZMWWriter::InPulseCalls(void) const {
+    return inPulseCalls_;
+}
+
+bool HDFZMWWriter::HasBaseLineSigma(void) const {
+    return InPulseCalls() and baseLineSigmaArray_.IsInitialized();
+}
+    
 bool HDFZMWWriter::WriteOneZmw(const SMRTSequence & read) {
-    int length_ = static_cast<int> (read.length);
+    _WriteNumEvent(read.length);
+    _WriteHoleNumber(read.HoleNumber());
+    _WriteHoleXY(static_cast<int16_t>(read.HoleX()),
+                 static_cast<int16_t>(read.HoleY()));
+    _WriteHoleStatus(read.HoleStatus());
+    return Errors().empty();
+}
+
+bool HDFZMWWriter::WriteOneZmw(const PacBio::BAM::BamRecord & read) {
+    if (InPulseCalls()) {
+        if (not read.HasPulseCall()) {
+            AddErrorMessage(std::string("PulseCall absent in read ") + read.FullName());
+        } else {
+            _WriteNumEvent(read.PulseCall().size());
+        }
+    } else _WriteNumEvent(read.Sequence().size());
+
+    uint32_t hn_ = read.HoleNumber();
+    _WriteHoleNumber(hn_);
+    _WriteHoleXY(static_cast<int16_t>(hn_ & 0x0000FFFF), 
+                 static_cast<int16_t>(hn_ >> 16));
+    _WriteHoleStatus(PacBio::AttributeValues::ZMW::HoleStatus::sequencingzmw);
+    _WriteBaseLineSigma(read);
+    return Errors().empty();
+}
+
+bool HDFZMWWriter::_WriteNumEvent(const uint32_t numEvent) {
+    int32_t length_ = static_cast<int32_t> (numEvent);
     numEventArray_.Write(&length_, 1);
+}
 
-    UInt hn_ = read.HoleNumber();
-    holeNumberArray_.Write(&hn_, 1);
+bool HDFZMWWriter::_WriteHoleNumber(const uint32_t holeNumber) {
+    holeNumberArray_.Write(&holeNumber, 1);
+}
 
-    unsigned char hs_ = read.HoleStatus();
-    holeStatusArray_.Write(&hs_, 1);
-
-    if (HasHoleXY()) {
-        int16_t xy[2] = {static_cast<int16_t>(read.HoleX()),
-                         static_cast<int16_t>(read.HoleY())};
-        holeXYArray_.WriteRow(xy, 2);
-    }
+bool HDFZMWWriter::_WriteHoleXY(const int16_t holeX, const int16_t holeY) {
+    int16_t xy[2] = {holeX, holeY};
+    holeXYArray_.WriteRow(xy, 2);
     return true;
 }
 
+bool HDFZMWWriter::_WriteHoleStatus(const unsigned char holeStatus) {
+    // NOTE that: We assume that all zmws in BAM are SEQUENCING zmws.
+    //unsigned char hs_ = 
+    holeStatusArray_.Write(&holeStatus, 1);
+}
+
+bool HDFZMWWriter::_WriteBaseLineSigma(const PacBio::BAM::BamRecord & read) {
+    // FIXME: pbbam should provide APIs: HasBaseLineSigma and BaseLineSigma().
+    if (HasBaseLineSigma()) {
+        if (read.Impl().HasTag("bs")) {
+            const PacBio::BAM::Tag & tag = read.Impl().TagValue("bs");
+            std::vector<float> data = tag.ToFloatArray();
+            if (data.size() != 4) {
+                AddErrorMessage(std::string("Tag BaseLineSigma must have 4 values per each record in read " + read.FullName()));
+            }
+            float bls[4]; 
+            bls[baseMap_['A']] = data[0]; bls[baseMap_['C']] = data[1];
+            bls[baseMap_['G']] = data[2]; bls[baseMap_['T']] = data[3];
+            baseLineSigmaArray_.WriteRow(bls, 4);
+        } else {
+            AddErrorMessage(std::string("Tag BaseLineSigma is absent in read ") + read.FullName());
+        }
+    } else {
+        AddErrorMessage("BaseLineSigma array is not initialized.");
+    }
+    return Errors().empty();
+}
+
 void HDFZMWWriter::Flush(void) {
+    // Mandatory metrics
     numEventArray_.Flush();
     holeNumberArray_.Flush();
     holeStatusArray_.Flush();
-    if (HasHoleXY())
-        holeXYArray_.Flush();
+    holeXYArray_.Flush();
+
+    // Optional metrics
+    if (HasBaseLineSigma()) baseLineSigmaArray_.Flush();
 }
 
 void HDFZMWWriter::Close(void) {
     this->Flush();
 
+    // Mandatory metrics
     numEventArray_.Close();
     holeNumberArray_.Close();
     holeStatusArray_.Close();
-    if (HasHoleXY())
-        holeXYArray_.Close();
+    holeXYArray_.Close();
+
+    // Optional metrics
+    if (HasBaseLineSigma()) baseLineSigmaArray_.Close();
+
     zmwGroup_.Close();
 }
 
 bool HDFZMWWriter::InitializeChildHDFGroups(void) {
-    bool OK = true;
-
+    // Mandatory metrics
     if (numEventArray_.Initialize(zmwGroup_, PacBio::GroupNames::numevent) == 0) { 
         FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::numevent);
-        OK = false;
     }
 
     if (holeNumberArray_.Initialize(zmwGroup_, PacBio::GroupNames::holenumber) == 0) {
         FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::holenumber);
-        OK = false;
     }
 
     if (holeStatusArray_.Initialize(zmwGroup_, PacBio::GroupNames::holestatus) == 0) {
         FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::holestatus);
-        OK = false;
     }
 
-    if (HasHoleXY()) {
-        if (holeXYArray_.Initialize(zmwGroup_, PacBio::GroupNames::holexy, 2) == 0) {
-            FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::holexy);
-            OK = false;
+    if (holeXYArray_.Initialize(zmwGroup_, PacBio::GroupNames::holexy, 2) == 0) {
+        FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::holexy);
+    }
+
+    if (InPulseCalls()) {
+        if (baseLineSigmaArray_.Initialize(zmwGroup_, PacBio::GroupNames::baselinesigma, 4) == 0) {
+            FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::baselinesigma);
         }
     }
-
-    return OK;
+    return Errors().empty();
 }
 
 void HDFZMWWriter::_WriteAttributes(void)
 {
+    // NumEvent has no attributes.
+
     if (holeNumberArray_.IsInitialized() and holeNumberArray_.size() > 0) {
         AddAttribute(holeNumberArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleNumber::description);
     }
@@ -137,8 +177,12 @@ void HDFZMWWriter::_WriteAttributes(void)
         AddAttribute(holeStatusArray_, PacBio::AttributeNames::ZMW::HoleStatus::lookuptable, PacBio::AttributeValues::ZMW::HoleStatus::lookuptable);
     }
 
-    if (holeXYArray_.IsInitialized()) {
+    if (holeXYArray_.IsInitialized() and holeXYArray_.GetNRows() > 0) {
         AddAttribute(holeXYArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleXY::description);
     }
-}
 
+    if (HasBaseLineSigma() and baseLineSigmaArray_.GetNRows() > 0) {
+        AddAttribute(baseLineSigmaArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::BaseLineSigma::description);
+    }
+}
+#endif
