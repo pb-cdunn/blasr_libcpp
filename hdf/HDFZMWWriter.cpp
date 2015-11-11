@@ -39,7 +39,8 @@ bool HDFZMWWriter::InPulseCalls(void) const {
 }
 
 bool HDFZMWWriter::HasBaseLineSigma(void) const {
-    return InPulseCalls() and baseLineSigmaArray_.IsInitialized();
+    return false; // base line sigma won't be provided util 3.0.1 bug 29486 
+    //return InPulseCalls() and baseLineSigmaArray_.IsInitialized();
 }
     
 bool HDFZMWWriter::WriteOneZmw(const SMRTSequence & read) {
@@ -107,7 +108,8 @@ bool HDFZMWWriter::_WriteBaseLineSigma(const PacBio::BAM::BamRecord & read) {
             AddErrorMessage(std::string("Tag BaseLineSigma is absent in read ") + read.FullName());
         }
     } else {
-        AddErrorMessage("BaseLineSigma array is not initialized.");
+        //BaseLineSigma won't be available uill v 3.0.1.
+        //AddErrorMessage("BaseLineSigma array is not initialized.");
     }
     return Errors().empty();
 }
@@ -156,11 +158,13 @@ bool HDFZMWWriter::InitializeChildHDFGroups(void) {
         FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::holexy);
     }
 
+    /* BaseLineSigma not available until 3.0.1
     if (InPulseCalls()) {
         if (baseLineSigmaArray_.Initialize(zmwGroup_, PacBio::GroupNames::baselinesigma, 4) == 0) {
             FAILED_TO_CREATE_GROUP_ERROR(PacBio::GroupNames::baselinesigma);
         }
     }
+    */
     return Errors().empty();
 }
 
