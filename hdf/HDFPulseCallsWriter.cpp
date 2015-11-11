@@ -156,17 +156,14 @@ bool HDFPulseCallsWriter::_WritePulseCall(const PacBio::BAM::BamRecord & read) {
             const std::string & pulsecall = read.PulseCall();
             const unsigned int length = pulsecall.size();
             _CheckRead(read, length, "PulseCall");
-            std::vector<uint8_t> ispulse; ispulse.resize(length);
             std::vector<uint8_t> channel; channel.resize(length);
             uint32_t num_bases = 0;
             for (size_t i = 0; i < length; i++) {
                 const char base = pulsecall[i];
                 if (base == 'A' or base == 'C' or base == 'G' or base == 'T') {
-                    ispulse[i] = 1; 
                     channel[i] = static_cast<uint8_t>(baseMap_[std::toupper(base)]);
                     num_bases += 1;
                 } else if (base == 'a' or base == 'c' or base == 'g' or base == 't') {
-                    ispulse[i] = 0; 
                     channel[i] = static_cast<uint8_t>(baseMap_[std::toupper(base)]);
                 } else {
                     AddErrorMessage(std::string("Unrecognizable base in PulseCall of " + read.FullName()));
@@ -175,8 +172,10 @@ bool HDFPulseCallsWriter::_WritePulseCall(const PacBio::BAM::BamRecord & read) {
             if (num_bases != read.Sequence().size()) {
                 AddErrorMessage(std::string("Number of bases in PulseCall does not match BaseCall in read ") + read.FullName());
             }
-            isPulseArray_.Write(&ispulse[0], length);
             pulseCallArray_.Write(&channel[0], length);
+
+            std::vector<uint8_t> ispulse(length, 1); // all pulses in BAM are real pulses
+            isPulseArray_.Write(&ispulse[0], length);
         } else {
             AddErrorMessage(std::string("PulseCall is absent in read " + read.FullName()));
         }
