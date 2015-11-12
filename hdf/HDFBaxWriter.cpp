@@ -6,7 +6,6 @@ HDFBaxWriter::HDFBaxWriter(const std::string & filename,
                            const ScanData & sd,
                            const std::string & basecallerVersion,
                            const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
-                           const std::vector<std::string> & regionTypes,
                            const H5::FileAccPropList & fileAccPropList)
     : HDFWriterBase(filename)
     , fileaccproplist_(fileAccPropList)
@@ -32,7 +31,16 @@ HDFBaxWriter::HDFBaxWriter(const std::string & filename,
     // Create a BaseCaller writer.
     basecallsWriter_.reset(new HDFBaseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), qvsToWrite));
     basecallsWriter_->WriteBaseCallerVersion(basecallerVersion);
+}
 
+HDFBaxWriter::HDFBaxWriter(const std::string & filename,
+                           const ScanData & sd,
+                           const std::string & basecallerVersion,
+                           const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
+                           const std::vector<std::string> & regionTypes,
+                           const H5::FileAccPropList & fileAccPropList)
+    : HDFBaxWriter(filename, sd, basecallerVersion, qvsToWrite, fileAccPropList)
+{
     // Create a Regions writer.
     regionsWriter_.reset(new HDFRegionsWriter(filename_, pulseDataGroup_, regionTypes));
 }
@@ -43,7 +51,7 @@ HDFBaxWriter::~HDFBaxWriter(void) {
 
 void HDFBaxWriter::Flush(void) {
     basecallsWriter_->Flush();
-    regionsWriter_->Flush();
+    if (HasRegions()) regionsWriter_->Flush();
 }
 
 std::vector<std::string> HDFBaxWriter::Errors(void) {
@@ -52,8 +60,10 @@ std::vector<std::string> HDFBaxWriter::Errors(void) {
     for (auto error: basecallsWriter_->Errors())
         errors.emplace_back(error);
 
-    for (auto error: regionsWriter_->Errors())
-        errors.emplace_back(error);
+    if (HasRegions()) {
+        for (auto error: regionsWriter_->Errors())
+            errors.emplace_back(error);
+    }
 
     return errors;
 }
@@ -61,7 +71,7 @@ std::vector<std::string> HDFBaxWriter::Errors(void) {
 void HDFBaxWriter::Close(void) {
     basecallsWriter_->Close();
     scandataWriter_->Close();
-    regionsWriter_->Close();
+    if (HasRegions()) regionsWriter_->Close();
     outfile_.Close();
 }
 
@@ -94,11 +104,13 @@ bool HDFBaxWriter::WriteOneZmw(const SMRTSequence & seq,
     if (not this->WriteOneZmw(seq)) {
         return false;
     }
-    if (regions.size() == 0) {
-        std::vector<RegionAnnotation> fake = {RegionAnnotation(seq.HoleNumber(), HQRegion, 0, 0, 0)};
-        return regionsWriter_->Write(fake);
-    } else {
-        return regionsWriter_->Write(regions);
+    if (HasRegions()) {
+        if (regions.size() == 0) {
+            std::vector<RegionAnnotation> fake = {RegionAnnotation(seq.HoleNumber(), HQRegion, 0, 0, 0)};
+            return regionsWriter_->Write(fake);
+        } else {
+            return regionsWriter_->Write(regions);
+        }
     }
 }
 

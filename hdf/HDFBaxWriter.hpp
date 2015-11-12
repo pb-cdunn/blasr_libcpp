@@ -22,20 +22,33 @@ public:
     /// \{
     /// \brief Sets output h5 file name, scan data, base caller version
     ///        QVs to write, and h5 file access property list.
+    /// \note Should not create /PulseData/Regions.
     /// \param[in] filename output h5 file name.
     /// \param[in] ScanData meta data string, must contain bindingKit and sequencingKit.
     /// \param[in] basecallerVersion meta data string
     /// \param[in] qvsToWrite Quality values to include in output h5 file. 
-    /// \param[in] regionTypes, regionTypes as /Regions/RegionTypes
     /// \param[in] fileAccPropList H5 file access property list
     HDFBaxWriter(const std::string & filename,
                  const ScanData & sd,
                  const std::string & basecallerVersion,
                  const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
-                 const std::vector<std::string> & regionTypes = PacBio::AttributeValues::Regions::regiontypes,
                  const H5::FileAccPropList & fileAccPropList = H5::FileAccPropList::DEFAULT);
 
+    /// \brief Sets output h5 file name, scan data, base caller version
+    ///        QVs to write, regions types and h5 file access property list.
+    /// \note /PulseData/Regions dataset should be created.
+    /// \param[in] regionTypes, regionTypes as /Regions/RegionTypes
+    HDFBaxWriter(const std::string & filename,
+                 const ScanData & sd,
+                 const std::string & basecallerVersion,
+                 const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
+                 const std::vector<std::string> & regionTypes,
+                 const H5::FileAccPropList & fileAccPropList = H5::FileAccPropList::DEFAULT);
+    
 	~HDFBaxWriter(void);
+
+    /// \returns whether or not write region table.
+    inline bool HasRegions(void) const;
 
     /// \brief Write one zmw sequence to output h5 file. 
     /// \param[in] seq, the SMRTSequence to write
@@ -88,6 +101,9 @@ private:
     void Close(void);
     /// \}
 };
+
+inline bool HDFBaxWriter::HasRegions(void) const 
+{ return bool(regionsWriter_); }
 
 #endif // end of #ifdef USE_PBBAM
 
