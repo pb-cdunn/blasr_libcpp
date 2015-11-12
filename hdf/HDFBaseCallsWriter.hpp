@@ -61,6 +61,7 @@ public:
     inline bool HasMergeQV(void) const;
     inline bool HasIPD(void) const;
     inline bool HasPulseWidth(void) const;
+    inline bool HasPulseIndex(void) const;
 
     std::vector<std::string> Errors(void) const;
 
@@ -89,6 +90,7 @@ private:
     bool _WriteMergeQV(const SMRTSequence & read);
     bool _WriteIPD(const SMRTSequence & read);
     bool _WritePulseWidth(const SMRTSequence & read);
+    bool _WritePulseIndex(const SMRTSequence & read);
 
 private:
     /// \brief Create and initialize QV groups.
@@ -122,6 +124,8 @@ private:
     ///        SubstitutionTag    st --> BaseCalls/SubstitutionTag
     ///        Ipd:Frames         ip --> BaseCalls/PreBaseFrames
     ///        PulseWidth:Frames  pw --> BaseCalls/WidthInFrames
+    ///        PulseIndex  inferred from
+    ///                           pc --> BaseCalls/PulseIndex
 	BufferedHDFArray<unsigned char> deletionQVArray_;
 	BufferedHDFArray<unsigned char> deletionTagArray_;
 	BufferedHDFArray<unsigned char> insertionQVArray_;
@@ -130,6 +134,8 @@ private:
 	BufferedHDFArray<unsigned char> substitutionTagArray_;
 	BufferedHDFArray<HalfWord> ipdArray_;
 	BufferedHDFArray<HalfWord> pulseWidthArray_;
+	//BufferedHDFArray<int32_t>  pulseIndexArray_;
+	BufferedHDFArray<HalfWord>  pulseIndexArray_;
 
     /// \}
 };
@@ -187,6 +193,11 @@ bool HDFBaseCallsWriter::HasPulseWidth(void) const
 inline
 bool HDFBaseCallsWriter::FakeQualityValue(void) const
 {return this->fakeQualityValue_;}
+
+inline
+bool HDFBaseCallsWriter::HasPulseIndex(void) const
+{return (_HasQV(PacBio::BAM::BaseFeature::PULSE_CALL) and
+         pulseIndexArray_.IsInitialized());}
 
 #endif
 #endif

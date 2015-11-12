@@ -131,6 +131,9 @@ bool HDFPulseCallsWriter::WriteOneZmw(const SMRTSequence & read) {
 bool HDFPulseCallsWriter::_CheckRead(const PacBio::BAM::BamRecord & read, 
                                      const uint32_t qvLength,
                                      const std::string & qvName) {
+    // Tag 'pb' will not be available until 3.0.1, bug 29486
+    return true;
+    /*
     // FIXME: pbbam should provide HasPulseBlockSize() and PulseBlockSize().
     if (read.Impl().HasTag("pb")) {
         if (qvLength != read.Impl().TagValue("pb").ToUInt32()) {
@@ -143,6 +146,7 @@ bool HDFPulseCallsWriter::_CheckRead(const PacBio::BAM::BamRecord & read,
         AddErrorMessage(std::string("Tag PulseBlockSize is absent in read ") + read.FullName());
         return false;
     }
+    */
 }
 
 bool HDFPulseCallsWriter::_WritePulseCall(const PacBio::BAM::BamRecord & read) {
@@ -152,17 +156,14 @@ bool HDFPulseCallsWriter::_WritePulseCall(const PacBio::BAM::BamRecord & read) {
             const std::string & pulsecall = read.PulseCall();
             const unsigned int length = pulsecall.size();
             _CheckRead(read, length, "PulseCall");
-            std::vector<uint8_t> ispulse; ispulse.resize(length);
             std::vector<uint8_t> channel; channel.resize(length);
             uint32_t num_bases = 0;
             for (size_t i = 0; i < length; i++) {
                 const char base = pulsecall[i];
                 if (base == 'A' or base == 'C' or base == 'G' or base == 'T') {
-                    ispulse[i] = 1; 
                     channel[i] = static_cast<uint8_t>(baseMap_[std::toupper(base)]);
                     num_bases += 1;
                 } else if (base == 'a' or base == 'c' or base == 'g' or base == 't') {
-                    ispulse[i] = 0; 
                     channel[i] = static_cast<uint8_t>(baseMap_[std::toupper(base)]);
                 } else {
                     AddErrorMessage(std::string("Unrecognizable base in PulseCall of " + read.FullName()));
@@ -171,8 +172,10 @@ bool HDFPulseCallsWriter::_WritePulseCall(const PacBio::BAM::BamRecord & read) {
             if (num_bases != read.Sequence().size()) {
                 AddErrorMessage(std::string("Number of bases in PulseCall does not match BaseCall in read ") + read.FullName());
             }
-            isPulseArray_.Write(&ispulse[0], length);
             pulseCallArray_.Write(&channel[0], length);
+
+            std::vector<uint8_t> ispulse(length, 1); // all pulses in BAM are real pulses
+            isPulseArray_.Write(&ispulse[0], length);
         } else {
             AddErrorMessage(std::string("PulseCall is absent in read " + read.FullName()));
         }
@@ -183,9 +186,8 @@ bool HDFPulseCallsWriter::_WritePulseCall(const PacBio::BAM::BamRecord & read) {
 bool HDFPulseCallsWriter::_WriteLabelQV(const PacBio::BAM::BamRecord & read) {
     if (HasLabelQV()) {
         if (read.HasLabelQV()) {
-            // FIXME: pbbam segfault reading LabelQV
-            const PacBio::BAM::Tag & tag = read.Impl().TagValue("pq");
-            std::vector<uint8_t> data(tag.ToUInt8Array());
+            const PacBio::BAM::QualityValues & qvs = read.LabelQV();
+            std::vector<uint8_t> data(qvs.cbegin(), qvs.cend());
             _CheckRead(read, data.size(), "LabelQV");
             labelQVArray_.Write(&data[0], data.size());
         } else {
@@ -212,9 +214,8 @@ bool HDFPulseCallsWriter::_WritePkmean(const PacBio::BAM::BamRecord & read) {
 bool HDFPulseCallsWriter::_WritePulseMergeQV(const PacBio::BAM::BamRecord & read) {
     if (HasPulseMergeQV()) {
         if (read.HasPulseMergeQV()) {
-            //FIXME: pbbam segfault reading PulseMergeQV.
-            const PacBio::BAM::Tag & tag = read.Impl().TagValue("pg");
-            std::vector<uint8_t> data = tag.ToUInt8Array();
+            const PacBio::BAM::QualityValues & qvs = read.PulseMergeQV();
+            std::vector<uint8_t> data(qvs.cbegin(), qvs.cend());
             _CheckRead(read, data.size(), "PulseMergeQV");
             pulseMergeQVArray_.Write(&data[0], data.size());
         } else {
@@ -243,7 +244,8 @@ bool HDFPulseCallsWriter::_WritePrePulseFrames(const PacBio::BAM::BamRecord & re
         if (read.HasPrePulseFrames()) {
             // FIXME: pbbam PrePulseFrames().Data() returns incorrect vector, e.g., incorrect vector size.
             const PacBio::BAM::Tag & tag = read.Impl().TagValue("pd");
-            // FIXME: Type of PrePulseFrames is uint32_t in ICD (H5 file), while is uint16_t in BAM
+            // Type of PrePulseFrames is uint32_t in ICD (H5 file), while is uint16_t in BAM
+            // This is a concious decision.
             const std::vector<uint16_t> data_ = tag.ToUInt16Array();
             std::vector<uint32_t> data(data_.begin(), data_.end());
             _CheckRead(read, data.size(), "PrePulseFrames");
@@ -287,9 +289,8 @@ bool HDFPulseCallsWriter::_WriteAltLabel(const PacBio::BAM::BamRecord & read) {
 bool HDFPulseCallsWriter::_WriteAltLabelQV(const PacBio::BAM::BamRecord & read) {
     if (HasAltLabelQV()) {
         if (read.HasAltLabelQV()) {
-            //FIXME: Fix pbbam BamRecord.AltLabelQV seg fault
-            const PacBio::BAM::Tag & tag = read.Impl().TagValue("pv");
-            std::vector<uint8_t> data = tag.ToUInt8Array();
+            const PacBio::BAM::QualityValues & qvs = read.AltLabelQV();
+            std::vector<uint8_t> data(qvs.begin(), qvs.end());
             _CheckRead(read, data.size(), "AltLabelQV");
             altLabelQVArray_.Write(&data[0], data.size());
         } else {
