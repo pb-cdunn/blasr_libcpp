@@ -369,8 +369,8 @@ void SMRTSequence::Copy(const PacBio::BAM::BamRecord & record,
             preBaseFrames = ProtectedNew<HalfWord>(qvs.size());
             std::memcpy(preBaseFrames, &qvs[0], qvs.size() * sizeof(HalfWord));
         }
-        if (record.HasIPD()) {
-            std::vector<uint16_t> qvs = record.IPD().DataRaw();
+        if (record.HasPulseWidth()) {
+            std::vector<uint16_t> qvs = record.PulseWidth().DataRaw();
             assert(widthInFrames == nullptr);
             widthInFrames = ProtectedNew<HalfWord>(qvs.size());
             std::memcpy(widthInFrames, &qvs[0], qvs.size() * sizeof(HalfWord));
