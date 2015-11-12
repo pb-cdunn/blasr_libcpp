@@ -6,7 +6,6 @@ HDFPulseWriter::HDFPulseWriter(const std::string & filename,
                            const ScanData & sd,
                            const std::string & basecallerVersion,
                            const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
-                           const std::vector<std::string> & regionTypes,
                            const H5::FileAccPropList & fileAccPropList)
     : HDFWriterBase(filename)
     , fileaccproplist_(fileAccPropList)
@@ -37,9 +36,20 @@ HDFPulseWriter::HDFPulseWriter(const std::string & filename,
     // Create a PulseCalls writer
     pulsecallsWriter_.reset(new HDFPulseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), qvsToWrite));
 
+}
+
+HDFPulseWriter::HDFPulseWriter(const std::string & filename,
+                           const ScanData & sd,
+                           const std::string & basecallerVersion,
+                           const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
+                           const std::vector<std::string> & regionTypes,
+                           const H5::FileAccPropList & fileAccPropList)
+    :HDFPulseWriter(filename, sd, basecallerVersion, qvsToWrite, fileAccPropList)
+{
     // Create a Regions writer.
     regionsWriter_.reset(new HDFRegionsWriter(filename_, pulseDataGroup_, regionTypes));
 }
+ 
 
 HDFPulseWriter::~HDFPulseWriter(void) {
     this->Close();
@@ -48,7 +58,7 @@ HDFPulseWriter::~HDFPulseWriter(void) {
 void HDFPulseWriter::Flush(void) {
     basecallsWriter_->Flush();
     pulsecallsWriter_->Flush();
-    regionsWriter_->Flush();
+    if (HasRegions()) regionsWriter_->Flush();
 }
 
 std::vector<std::string> HDFPulseWriter::Errors(void) {
@@ -63,8 +73,10 @@ std::vector<std::string> HDFPulseWriter::Errors(void) {
     for (auto error: pulsecallsWriter_->Errors())
         errors.emplace_back(error);
 
-    for (auto error: regionsWriter_->Errors())
-        errors.emplace_back(error);
+    if (HasRegions()) {
+        for (auto error: regionsWriter_->Errors())
+            errors.emplace_back(error);
+    }
 
     return errors;
 }
@@ -73,7 +85,7 @@ void HDFPulseWriter::Close(void) {
     basecallsWriter_->Close();
     pulsecallsWriter_->Close();
     scandataWriter_->Close();
-    regionsWriter_->Close();
+    if (HasRegions()) regionsWriter_->Close();
     outfile_.Close();
 }
 
@@ -108,11 +120,13 @@ bool HDFPulseWriter::WriteOneZmw(const SMRTSequence & seq,
     if (not this->WriteOneZmw(seq)) {
         return false;
     }
-    if (regions.size() == 0) {
-        std::vector<RegionAnnotation> fake = {RegionAnnotation(seq.HoleNumber(), HQRegion, 0, 0, 0)};
-        return regionsWriter_->Write(fake);
-    } else {
-        return regionsWriter_->Write(regions);
+    if (HasRegions()) {
+        if (regions.size() == 0) {
+            std::vector<RegionAnnotation> fake = {RegionAnnotation(seq.HoleNumber(), HQRegion, 0, 0, 0)};
+            return regionsWriter_->Write(fake);
+        } else {
+            return regionsWriter_->Write(regions);
+        }
     }
 } 
 #endif // ifndef USE_PBBAM
