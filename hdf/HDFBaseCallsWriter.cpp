@@ -11,6 +11,7 @@ const std::vector<PacBio::BAM::BaseFeature> HDFBaseCallsWriter::ValidQVEnums =
     , PacBio::BAM::BaseFeature::SUBSTITUTION_TAG
     , PacBio::BAM::BaseFeature::IPD
     , PacBio::BAM::BaseFeature::PULSE_WIDTH
+    , PacBio::BAM::BaseFeature::PULSE_CALL
 };
 
 std::vector<PacBio::BAM::BaseFeature> 
@@ -54,10 +55,10 @@ HDFBaseCallsWriter::HDFBaseCallsWriter(const std::string & filename,
     }
 
     // Create a zmwWriter.
-    zmwWriter_.reset(new HDFZMWWriter(Filename(), basecallsGroup_));
+    zmwWriter_.reset(new HDFZMWWriter(filename, basecallsGroup_));
 
     // Create a zmwMetricsWriter.
-    zmwMetricsWriter_.reset(new HDFZMWMetricsWriter(Filename(), basecallsGroup_, baseMap_));
+    zmwMetricsWriter_.reset(new HDFZMWMetricsWriter(filename, basecallsGroup_, baseMap));
 }
 
 std::vector<std::string> HDFBaseCallsWriter::Errors(void) const {
@@ -76,7 +77,6 @@ std::vector<std::string> HDFBaseCallsWriter::Errors(void) const {
 HDFBaseCallsWriter::~HDFBaseCallsWriter(void) {
     this->Close();
 }
-
 
 bool HDFBaseCallsWriter::InitializeQVGroups(void) {
     int ret = 1;
@@ -101,6 +101,8 @@ bool HDFBaseCallsWriter::InitializeQVGroups(void) {
         ret *= ipdArray_.Initialize(basecallsGroup_,             PacBio::GroupNames::prebaseframes);
     if (_HasQV(PacBio::BAM::BaseFeature::PULSE_WIDTH))
         ret *= pulseWidthArray_.Initialize(basecallsGroup_,      PacBio::GroupNames::widthinframes);
+    if (_HasQV(PacBio::BAM::BaseFeature::PULSE_CALL))
+        ret *= pulseIndexArray_.Initialize(basecallsGroup_,      PacBio::GroupNames::pulseindex);
     return (ret != 0);
 }
 
@@ -135,6 +137,7 @@ bool HDFBaseCallsWriter::WriteOneZmw(const SMRTSequence & read) {
     OK = OK and _WriteSubstitutionQV(read);
     OK = OK and _WriteIPD(read);
     OK = OK and _WritePulseWidth(read);
+    OK = OK and _WritePulseIndex(read);
     return OK;
 }
 
@@ -266,6 +269,35 @@ bool HDFBaseCallsWriter::_WritePulseWidth(const SMRTSequence & read) {
     }
     return true;
 }
+
+bool HDFBaseCallsWriter::_WritePulseIndex(const SMRTSequence & read) {
+    if (HasPulseIndex()) {
+        if (read.copiedFromBam) {
+            const PacBio::BAM::BamRecord & record = read.bamRecord;
+            if (record.HasPulseCall()) {
+                const std::string & pulsecall = record.PulseCall();
+                std::vector<uint16_t> data(read.length, 0);
+                size_t indx = 0;
+                for(size_t i = 0; i < pulsecall.size(); i++) {
+                    const char base = pulsecall[i];
+                    if (base == 'A' or base == 'C' or base == 'G' or base == 'T') {
+                        assert(indx < read.length);
+                        data[indx] = static_cast<uint16_t>(i);
+                        indx ++;
+                    } else {
+                        assert(base == 'a' or base == 'c' or base == 'g' or base == 't');
+                    }
+                }
+                assert(indx == read.length);
+                pulseIndexArray_.Write(&data[0], read.length);
+                return true;
+            }
+        }
+        AddErrorMessage(std::string(PacBio::GroupNames::pulseindex) + " absent in read " + read.GetTitle());
+        return false;
+    }
+    return true;
+}
  
 void HDFBaseCallsWriter::Flush(void) {
     basecallArray_.Flush();
@@ -279,6 +311,7 @@ void HDFBaseCallsWriter::Flush(void) {
     if (HasSubstitutionTag()) substitutionTagArray_.Flush();
     if (HasIPD())             ipdArray_.Flush();
     if (HasPulseWidth())      pulseWidthArray_.Flush();
+    if (HasPulseIndex())      pulseIndexArray_.Flush();
 
     if (zmwWriter_)           zmwWriter_->Flush();
     if (zmwMetricsWriter_)    zmwMetricsWriter_->Flush();
@@ -298,10 +331,6 @@ void HDFBaseCallsWriter::Close(void) {
     if (HasSubstitutionTag()) substitutionTagArray_.Close();
     if (HasIPD())             ipdArray_.Close();
     if (HasPulseWidth())      pulseWidthArray_.Close();
-    
-    /*
-    if (zmwWriter_)           zmwWriter_->Close();
-    if (zmwMetricsWriter_)    zmwMetricsWriter_->Close();
-    */
+    if (HasPulseIndex())      pulseIndexArray_.Close();
 }
 #endif

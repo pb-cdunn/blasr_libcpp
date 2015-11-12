@@ -63,6 +63,7 @@ namespace GroupNames {
     static const std::string substitutiontag  = "SubstitutionTag";
     static const std::string prebaseframes    = "PreBaseFrames";
     static const std::string widthinframes    = "WidthInFrames";
+    static const std::string pulseindex       = "PulseIndex";
 
     ///PulseData/BaseCalls/ZMW
     static const std::string zmw              = "ZMW";
@@ -73,7 +74,7 @@ namespace GroupNames {
     static const std::string holestatus       = "HoleStatus";
     static const std::string holexy           = "HoleXY";
     static const std::string numevent         = "NumEvent";
-    static const std::string baselinesigma    = "BaseLineSigma";
+    static const std::string baselinesigma    = "BaselineSigma";
 
     ///PulseData/BaseCalls/ZMWMetrics/HQRegionSNR
     static const std::string hqregionsnr      = "HQRegionSNR";
