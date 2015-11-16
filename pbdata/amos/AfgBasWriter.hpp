@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sstream>
 #include "SMRTSequence.hpp"
-#include "qvs/QualityValueVector.hpp"
 
 class AfgBasWriter {
     // TODO correct file type? outFile
