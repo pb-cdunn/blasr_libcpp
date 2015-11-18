@@ -54,7 +54,7 @@ public:
     inline bool HasPkmean(void) const;
     inline bool HasPulseMergeQV(void) const;
     inline bool HasPkmid(void) const;
-    inline bool HasPrePulseFrames(void) const;
+    inline bool HasStartFrame(void) const;
     inline bool HasPulseCallWidth(void) const;
     inline bool HasAltLabel(void) const;
     inline bool HasAltLabelQV(void) const;
@@ -68,7 +68,7 @@ private:
     bool _WritePkmean(const PacBio::BAM::BamRecord & read);
     bool _WritePulseMergeQV(const PacBio::BAM::BamRecord & read);
     bool _WritePkmid(const PacBio::BAM::BamRecord & read);
-    bool _WritePrePulseFrames(const PacBio::BAM::BamRecord & read);
+    bool _WriteStartFrame(const PacBio::BAM::BamRecord & read);
     bool _WritePulseCallWidth(const PacBio::BAM::BamRecord & read);
     bool _WriteAltLabel(const PacBio::BAM::BamRecord & read);
     bool _WriteAltLabelQV(const PacBio::BAM::BamRecord & read);
@@ -104,7 +104,7 @@ private:
     ///  PulseMergeQV
     ///              pg --> PulseCalls/MergeQV
     ///  Pkmid       pm --> PulseCalls/MidSignal
-    ///  PrePulseFrames
+    ///  StartFrame
     ///              pd --> PulseCalls/StartFrame
     ///                 --> Note that BaseCalls/PreBaseFrames is defined as 'ip' in BAM
     ///  PulseCallWidth
@@ -126,7 +126,7 @@ private:
 	BufferedHDFArray<HalfWord>      pkmeanArray_;
 	BufferedHDFArray<unsigned char> pulseMergeQVArray_;
 	BufferedHDFArray<HalfWord>      pkmidArray_;
-	BufferedHDFArray<uint32_t>      prePulseFramesArray_;
+	BufferedHDFArray<uint32_t>      startFrameArray_;
 	BufferedHDFArray<HalfWord>      pulseCallWidthArray_;
 	BufferedHDFArray<unsigned char> altLabelArray_;
 	BufferedHDFArray<unsigned char> altLabelQVArray_;
@@ -171,9 +171,9 @@ bool HDFPulseCallsWriter::HasPkmid(void) const
          pkmidArray_.IsInitialized());}
 
 inline
-bool HDFPulseCallsWriter::HasPrePulseFrames(void) const
-{return (_HasQV(PacBio::BAM::BaseFeature::PRE_PULSE_FRAMES) and 
-         prePulseFramesArray_.IsInitialized());}
+bool HDFPulseCallsWriter::HasStartFrame(void) const
+{return (_HasQV(PacBio::BAM::BaseFeature::START_FRAME) and 
+         startFrameArray_.IsInitialized());}
 
 inline
 bool HDFPulseCallsWriter::HasPulseCallWidth(void) const
