@@ -11,7 +11,7 @@ const std::vector<PacBio::BAM::BaseFeature>  HDFPulseCallsWriter::ValidQVEnums =
     , PacBio::BAM::BaseFeature::PULSE_MERGE_QV
     , PacBio::BAM::BaseFeature::ALT_LABEL
     , PacBio::BAM::BaseFeature::ALT_LABEL_QV
-    , PacBio::BAM::BaseFeature::PRE_PULSE_FRAMES
+    , PacBio::BAM::BaseFeature::START_FRAME
     , PacBio::BAM::BaseFeature::PULSE_CALL_WIDTH 
 };
 
@@ -86,8 +86,8 @@ bool HDFPulseCallsWriter::InitializeQVGroups(void) {
         ret *= pulseMergeQVArray_.Initialize(pulsecallsGroup_,   PacBio::GroupNames::mergeqv);
     if (_HasQV(PacBio::BAM::BaseFeature::PKMID))
         ret *= pkmidArray_.Initialize(pulsecallsGroup_,          PacBio::GroupNames::midsignal);
-    if (_HasQV(PacBio::BAM::BaseFeature::PRE_PULSE_FRAMES))
-        ret *= prePulseFramesArray_.Initialize(pulsecallsGroup_, PacBio::GroupNames::startframe);
+    if (_HasQV(PacBio::BAM::BaseFeature::START_FRAME))
+        ret *= startFrameArray_.Initialize(pulsecallsGroup_,     PacBio::GroupNames::startframe);
     if (_HasQV(PacBio::BAM::BaseFeature::PULSE_CALL_WIDTH))
         ret *= pulseCallWidthArray_.Initialize(pulsecallsGroup_, PacBio::GroupNames::widthinframes);
     if (_HasQV(PacBio::BAM::BaseFeature::ALT_LABEL))
@@ -120,7 +120,7 @@ bool HDFPulseCallsWriter::WriteOneZmw(const SMRTSequence & read) {
     _WritePkmean(record);
     _WritePulseMergeQV(record);
     _WritePkmid(record);
-    _WritePrePulseFrames(record);
+    _WriteStartFrame(record);
     _WritePulseCallWidth(record);
     _WriteAltLabel(record);
     _WriteAltLabelQV(record);
@@ -239,19 +239,14 @@ bool HDFPulseCallsWriter::_WritePkmid(const PacBio::BAM::BamRecord & read) {
     return Errors().empty();
 }
 
-bool HDFPulseCallsWriter::_WritePrePulseFrames(const PacBio::BAM::BamRecord & read) {
-    if (HasPrePulseFrames()) {
-        if (read.HasPrePulseFrames()) {
-            // FIXME: pbbam PrePulseFrames().Data() returns incorrect vector, e.g., incorrect vector size.
-            const PacBio::BAM::Tag & tag = read.Impl().TagValue("pd");
-            // Type of PrePulseFrames is uint32_t in ICD (H5 file), while is uint16_t in BAM
-            // This is a concious decision.
-            const std::vector<uint16_t> data_ = tag.ToUInt16Array();
-            std::vector<uint32_t> data(data_.begin(), data_.end());
-            _CheckRead(read, data.size(), "PrePulseFrames");
-            prePulseFramesArray_.Write(&data[0], data.size());
+bool HDFPulseCallsWriter::_WriteStartFrame(const PacBio::BAM::BamRecord & read) {
+    if (HasStartFrame()) {
+        if (read.HasStartFrame()) {
+            const std::vector<uint32_t> data = read.StartFrame();
+            _CheckRead(read, data.size(), "StartFrame");
+            startFrameArray_.Write(&data[0], data.size());
         } else {
-            AddErrorMessage(std::string("PrePulseFrames is absent in read " + read.FullName()));
+            AddErrorMessage(std::string("StartFrame is absent in read " + read.FullName()));
         }
     }
     return Errors().empty();
@@ -307,7 +302,7 @@ void HDFPulseCallsWriter::Flush(void) {
     if (HasPkmean())         pkmeanArray_.Flush();
     if (HasPulseMergeQV())   pulseMergeQVArray_.Flush();
     if (HasPkmid())          pkmidArray_.Flush();
-    if (HasPrePulseFrames()) prePulseFramesArray_.Flush();
+    if (HasStartFrame())     startFrameArray_.Flush();
     if (HasPulseCallWidth()) pulseCallWidthArray_.Flush();
     if (HasAltLabel())       altLabelArray_.Flush();
     if (HasAltLabelQV())     altLabelQVArray_.Flush();
@@ -323,7 +318,7 @@ void HDFPulseCallsWriter::Close(void) {
     if (HasPkmean())         pkmeanArray_.Close();
     if (HasPulseMergeQV())   pulseMergeQVArray_.Close();
     if (HasPkmid())          pkmidArray_.Close();
-    if (HasPrePulseFrames()) prePulseFramesArray_.Close();
+    if (HasStartFrame())     startFrameArray_.Close();
     if (HasPulseCallWidth()) pulseCallWidthArray_.Close();
     if (HasAltLabel())       altLabelArray_.Close();
     if (HasAltLabelQV())     altLabelQVArray_.Close();
