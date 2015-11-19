@@ -48,6 +48,12 @@ HDFPulseCallsWriter::HDFPulseCallsWriter(const std::string & filename,
         return;
     }
 
+    // Reject if it does not have StartFrame
+    if (not _HasQV(PacBio::BAM::BaseFeature::START_FRAME)) {
+        AddErrorMessage("Bam input must contain tag 'StartFrame' using PPA 2.0.0 or later.");
+        return;
+    }
+
     // Initialize QV groups
     if (not InitializeQVGroups()) {
         AddErrorMessage("Failed to initialize QV Groups.");
