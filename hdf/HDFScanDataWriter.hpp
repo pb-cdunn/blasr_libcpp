@@ -61,7 +61,7 @@ private:
 	HDFAtom<unsigned int> numFramesAtom;
 
     HDFAtom<std::string> baseMapAtom;
-    HDFAtom<unsigned int> numAnalogAtom;
+    HDFAtom<uint16_t> numAnalogAtom;
 
 	HDFAtom<std::string> movieNameAtom;
 	HDFAtom<std::string> runCodeAtom;
@@ -104,7 +104,7 @@ public:
 private:
     void WriteBaseMap(const std::string baseMapStr);
    
-    void WriteNumAnalog(const unsigned int numAnalog);
+    void WriteNumAnalog(const uint16_t numAnalog);
 
     void WritePlatformId(const PlatformId id);
    

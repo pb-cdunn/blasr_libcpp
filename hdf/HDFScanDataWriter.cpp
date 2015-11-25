@@ -104,7 +104,7 @@ void HDFScanDataWriter::Write(const ScanData & scanData) {
     const float DEFAULT_FRAMERATE        = 75.0;
     const unsigned int DEFAULT_NUMFRAMES = 1000000;
     const std::string DEFAULT_DATE       = "2013-01-01T01:01:01";
-    const int DEFAULT_NUMANALOG          = 4;
+    const uint16_t DEFAULT_NUMANALOG     = 4;
     const std::string DEFAULT_MOVIENAME  = "simulated_movie";
     const std::string DEFAULT_RUNCODE    = "simulated_runcode";
 
@@ -197,7 +197,7 @@ void HDFScanDataWriter::WriteBaseMap(const std::string baseMapStr) {
     baseMapAtom.Write(baseMapStr);
 }
 
-void HDFScanDataWriter::WriteNumAnalog(const unsigned int numAnalog) {
+void HDFScanDataWriter::WriteNumAnalog(const uint16_t numAnalog) {
     //Write /ScanData/DyeSet/NumAnalog attribute.
     numAnalogAtom.Write(numAnalog);
 }
