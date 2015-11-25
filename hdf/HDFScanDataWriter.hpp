@@ -45,6 +45,8 @@
 #include "HDFAtom.hpp"
 #include "Enumerations.h"
 #include "reads/ScanData.hpp"
+#include "reads/AcqParams.hpp"
+
 
 class HDFScanDataWriter {
 private:
@@ -86,6 +88,9 @@ public:
     int Initialize(HDFGroup & _rootGroup);
       
     void Write(const ScanData & scanData);
+
+    void Write(const ScanData & scanData, 
+               const AcqParams & acqParam);
    
 	void WriteFrameRate(const float frameRate);
 
@@ -109,6 +114,21 @@ private:
     void WriteBindingKit(const std::string & bindingKit);
 
     void WriteSequencingKit(const std::string & sequencingKit);
+
+private:
+    /// Write attributes to /ScanData/AcqParams
+    void _WriteAcqParams(const AcqParams & acqParams);
+
+    void _WriteAduGain(const float aduGain);
+
+    void _WriteCameraGain(const float cameraGain);
+
+    void _WriteCameraType(const int cameraType);
+
+    void _WriteHotStartFrame(const UInt hotStartFrame);
+
+    void _WriteLaserOnFrame(const UInt laserOnFrame);
+
 };
 
 #endif

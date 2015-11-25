@@ -130,6 +130,15 @@ void HDFScanDataWriter::Write(const ScanData & scanData) {
 
     WriteBindingKit(scanData.BindingKit());
     WriteSequencingKit(scanData.SequencingKit());
+    _WriteAcqParams(scanData.GetAcqParams());
+}
+
+void HDFScanDataWriter::_WriteAcqParams(const AcqParams & acqParams) {
+    _WriteAduGain(acqParams.aduGain_);
+    _WriteCameraGain(acqParams.cameraGain_);
+    _WriteCameraType(acqParams.cameraType_);
+    _WriteHotStartFrame(acqParams.hotStartFrame_);
+    _WriteLaserOnFrame(acqParams.laserOnFrame_);
 }
 
 void HDFScanDataWriter::WriteFrameRate(const float frameRate) {
@@ -145,6 +154,41 @@ void HDFScanDataWriter::WriteNumFrames(const unsigned int numFrames) {
 void HDFScanDataWriter::WriteWhenStarted(const std::string whenStarted) {
     // Write /ScanData/AcqParams/WhenStarted attribute.
     whenStartedAtom.Write(whenStarted);
+}
+
+void HDFScanDataWriter::_WriteAduGain(const float aduGain) {
+    HDFAtom<float> aduGainAtom;
+    aduGainAtom.Create(acqParamsGroup.group, "AduGain");
+    aduGainAtom.Write(aduGain);
+    aduGainAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteCameraGain(const float cameraGain) {
+    HDFAtom<float> cameraGainAtom;
+    cameraGainAtom.Create(acqParamsGroup.group, "CameraGain");
+    cameraGainAtom.Write(cameraGain);
+    cameraGainAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteCameraType(const int cameraType) {
+    HDFAtom<int> cameraTypeAtom;
+    cameraTypeAtom.Create(acqParamsGroup.group, "CameraType");
+    cameraTypeAtom.Write(cameraType);
+    cameraTypeAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteHotStartFrame(const UInt hotStartFrame) {
+    HDFAtom<UInt> hotStartFrameAtom;
+    hotStartFrameAtom.Create(acqParamsGroup.group, "HotStartFrame");
+    hotStartFrameAtom.Write(hotStartFrame);
+    hotStartFrameAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteLaserOnFrame(const UInt laserOnFrame) {
+    HDFAtom<UInt> laserOnFrameAtom;
+    laserOnFrameAtom.Create(acqParamsGroup.group, "LaserOnFrame");
+    laserOnFrameAtom.Write(laserOnFrame);
+    laserOnFrameAtom.Close();
 }
 
 void HDFScanDataWriter::WriteBaseMap(const std::string baseMapStr) {

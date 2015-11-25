@@ -78,12 +78,23 @@ bool ScanData::IsValidBaseMap(const std::map<char, size_t> & baseMap) {
     else return true;
 }
 
-ScanData::ScanData() {
+ScanData::ScanData(const AcqParams & acqParams) 
+    : acqParams_(acqParams) 
+{
     platformId = NoPlatform;
     frameRate = 0.0;
     numFrames = 0;
     movieName = runCode = whenStarted = "";
     baseMap.clear();
+}
+
+ScanData & ScanData::SetAcqParams(const AcqParams & acqParams) {
+    acqParams_ = acqParams;
+    return *this;
+}
+
+AcqParams ScanData::GetAcqParams(void) const {
+    return acqParams_;
 }
 
 std::string ScanData::GetMovieName() {
