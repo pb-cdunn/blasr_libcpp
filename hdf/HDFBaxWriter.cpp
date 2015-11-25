@@ -29,8 +29,7 @@ HDFBaxWriter::HDFBaxWriter(const std::string & filename,
     scandataWriter_->Write(sd);
 
     // Create a BaseCaller writer.
-    basecallsWriter_.reset(new HDFBaseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), qvsToWrite));
-    basecallsWriter_->WriteBaseCallerVersion(basecallerVersion);
+    basecallsWriter_.reset(new HDFBaseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), basecallerVersion, qvsToWrite));
 }
 
 HDFBaxWriter::HDFBaxWriter(const std::string & filename,

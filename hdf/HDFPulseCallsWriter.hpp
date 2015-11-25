@@ -24,14 +24,12 @@ public:
 
 public:
     HDFPulseCallsWriter(const std::string & filename,
-                       HDFGroup & parentGroup,
-                       const std::map<char, size_t> & baseMap,
-                       const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite = {});
+                        HDFGroup & parentGroup,
+                        const std::map<char, size_t> & baseMap,
+                        const std::string & basecallerVersion,
+                        const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite = {});
 
     ~HDFPulseCallsWriter(void);
-
-    /// \brief Write base caller version (changeListId)
-    bool WriteBaseCallerVersion(const std::string & basecallerVersion);
 
     /// \brief Write a zmw read.
     bool WriteOneZmw(const SMRTSequence & read);
@@ -84,6 +82,16 @@ private:
     /// \brief Create and initialize QV groups.
     /// \returns Whether or not QV groups initialized successfully.
     bool InitializeQVGroups(void);
+
+    /// \brief Write attributes to PulseCalls group.
+    /// \returns Whether or not all attributes written successfully.
+    bool _WriteAttributes(const std::string & basecallerVersion);
+
+    /// \brief Write attribute SchemaRevision to PulseCalls group.
+    void _WriteSchemaRevision(void);
+
+    /// \brief Write base caller version (changeListId)
+    bool _WriteBaseCallerVersion(const std::string & basecallerVersion);
 
 private:
     HDFGroup & parentGroup_;

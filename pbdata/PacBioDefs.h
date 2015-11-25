@@ -100,6 +100,7 @@ namespace AttributeNames {
     namespace Common {
         static const std::string changelistid       = "ChangeListID";
         static const std::string description        = "Description";
+        static const std::string schemarevision     = "SchemaRevision";
     } // Common
 
     namespace ZMW {
@@ -125,6 +126,9 @@ namespace AttributeNames {
 } // namespace AttributeNames 
 
 namespace AttributeValues {
+    namespace Common {
+        static const std::string schemarevision     = "1.1";
+    }
 
     namespace ZMW {
         namespace HoleNumber {
@@ -178,7 +182,7 @@ namespace AttributeValues {
 
     namespace ScanData {
         namespace DyeSet {
-            static const std::string basemap = "ACGT"; // default, order matters!
+            static const std::string basemap = "TGCA"; // default, order matters!
         }
     } // ScanData
 

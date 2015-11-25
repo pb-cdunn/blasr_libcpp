@@ -30,6 +30,7 @@ HDFBaseCallsWriter::WritableQVs(const std::vector<PacBio::BAM::BaseFeature> & qv
 HDFBaseCallsWriter::HDFBaseCallsWriter(const std::string & filename,
                                        HDFGroup & parentGroup,
                                        const std::map<char, size_t> & baseMap,
+                                       const std::string & basecallerVersion,
                                        const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite,
                                        const bool fakeQualityValue)
     : HDFWriterBase(filename)
@@ -42,6 +43,10 @@ HDFBaseCallsWriter::HDFBaseCallsWriter(const std::string & filename,
 {
     // Add BaseCalls as a child group to the parent group.
     AddChildGroup(parentGroup_, basecallsGroup_, PacBio::GroupNames::basecalls);
+
+    if (not _WriteAttributes(basecallerVersion)) {
+        return;
+    }
 
     // Initialize the 'basecall' group.
     basecallArray_.Initialize(basecallsGroup_, PacBio::GroupNames::basecall);
@@ -106,8 +111,12 @@ bool HDFBaseCallsWriter::InitializeQVGroups(void) {
     return (ret != 0);
 }
 
+bool HDFBaseCallsWriter::_WriteAttributes(const std::string & basecallerVersion) {
+    _WriteSchemaRevision();
+    return _WriteBaseCallerVersion(basecallerVersion);
+}
 
-bool HDFBaseCallsWriter::WriteBaseCallerVersion(const std::string & basecallerVersion) {
+bool HDFBaseCallsWriter::_WriteBaseCallerVersion(const std::string & basecallerVersion) {
     if (basecallerVersion.empty()) {
         AddErrorMessage("BaseCallerVersion must not be empty!");
         return false;
@@ -116,6 +125,14 @@ bool HDFBaseCallsWriter::WriteBaseCallerVersion(const std::string & basecallerVe
                              PacBio::AttributeNames::Common::changelistid,
                              basecallerVersion);
     return true;
+}
+
+void HDFBaseCallsWriter::_WriteSchemaRevision(void) {
+    HDFAtom<std::string> schemaRevisionAtom;
+    schemaRevisionAtom.Create(basecallsGroup_.group, 
+                              PacBio::AttributeNames::Common::schemarevision,
+                              PacBio::AttributeValues::Common::schemarevision);
+    schemaRevisionAtom.Close();
 }
 
 bool HDFBaseCallsWriter::WriteOneZmw(const SMRTSequence & read) {

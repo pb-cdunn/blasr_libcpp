@@ -30,6 +30,7 @@ HDFPulseCallsWriter::WritableQVs(const std::vector<PacBio::BAM::BaseFeature> & q
 HDFPulseCallsWriter::HDFPulseCallsWriter(const std::string & filename,
                                          HDFGroup & parentGroup,
                                          const std::map<char, size_t> & baseMap,
+                                         const std::string & basecallerVersion,
                                          const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite)
     : HDFWriterBase(filename)
     , parentGroup_(parentGroup)
@@ -39,6 +40,12 @@ HDFPulseCallsWriter::HDFPulseCallsWriter(const std::string & filename,
 {
     // Add PulseCalls as a child group to the parent group.
     AddChildGroup(parentGroup_, pulsecallsGroup_, PacBio::GroupNames::pulsecalls);
+
+    // Write attributes to pulsecallsGroup
+    if (not _WriteAttributes(basecallerVersion)) {
+        AddErrorMessage("Failed to write attributes to " +
+                        PacBio::GroupNames::pulsecalls);
+    }
 
     this->qvsToWrite_ = WritableQVs(qvsToWrite);
 
@@ -64,6 +71,30 @@ HDFPulseCallsWriter::HDFPulseCallsWriter(const std::string & filename,
     zmwWriter_.reset(new HDFZMWWriter(Filename(), pulsecallsGroup_, true, baseMap));
 
     // Note: ignore /PulseCalls/ZMWMetrics none of its metrics exist in BAM.
+}
+
+bool HDFPulseCallsWriter::_WriteAttributes(const std::string & basecallerVersion) {
+    _WriteSchemaRevision();
+    return _WriteBaseCallerVersion(basecallerVersion);
+}
+
+void HDFPulseCallsWriter::_WriteSchemaRevision(void) {
+    HDFAtom<std::string> schemaRevisionAtom;
+    schemaRevisionAtom.Create(pulsecallsGroup_.group, 
+                              PacBio::AttributeNames::Common::schemarevision,
+                              PacBio::AttributeValues::Common::schemarevision);
+    schemaRevisionAtom.Close();
+}
+
+bool HDFPulseCallsWriter::_WriteBaseCallerVersion(const std::string & basecallerVersion) {
+    if (basecallerVersion.empty()) {
+        AddErrorMessage("BaseCallerVersion must not be empty!");
+        return false;
+    }
+    changeListIDAtom_.Create(pulsecallsGroup_.group, 
+                             PacBio::AttributeNames::Common::changelistid,
+                             basecallerVersion);
+    return true;
 }
 
 std::vector<std::string> HDFPulseCallsWriter::Errors(void) const {
@@ -101,18 +132,6 @@ bool HDFPulseCallsWriter::InitializeQVGroups(void) {
     if (_HasQV(PacBio::BAM::BaseFeature::ALT_LABEL_QV))
         ret *= altLabelQVArray_.Initialize(pulsecallsGroup_,     PacBio::GroupNames::altlabelqv);
     return (ret != 0);
-}
-
-
-bool HDFPulseCallsWriter::WriteBaseCallerVersion(const std::string & basecallerVersion) {
-    if (basecallerVersion.empty()) {
-        AddErrorMessage("BaseCallerVersion must not be empty!");
-        return false;
-    }
-    changeListIDAtom_.Create(pulsecallsGroup_.group, 
-                             PacBio::AttributeNames::Common::changelistid,
-                             basecallerVersion);
-    return true;
 }
 
 bool HDFPulseCallsWriter::WriteOneZmw(const SMRTSequence & read) {
