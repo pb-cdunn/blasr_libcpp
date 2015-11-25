@@ -64,6 +64,7 @@ void HDFScanDataWriter::CreateRunInfoGroup(){
     movieNameAtom.Create(runInfoGroup.group, "MovieName");
     platformIdAtom.Create(runInfoGroup.group, "PlatformId");
     platformNameAtom.Create(runInfoGroup.group, "PlatformName");
+    instrumentNameAtom.Create(runInfoGroup.group, "InstrumentName");
     runCodeAtom.Create(runInfoGroup.group, "RunCode");
     bindingKitAtom.Create(runInfoGroup.group, "BindingKit");
     sequencingKitAtom.Create(runInfoGroup.group, "SequencingKit");
@@ -203,9 +204,16 @@ void HDFScanDataWriter::WriteNumAnalog(const unsigned int numAnalog) {
 
 void HDFScanDataWriter::WritePlatformId(const PlatformId id) {
     //Write /ScanData/RunInfo/Platform attribute.
-    std::string name = (id == Springfield)?"Springfield":"Astro";
+    std::string name, instrumentName;
+    if (id == Springfield) { name = "Springfield"; instrumentName = name;}
+    else if (id == Sequel) { name = "SequelAlpha"; instrumentName = "Sequel";}
+    else if (id == Astro)  { name = "Astro"; instrumentName = name;}
+    else { name = "Unknown"; }
+    cout << name << endl;
+    cout << instrumentName << endl;
     platformIdAtom.Write(id);
     platformNameAtom.Write(name);
+    instrumentNameAtom.Write(instrumentName);
 }
 
 void HDFScanDataWriter::WriteMovieName(const std::string movieName) {
@@ -240,6 +248,7 @@ void HDFScanDataWriter::Close() {
     runCodeAtom.Close();
     platformIdAtom.Close();
     platformNameAtom.Close();
+    instrumentNameAtom.Close();
     bindingKitAtom.Close();
     sequencingKitAtom.Close();
 

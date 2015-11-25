@@ -71,6 +71,7 @@ private:
 
 	HDFAtom<unsigned int> platformIdAtom;
 	HDFAtom<std::string> platformNameAtom;
+    HDFAtom<std::string> instrumentNameAtom;
 
     void CreateAcqParamsGroup();
 
