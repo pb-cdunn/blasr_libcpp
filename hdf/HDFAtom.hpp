@@ -127,6 +127,7 @@ DECLARE_TYPED_CREATE_ATOM(unsigned int, H5::PredType::NATIVE_UINT)
 DECLARE_TYPED_CREATE_ATOM(unsigned char, H5::PredType::NATIVE_UINT8)
 DECLARE_TYPED_CREATE_ATOM(char, H5::PredType::NATIVE_INT8)
 DECLARE_TYPED_CREATE_ATOM(float, H5::PredType::NATIVE_FLOAT)
+DECLARE_TYPED_CREATE_ATOM(uint16_t, H5::PredType::NATIVE_UINT16)
 DECLARE_TYPED_CREATE_ATOM(uint64_t, H5::PredType::STD_I64LE)
 
 
@@ -138,6 +139,9 @@ void HDFAtom<std::string>::Write(std::string value);
 
 template<>
 void HDFAtom<uint64_t>::Write(uint64_t value);
+
+template<>
+void HDFAtom<uint16_t>::Write(uint16_t value);
 
 template<>
 void HDFAtom<int>::Write(int value);
@@ -162,6 +166,9 @@ void HDFAtom<int>::Read(int &value);
 
 template<>
 void HDFAtom<uint64_t>::Read(uint64_t &value);
+
+template<>
+void HDFAtom<uint16_t>::Read(uint16_t &value);
 
 template<>
 void HDFAtom<unsigned int>::Read(unsigned int &value);

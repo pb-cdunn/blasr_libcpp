@@ -40,6 +40,7 @@
 
 #include <string>
 #include <map>
+#include "reads/AcqParams.hpp"
 #include "Enumerations.h"
 #include "PacBioDefs.h"
 
@@ -69,7 +70,7 @@ public:
     std::string whenStarted;
     std::map<char, size_t> baseMap;
 
-    ScanData();
+    ScanData(const AcqParams & acqParams = AcqParams());
     std::string GetMovieName(); 
 
     ScanData & PlatformID(const PlatformId & id);
@@ -82,6 +83,7 @@ public:
     ScanData & BaseMap(const std::string & baseMapStr); 
     ScanData & SequencingKit(const std::string sequencingKit);
     ScanData & BindingKit(const std::string bindingKit);
+    ScanData & SetAcqParams(const AcqParams & acqParams);
 
     PlatformId PlatformID(void) const;
     float FrameRate(void) const;
@@ -91,14 +93,14 @@ public:
     std::string WhenStarted(void) const;
     std::map<char, size_t> BaseMap(void) const;
     std::string BaseMapStr(void) const;
-
     std::string SequencingKit(void) const;
     std::string BindingKit(void) const;
+    AcqParams GetAcqParams(void) const;
  
-
 private:
     std::string sequencingKit_;
     std::string bindingKit_;
+    AcqParams acqParams_;
 };
 
 #endif

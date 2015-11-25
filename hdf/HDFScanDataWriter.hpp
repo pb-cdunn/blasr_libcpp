@@ -45,6 +45,8 @@
 #include "HDFAtom.hpp"
 #include "Enumerations.h"
 #include "reads/ScanData.hpp"
+#include "reads/AcqParams.hpp"
+
 
 class HDFScanDataWriter {
 private:
@@ -59,7 +61,7 @@ private:
 	HDFAtom<unsigned int> numFramesAtom;
 
     HDFAtom<std::string> baseMapAtom;
-    HDFAtom<unsigned int> numAnalogAtom;
+    HDFAtom<uint16_t> numAnalogAtom;
 
 	HDFAtom<std::string> movieNameAtom;
 	HDFAtom<std::string> runCodeAtom;
@@ -69,6 +71,7 @@ private:
 
 	HDFAtom<unsigned int> platformIdAtom;
 	HDFAtom<std::string> platformNameAtom;
+    HDFAtom<std::string> instrumentNameAtom;
 
     void CreateAcqParamsGroup();
 
@@ -86,6 +89,9 @@ public:
     int Initialize(HDFGroup & _rootGroup);
       
     void Write(const ScanData & scanData);
+
+    void Write(const ScanData & scanData, 
+               const AcqParams & acqParam);
    
 	void WriteFrameRate(const float frameRate);
 
@@ -98,7 +104,7 @@ public:
 private:
     void WriteBaseMap(const std::string baseMapStr);
    
-    void WriteNumAnalog(const unsigned int numAnalog);
+    void WriteNumAnalog(const uint16_t numAnalog);
 
     void WritePlatformId(const PlatformId id);
    
@@ -109,6 +115,21 @@ private:
     void WriteBindingKit(const std::string & bindingKit);
 
     void WriteSequencingKit(const std::string & sequencingKit);
+
+private:
+    /// Write attributes to /ScanData/AcqParams
+    void _WriteAcqParams(const AcqParams & acqParams);
+
+    void _WriteAduGain(const float aduGain);
+
+    void _WriteCameraGain(const float cameraGain);
+
+    void _WriteCameraType(const int cameraType);
+
+    void _WriteHotStartFrame(const UInt hotStartFrame);
+
+    void _WriteLaserOnFrame(const UInt laserOnFrame);
+
 };
 
 #endif

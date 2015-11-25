@@ -64,6 +64,7 @@ void HDFScanDataWriter::CreateRunInfoGroup(){
     movieNameAtom.Create(runInfoGroup.group, "MovieName");
     platformIdAtom.Create(runInfoGroup.group, "PlatformId");
     platformNameAtom.Create(runInfoGroup.group, "PlatformName");
+    instrumentNameAtom.Create(runInfoGroup.group, "InstrumentName");
     runCodeAtom.Create(runInfoGroup.group, "RunCode");
     bindingKitAtom.Create(runInfoGroup.group, "BindingKit");
     sequencingKitAtom.Create(runInfoGroup.group, "SequencingKit");
@@ -103,7 +104,7 @@ void HDFScanDataWriter::Write(const ScanData & scanData) {
     const float DEFAULT_FRAMERATE        = 75.0;
     const unsigned int DEFAULT_NUMFRAMES = 1000000;
     const std::string DEFAULT_DATE       = "2013-01-01T01:01:01";
-    const int DEFAULT_NUMANALOG          = 4;
+    const uint16_t DEFAULT_NUMANALOG     = 4;
     const std::string DEFAULT_MOVIENAME  = "simulated_movie";
     const std::string DEFAULT_RUNCODE    = "simulated_runcode";
 
@@ -130,6 +131,15 @@ void HDFScanDataWriter::Write(const ScanData & scanData) {
 
     WriteBindingKit(scanData.BindingKit());
     WriteSequencingKit(scanData.SequencingKit());
+    _WriteAcqParams(scanData.GetAcqParams());
+}
+
+void HDFScanDataWriter::_WriteAcqParams(const AcqParams & acqParams) {
+    _WriteAduGain(acqParams.aduGain_);
+    _WriteCameraGain(acqParams.cameraGain_);
+    _WriteCameraType(acqParams.cameraType_);
+    _WriteHotStartFrame(acqParams.hotStartFrame_);
+    _WriteLaserOnFrame(acqParams.laserOnFrame_);
 }
 
 void HDFScanDataWriter::WriteFrameRate(const float frameRate) {
@@ -147,21 +157,61 @@ void HDFScanDataWriter::WriteWhenStarted(const std::string whenStarted) {
     whenStartedAtom.Write(whenStarted);
 }
 
+void HDFScanDataWriter::_WriteAduGain(const float aduGain) {
+    HDFAtom<float> aduGainAtom;
+    aduGainAtom.Create(acqParamsGroup.group, "AduGain");
+    aduGainAtom.Write(aduGain);
+    aduGainAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteCameraGain(const float cameraGain) {
+    HDFAtom<float> cameraGainAtom;
+    cameraGainAtom.Create(acqParamsGroup.group, "CameraGain");
+    cameraGainAtom.Write(cameraGain);
+    cameraGainAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteCameraType(const int cameraType) {
+    HDFAtom<int> cameraTypeAtom;
+    cameraTypeAtom.Create(acqParamsGroup.group, "CameraType");
+    cameraTypeAtom.Write(cameraType);
+    cameraTypeAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteHotStartFrame(const UInt hotStartFrame) {
+    HDFAtom<UInt> hotStartFrameAtom;
+    hotStartFrameAtom.Create(acqParamsGroup.group, "HotStartFrame");
+    hotStartFrameAtom.Write(hotStartFrame);
+    hotStartFrameAtom.Close();
+}
+
+void HDFScanDataWriter::_WriteLaserOnFrame(const UInt laserOnFrame) {
+    HDFAtom<UInt> laserOnFrameAtom;
+    laserOnFrameAtom.Create(acqParamsGroup.group, "LaserOnFrame");
+    laserOnFrameAtom.Write(laserOnFrame);
+    laserOnFrameAtom.Close();
+}
+
 void HDFScanDataWriter::WriteBaseMap(const std::string baseMapStr) {
     //Write /ScanData/DyeSet/BaseMap attribute.
     baseMapAtom.Write(baseMapStr);
 }
 
-void HDFScanDataWriter::WriteNumAnalog(const unsigned int numAnalog) {
+void HDFScanDataWriter::WriteNumAnalog(const uint16_t numAnalog) {
     //Write /ScanData/DyeSet/NumAnalog attribute.
     numAnalogAtom.Write(numAnalog);
 }
 
 void HDFScanDataWriter::WritePlatformId(const PlatformId id) {
     //Write /ScanData/RunInfo/Platform attribute.
-    std::string name = (id == Springfield)?"Springfield":"Astro";
+    std::string name, instrumentName;
+    if (id == Springfield) { name = "Springfield"; instrumentName = name;}
+    else if (id == Sequel) { name = "SequelAlpha"; instrumentName = "Sequel";}
+    else if (id == Astro)  { name = "Astro"; instrumentName = name;}
+    else { name = "Unknown"; }
     platformIdAtom.Write(id);
     platformNameAtom.Write(name);
+    instrumentNameAtom.Write(instrumentName);
 }
 
 void HDFScanDataWriter::WriteMovieName(const std::string movieName) {
@@ -196,6 +246,7 @@ void HDFScanDataWriter::Close() {
     runCodeAtom.Close();
     platformIdAtom.Close();
     platformNameAtom.Close();
+    instrumentNameAtom.Close();
     bindingKitAtom.Close();
     sequencingKitAtom.Close();
 
