@@ -209,8 +209,6 @@ void HDFScanDataWriter::WritePlatformId(const PlatformId id) {
     else if (id == Sequel) { name = "SequelAlpha"; instrumentName = "Sequel";}
     else if (id == Astro)  { name = "Astro"; instrumentName = name;}
     else { name = "Unknown"; }
-    cout << name << endl;
-    cout << instrumentName << endl;
     platformIdAtom.Write(id);
     platformNameAtom.Write(name);
     instrumentNameAtom.Write(instrumentName);
