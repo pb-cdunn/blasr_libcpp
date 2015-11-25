@@ -30,12 +30,10 @@ HDFPulseWriter::HDFPulseWriter(const std::string & filename,
     scandataWriter_->Write(sd);
 
     // Create a BaseCaller writer.
-    basecallsWriter_.reset(new HDFBaseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), qvsToWrite));
-    basecallsWriter_->WriteBaseCallerVersion(basecallerVersion);
+    basecallsWriter_.reset(new HDFBaseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), basecallerVersion, qvsToWrite));
 
     // Create a PulseCalls writer
-    pulsecallsWriter_.reset(new HDFPulseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), qvsToWrite));
-
+    pulsecallsWriter_.reset(new HDFPulseCallsWriter(filename_, pulseDataGroup_, sd.BaseMap(), basecallerVersion, qvsToWrite));
 }
 
 HDFPulseWriter::HDFPulseWriter(const std::string & filename,

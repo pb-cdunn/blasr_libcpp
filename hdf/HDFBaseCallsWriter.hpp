@@ -27,13 +27,11 @@ public:
     HDFBaseCallsWriter(const std::string & filename,
                        HDFGroup & parentGroup,
                        const std::map<char, size_t> & baseMap,
+                       const std::string & basecallerVersion,
                        const std::vector<PacBio::BAM::BaseFeature> & qvsToWrite = {},
                        const bool fakeQualityValue = true);
 
     ~HDFBaseCallsWriter(void);
-
-    /// \brief Write base caller version (changeListId)
-    bool WriteBaseCallerVersion(const std::string & basecallerVersion);
 
     /// \brief Write a zmw read.
     bool WriteOneZmw(const SMRTSequence & read);
@@ -72,8 +70,16 @@ public:
 private:
     bool fakeQualityValue_;
 
-
 private:
+    /// \brief Write all attributes of BaseCalls group
+    bool _WriteAttributes(const std::string & basecallerVersion);
+
+    /// \brief Write base caller version (changeListId)
+    bool _WriteBaseCallerVersion(const std::string & basecallerVersion);
+
+    /// \brief Write BaseCalls attribute SchemaRevision
+    void _WriteSchemaRevision(void);
+
     inline bool _HasQV(const PacBio::BAM::BaseFeature & qvToQuery) const;
 
     bool _WriteBasecall(const SMRTSequence & read);
