@@ -206,7 +206,7 @@ void HDFScanDataWriter::WritePlatformId(const PlatformId id) {
     //Write /ScanData/RunInfo/Platform attribute.
     std::string name, instrumentName;
     if (id == Springfield) { name = "Springfield"; instrumentName = name;}
-    else if (id == Sequel) { name = "SequelAlpha"; instrumentName = "Sequel";}
+    else if (id == Sequel) { name = "SequelAlpha"; instrumentName = "sequel";}
     else if (id == Astro)  { name = "Astro"; instrumentName = name;}
     else { name = "Unknown"; }
     platformIdAtom.Write(id);
