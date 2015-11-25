@@ -182,7 +182,7 @@ namespace AttributeValues {
 
     namespace ScanData {
         namespace DyeSet {
-            static const std::string basemap = "ACGT"; // default, order matters!
+            static const std::string basemap = "TGCA"; // default, order matters!
         }
     } // ScanData
 
