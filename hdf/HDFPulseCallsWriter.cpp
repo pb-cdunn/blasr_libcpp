@@ -225,10 +225,10 @@ bool HDFPulseCallsWriter::_WriteLabelQV(const PacBio::BAM::BamRecord & read) {
 bool HDFPulseCallsWriter::_WritePkmean(const PacBio::BAM::BamRecord & read) {
     if (HasPkmean()) {
         if (read.HasPkmean()) {
-            const std::vector<float> & qvs = read.Pkmean();
-            _CheckRead(read, qvs.size(), "Pkmean");
-            std::vector<HalfWord> data(qvs.begin(), qvs.end());
-            pkmeanArray_.Write(&data[0], qvs.size());
+            const PacBio::BAM::Tag & tag = read.Impl().TagValue("pa");
+            std::vector<uint16_t> data = tag.ToUInt16Array();
+            _CheckRead(read, data.size(), "Pkmean");
+            pkmeanArray_.Write(&data[0], data.size());
         } else {
             AddErrorMessage(std::string("Pkmean is absent in read " + read.FullName()));
         }
@@ -253,10 +253,10 @@ bool HDFPulseCallsWriter::_WritePulseMergeQV(const PacBio::BAM::BamRecord & read
 bool HDFPulseCallsWriter::_WritePkmid(const PacBio::BAM::BamRecord & read) {
     if (HasPkmid()) {
         if (read.HasPkmid()) {
-            const std::vector<float> & qvs = read.Pkmid();
-            std::vector<HalfWord> data(qvs.begin(), qvs.end());
+            const PacBio::BAM::Tag & tag = read.Impl().TagValue("pm");
+            std::vector<uint16_t> data = tag.ToUInt16Array();
             _CheckRead(read, data.size(), "Pkmid");
-            pkmidArray_.Write(&data[0], qvs.size());
+            pkmidArray_.Write(&data[0], data.size());
         } else {
             AddErrorMessage(std::string("Pkmid is absent in read " + read.FullName()));
         }

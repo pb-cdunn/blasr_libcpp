@@ -131,11 +131,11 @@ private:
 	BufferedHDFArray<unsigned char> labelQVArray_; 
     // FIXME: pkmean is 2D array (one value per pulse per channel) in H5,
     // while is 1D array (one value per pulse) in BAM.
-	BufferedHDFArray<HalfWord>      pkmeanArray_;
+	BufferedHDFArray<uint16_t>      pkmeanArray_;
 	BufferedHDFArray<unsigned char> pulseMergeQVArray_;
-	BufferedHDFArray<HalfWord>      pkmidArray_;
+	BufferedHDFArray<uint16_t>      pkmidArray_;
 	BufferedHDFArray<uint32_t>      startFrameArray_;
-	BufferedHDFArray<HalfWord>      pulseCallWidthArray_;
+	BufferedHDFArray<uint16_t>      pulseCallWidthArray_;
 	BufferedHDFArray<unsigned char> altLabelArray_;
 	BufferedHDFArray<unsigned char> altLabelQVArray_;
 
