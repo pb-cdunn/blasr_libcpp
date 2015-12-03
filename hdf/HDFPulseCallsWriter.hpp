@@ -43,6 +43,8 @@ public:
 
     std::vector<std::string> Errors(void) const;
 
+    bool WriteFakeDataSets();
+
 public:
     /// \returns true if has PulseCall dataset and pulseCallArray_
     ///          has been initialized.
@@ -70,6 +72,9 @@ private:
     bool _WritePulseCallWidth(const PacBio::BAM::BamRecord & read);
     bool _WriteAltLabel(const PacBio::BAM::BamRecord & read);
     bool _WriteAltLabelQV(const PacBio::BAM::BamRecord & read);
+
+    /// Write fake datasets
+    bool __WriteUInt16DS(const std::string & dsName, const uint32_t dsLength, std::vector<uint16_t> & buffer);
 
     /// \returns If record has Tag PulseBlockSize and PulseBlockSize 
     ///          equals qvLength. Otherwise, add error message and 
@@ -100,6 +105,7 @@ private:
     std::unique_ptr<HDFZMWWriter> zmwWriter_;
 	HDFGroup pulsecallsGroup_;
 	HDFAtom<string> changeListIDAtom_;
+    uint32_t arrayLength_; /// dataset length e.g., length of Channel
 
 private:
 	/// \brief Datasets which exist in both PulseCalls and BAM.

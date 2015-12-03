@@ -113,4 +113,8 @@ bool HDFBaxWriter::WriteOneZmw(const SMRTSequence & seq,
     }
 }
 
+bool HDFBaxWriter::WriteFakeDataSets() {
+    return basecallsWriter_->WriteFakeDataSets();
+}
+
 #endif // end of ifdef USE_PBBAM

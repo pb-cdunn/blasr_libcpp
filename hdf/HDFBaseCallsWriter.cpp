@@ -315,6 +315,9 @@ bool HDFBaseCallsWriter::_WritePulseIndex(const SMRTSequence & read) {
     }
     return true;
 }
+
+bool HDFBaseCallsWriter::WriteFakeDataSets()
+{ return true; }
  
 void HDFBaseCallsWriter::Flush(void) {
     basecallArray_.Flush();

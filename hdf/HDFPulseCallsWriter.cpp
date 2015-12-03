@@ -37,6 +37,7 @@ HDFPulseCallsWriter::HDFPulseCallsWriter(const std::string & filename,
     , baseMap_(baseMap)
     , qvsToWrite_({}) // Input qvsToWrite must be checked.
     , zmwWriter_(nullptr)
+    , arrayLength_(0)
 {
     // Add PulseCalls as a child group to the parent group.
     AddChildGroup(parentGroup_, pulsecallsGroup_, PacBio::GroupNames::pulsecalls);
@@ -148,9 +149,41 @@ bool HDFPulseCallsWriter::WriteOneZmw(const SMRTSequence & read) {
     _WriteStartFrame(record);
     _WritePulseCallWidth(record);
     _WriteAltLabel(record);
-    _WriteAltLabelQV(record);
+    _WriteAltLabelQV(record); 
+
+    arrayLength_ +=  record.PulseCall().size();
 
     return Errors().empty();
+}
+
+bool HDFPulseCallsWriter::WriteFakeDataSets() {
+    uint32_t block_sz = 5000000; // This is a data buffer.
+    std::vector<uint16_t> buffer_uint16_5M_0(block_sz);
+    std::fill(buffer_uint16_5M_0.begin(), buffer_uint16_5M_0.end(), 0);
+
+    // Write Chi2, MaxSignal, MidStdDev 
+    bool OK = __WriteUInt16DS(PacBio::GroupNames::chi2, arrayLength_, buffer_uint16_5M_0) and 
+              __WriteUInt16DS(PacBio::GroupNames::maxsignal, arrayLength_, buffer_uint16_5M_0) and 
+              __WriteUInt16DS(PacBio::GroupNames::midstddev, arrayLength_, buffer_uint16_5M_0);
+    return OK;
+}
+
+bool HDFPulseCallsWriter::__WriteUInt16DS(const std::string & dsName, const uint32_t dsLength, std::vector<uint16_t> & buffer) {
+    BufferedHDFArray<uint16_t> dsArray_;
+    dsArray_.Initialize(pulsecallsGroup_, dsName);
+    uint32_t totalLength = 0; 
+    while(totalLength < dsLength) {
+        uint32_t thisLength = buffer.size();
+        if (totalLength + thisLength <= dsLength) {
+            totalLength = totalLength + thisLength;
+        } else {
+            thisLength = dsLength - totalLength;
+            totalLength = dsLength;
+        }
+        dsArray_.Write(&buffer[0], thisLength);
+        dsArray_.Flush();
+    }
+    dsArray_.Close();
 }
 
 bool HDFPulseCallsWriter::_CheckRead(const PacBio::BAM::BamRecord & read, 

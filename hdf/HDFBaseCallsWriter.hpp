@@ -36,8 +36,7 @@ public:
     /// \brief Write a zmw read.
     bool WriteOneZmw(const SMRTSequence & read);
 
-    /// \brief return a vector of QV name strings to write.
-    //const std::vector<std::string> & QVNamesToWrite(void) const;
+    bool WriteFakeDataSets();
 
     void Flush(void);
 

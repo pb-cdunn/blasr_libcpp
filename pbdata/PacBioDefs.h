@@ -89,9 +89,12 @@ namespace GroupNames {
     static const std::string labelqv          = "LabelQV";
     static const std::string meansignal       = "MeanSignal";
     static const std::string midsignal        = "MidSignal";
+    static const std::string maxsignal        = "MaxSignal";
     static const std::string startframe       = "StartFrame";
     static const std::string altlabel         = "AltLabel";
     static const std::string altlabelqv       = "AltLabelQV";
+    static const std::string chi2             = "Chi2";
+    static const std::string midstddev        = "MidStdDev";
 
 } // namespace Group
 

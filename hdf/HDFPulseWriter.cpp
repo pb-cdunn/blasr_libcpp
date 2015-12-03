@@ -127,4 +127,8 @@ bool HDFPulseWriter::WriteOneZmw(const SMRTSequence & seq,
         }
     }
 } 
+
+bool HDFPulseWriter::WriteFakeDataSets() {
+    return pulsecallsWriter_->WriteFakeDataSets();
+}
 #endif // ifndef USE_PBBAM
