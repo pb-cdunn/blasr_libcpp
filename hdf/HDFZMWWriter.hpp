@@ -54,6 +54,9 @@ public:
 
     bool WriteOneZmw(const SMRTSequence & read);
 
+    /// \brief Write fake datasets under /PulseCalls/ZMW
+    bool WriteFakeDataSets(void);
+
     /// \note Flushes all data from cache to disc.
     void Flush(void);
 
@@ -83,6 +86,8 @@ private:
     std::map<char, size_t> baseMap_;
     /// true if parent gropu is PulseCalls.
     bool inPulseCalls_;
+    /// dataset (array) size.
+    uint32_t arrayLength_;
     /// \}
 
 private:

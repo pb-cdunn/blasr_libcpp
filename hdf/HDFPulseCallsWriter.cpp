@@ -162,28 +162,14 @@ bool HDFPulseCallsWriter::WriteFakeDataSets() {
     std::fill(buffer_uint16_5M_0.begin(), buffer_uint16_5M_0.end(), 0);
 
     // Write Chi2, MaxSignal, MidStdDev 
-    bool OK = __WriteUInt16DS(PacBio::GroupNames::chi2, arrayLength_, buffer_uint16_5M_0) and 
-              __WriteUInt16DS(PacBio::GroupNames::maxsignal, arrayLength_, buffer_uint16_5M_0) and 
-              __WriteUInt16DS(PacBio::GroupNames::midstddev, arrayLength_, buffer_uint16_5M_0);
-    return OK;
-}
+    bool OK = __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::chi2, arrayLength_, buffer_uint16_5M_0) and 
+              __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::maxsignal, arrayLength_, buffer_uint16_5M_0) and 
+              __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::midstddev, arrayLength_, buffer_uint16_5M_0);
 
-bool HDFPulseCallsWriter::__WriteUInt16DS(const std::string & dsName, const uint32_t dsLength, std::vector<uint16_t> & buffer) {
-    BufferedHDFArray<uint16_t> dsArray_;
-    dsArray_.Initialize(pulsecallsGroup_, dsName);
-    uint32_t totalLength = 0; 
-    while(totalLength < dsLength) {
-        uint32_t thisLength = buffer.size();
-        if (totalLength + thisLength <= dsLength) {
-            totalLength = totalLength + thisLength;
-        } else {
-            thisLength = dsLength - totalLength;
-            totalLength = dsLength;
-        }
-        dsArray_.Write(&buffer[0], thisLength);
-        dsArray_.Flush();
-    }
-    dsArray_.Close();
+    if (zmwWriter_)
+        return OK and zmwWriter_->WriteFakeDataSets();
+
+    return OK;
 }
 
 bool HDFPulseCallsWriter::_CheckRead(const PacBio::BAM::BamRecord & read, 

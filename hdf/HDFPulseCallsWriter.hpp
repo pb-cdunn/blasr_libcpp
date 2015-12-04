@@ -73,9 +73,6 @@ private:
     bool _WriteAltLabel(const PacBio::BAM::BamRecord & read);
     bool _WriteAltLabelQV(const PacBio::BAM::BamRecord & read);
 
-    /// Write fake datasets
-    bool __WriteUInt16DS(const std::string & dsName, const uint32_t dsLength, std::vector<uint16_t> & buffer);
-
     /// \returns If record has Tag PulseBlockSize and PulseBlockSize 
     ///          equals qvLength. Otherwise, add error message and 
     ///          return false.

@@ -75,6 +75,10 @@ namespace GroupNames {
     static const std::string holexy           = "HoleXY";
     static const std::string numevent         = "NumEvent";
     static const std::string baselinesigma    = "BaselineSigma";
+    static const std::string baselinelevel    = "BaselineLevel";
+    static const std::string signallevel      = "SignalLevel";
+    static const std::string signalsigma      = "SignalSigma";
+
 
     ///PulseData/BaseCalls/ZMWMetrics/HQRegionSNR
     static const std::string hqregionsnr      = "HQRegionSNR";
