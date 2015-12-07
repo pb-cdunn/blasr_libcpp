@@ -78,6 +78,29 @@ bool HDFWriterBase::AddAttribute(HDFData & group,
     return true;
 }
 
+bool HDFWriterBase::AddAttribute(HDFGroup & group, 
+                                 const std::string & attributeName, 
+                                 const std::vector<std::string> & attributeValues)
+{
+    try {
+        HDFAtom<std::vector<std::string> > attributeAtom;
+        attributeAtom.Create(group.group, std::string(attributeName), attributeValues);
+        attributeAtom.Close();
+    }
+    catch (H5::Exception &e) {
+        FAILED_TO_CREATE_ATTRIBUTE_ERROR(attributeName);
+        return false;
+    }
+    return true;
+}
+
+bool HDFWriterBase::AddAttribute(HDFGroup & group, 
+                                 const std::string & attributeName, 
+                                 const std::string & attributeValue)
+{
+    return this->AddAttribute(group, attributeName, std::vector<std::string>({attributeValue}));
+}
+
 void HDFWriterBase::AddErrorMessage(const std::string & errmsg) {
     errors_.push_back(errmsg);
 }

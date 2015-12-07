@@ -11,6 +11,7 @@ HDFZMWWriter::HDFZMWWriter(const std::string & filename,
     , parentGroup_(parentGroup)
     , inPulseCalls_(inPulseCalls)
     , baseMap_(baseMap)
+    , arrayLength_(0)
 { 
     if (not parentGroup.groupIsInitialized)
         PARENT_GROUP_NOT_INITIALIZED_ERROR(PacBio::GroupNames::zmw);
@@ -49,6 +50,7 @@ bool HDFZMWWriter::WriteOneZmw(const SMRTSequence & read) {
     _WriteHoleXY(static_cast<int16_t>(read.HoleX()),
                  static_cast<int16_t>(read.HoleY()));
     _WriteHoleStatus(read.HoleStatus());
+    arrayLength_++;
     return Errors().empty();
 }
 
@@ -59,7 +61,10 @@ bool HDFZMWWriter::WriteOneZmw(const PacBio::BAM::BamRecord & read) {
         } else {
             _WriteNumEvent(read.PulseCall().size());
         }
-    } else _WriteNumEvent(read.Sequence().size());
+    } else {
+        _WriteNumEvent(read.Sequence().size());
+    }
+    arrayLength_++;
 
     uint32_t hn_ = read.HoleNumber();
     _WriteHoleNumber(hn_);
@@ -68,6 +73,16 @@ bool HDFZMWWriter::WriteOneZmw(const PacBio::BAM::BamRecord & read) {
     _WriteHoleStatus(PacBio::AttributeValues::ZMW::HoleStatus::sequencingzmw);
     _WriteBaseLineSigma(read);
     return Errors().empty();
+}
+
+bool HDFZMWWriter::WriteFakeDataSets(void) {
+    // Fake BaselineLevel, BaselineSigma, SignalLevel, SignalSigma
+    std::vector<float> buffer(arrayLength_);
+    std::fill(buffer.begin(), buffer.end(), 0.0);
+    return __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::baselinelevel, arrayLength_, buffer) and
+           __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::baselinesigma, arrayLength_, buffer) and
+           __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::signallevel, arrayLength_, buffer) and
+           __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::signalsigma, arrayLength_, buffer);
 }
 
 bool HDFZMWWriter::_WriteNumEvent(const uint32_t numEvent) {

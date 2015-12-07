@@ -60,6 +60,9 @@ public:
     bool WriteOneZmw(const SMRTSequence & seq, 
                      const std::vector<RegionAnnotation> & regions);
 
+    /// \brief Write fake datasets for POC compatible bax file.
+    bool WriteFakeDataSets();
+
     /// \brief Flushes buffered data.
     void Flush(void);
 

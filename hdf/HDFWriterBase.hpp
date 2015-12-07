@@ -43,6 +43,7 @@
 #include <vector>
 #include "HDFGroup.hpp"
 #include "HDFAtom.hpp"
+#include "BufferedHDFArray.hpp"
 
 class HDFWriterBase {
 public:
@@ -73,6 +74,14 @@ protected:
     bool AddAttribute(HDFData & group, 
                       const std::string & attributeName, 
                       const std::vector<std::string> & attributeValues);
+
+    bool AddAttribute(HDFGroup & group, 
+                      const std::string & attributeName, 
+                      const std::string & attributeValue);
+
+    bool AddAttribute(HDFGroup & group, 
+                      const std::string & attributeName, 
+                      const std::vector<std::string> & attributeValues);
     
     void AddErrorMessage(const std::string & errmsg);
 
@@ -85,4 +94,27 @@ protected:
     virtual void Close(void) = 0;
 };
 
+
+/// \brief Write a dataset of name 'dsName' under h5 group 'dsGroup' with
+///        length 'dsLength'. Just fill this dataset with buffer repeatedly.
+template<typename T>
+bool __WriteFakeDataSet(HDFGroup & dsGroup, const std::string & dsName,
+                        const uint32_t dsLength, std::vector<T> & buffer) {
+    BufferedHDFArray<T> dsArray_;
+    if (dsArray_.Initialize(dsGroup, dsName) == 0) return false;
+    uint32_t totalLength = 0; 
+    while(totalLength < dsLength) {
+        uint32_t thisLength = buffer.size();
+        if (totalLength + thisLength <= dsLength) {
+            totalLength = totalLength + thisLength;
+        } else {
+            thisLength = dsLength - totalLength;
+            totalLength = dsLength;
+        }
+        dsArray_.Write(&buffer[0], thisLength);
+        dsArray_.Flush();
+    }
+    dsArray_.Close();
+    return true;
+}
 #endif

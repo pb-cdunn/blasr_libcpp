@@ -80,10 +80,10 @@ std::vector<std::string> HDFPulseWriter::Errors(void) {
 }
 
 void HDFPulseWriter::Close(void) {
-    basecallsWriter_->Close();
-    pulsecallsWriter_->Close();
-    scandataWriter_->Close();
-    if (HasRegions()) regionsWriter_->Close();
+    if (basecallsWriter_) basecallsWriter_.reset();
+    if (pulsecallsWriter_) pulsecallsWriter_.reset();
+    if (scandataWriter_) scandataWriter_.reset();
+    if (HasRegions() and regionsWriter_) regionsWriter_.reset();
     outfile_.Close();
 }
 
@@ -127,4 +127,8 @@ bool HDFPulseWriter::WriteOneZmw(const SMRTSequence & seq,
         }
     }
 } 
+
+bool HDFPulseWriter::WriteFakeDataSets() {
+    return pulsecallsWriter_->WriteFakeDataSets();
+}
 #endif // ifndef USE_PBBAM

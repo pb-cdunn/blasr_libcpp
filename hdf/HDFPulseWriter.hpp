@@ -57,6 +57,9 @@ public:
     bool WriteOneZmw(const SMRTSequence & seq, 
                      const std::vector<RegionAnnotation> & regions);
 
+    /// \brief Write fake datasets to create POC/PulseRecognizer compatible plx file.
+    bool WriteFakeDataSets();
+
     inline bool HasRegions(void) const;
 
     /// \brief Flushes buffered data.

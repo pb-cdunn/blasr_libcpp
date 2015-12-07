@@ -36,8 +36,7 @@ public:
     /// \brief Write a zmw read.
     bool WriteOneZmw(const SMRTSequence & read);
 
-    /// \brief return a vector of QV name strings to write.
-    //const std::vector<std::string> & QVNamesToWrite(void) const;
+    bool WriteFakeDataSets();
 
     void Flush(void);
 
@@ -72,13 +71,7 @@ private:
 
 private:
     /// \brief Write all attributes of BaseCalls group
-    bool _WriteAttributes(const std::string & basecallerVersion);
-
-    /// \brief Write base caller version (changeListId)
-    bool _WriteBaseCallerVersion(const std::string & basecallerVersion);
-
-    /// \brief Write BaseCalls attribute SchemaRevision
-    void _WriteSchemaRevision(void);
+    bool _WriteAttributes(void);
 
     inline bool _HasQV(const PacBio::BAM::BaseFeature & qvToQuery) const;
 
@@ -110,10 +103,9 @@ private:
     std::unique_ptr<HDFZMWWriter> zmwWriter_;
     std::unique_ptr<HDFZMWMetricsWriter> zmwMetricsWriter_;
 	HDFGroup basecallsGroup_;
+    std::string basecallerVersion_;
 
 private:
-	HDFAtom<string> changeListIDAtom_;
-
     /// BaseCalls/Basecall group
 	BufferedHDFArray<unsigned char> basecallArray_;
 

@@ -1,7 +1,9 @@
 #include "libconfig.h"
 #ifdef USE_PBBAM
-#include "HDFPulseCallsWriter.hpp"
 #include <ctype.h>
+#include <sstream>
+#include "HDFPulseCallsWriter.hpp"
+#include <utils/TimeUtils.hpp>
 
 const std::vector<PacBio::BAM::BaseFeature>  HDFPulseCallsWriter::ValidQVEnums = 
 {     PacBio::BAM::BaseFeature::PULSE_CALL
@@ -37,16 +39,17 @@ HDFPulseCallsWriter::HDFPulseCallsWriter(const std::string & filename,
     , baseMap_(baseMap)
     , qvsToWrite_({}) // Input qvsToWrite must be checked.
     , zmwWriter_(nullptr)
+    , arrayLength_(0)
+    , basecallerVersion_(basecallerVersion)
 {
     // Add PulseCalls as a child group to the parent group.
     AddChildGroup(parentGroup_, pulsecallsGroup_, PacBio::GroupNames::pulsecalls);
 
-    // Write attributes to pulsecallsGroup
-    if (not _WriteAttributes(basecallerVersion)) {
-        AddErrorMessage("Failed to write attributes to " +
-                        PacBio::GroupNames::pulsecalls);
+    if (basecallerVersion_.empty()) {
+        AddErrorMessage("BaseCallerVersion must not be empty!");
+        return;
     }
-
+ 
     this->qvsToWrite_ = WritableQVs(qvsToWrite);
 
     // Any QVs to write?
@@ -73,29 +76,144 @@ HDFPulseCallsWriter::HDFPulseCallsWriter(const std::string & filename,
     // Note: ignore /PulseCalls/ZMWMetrics none of its metrics exist in BAM.
 }
 
-bool HDFPulseCallsWriter::_WriteAttributes(const std::string & basecallerVersion) {
-    _WriteSchemaRevision();
-    return _WriteBaseCallerVersion(basecallerVersion);
+uint32_t HDFPulseCallsWriter::NumZMWs(void) const {
+    if (zmwWriter_) return zmwWriter_->NumZMWs();
+    else return 0;
 }
 
-void HDFPulseCallsWriter::_WriteSchemaRevision(void) {
-    HDFAtom<std::string> schemaRevisionAtom;
-    schemaRevisionAtom.Create(pulsecallsGroup_.group, 
-                              PacBio::AttributeNames::Common::schemarevision,
-                              PacBio::AttributeValues::Common::schemarevision);
-    schemaRevisionAtom.Close();
-}
+std::string HDFPulseCallsWriter::Content(void) const {
+    // Print order matters;
+    const bool fakeChi2 =true, fakeMaxSignal = true, fakeMidStdDev = true;
 
-bool HDFPulseCallsWriter::_WriteBaseCallerVersion(const std::string & basecallerVersion) {
-    if (basecallerVersion.empty()) {
-        AddErrorMessage("BaseCallerVersion must not be empty!");
-        return false;
+    const std::string uint8_t_str        = "uint8_t";
+    const std::string uint16_t_str       = "uint16_t";
+    const std::string uint32_t_str       = "uint32_t";
+
+    const std::string channeltype        = uint8_t_str;
+    const std::string ispulsetype        = uint8_t_str;
+    const std::string labelqvtype        = uint8_t_str;
+    const std::string mergeqvtype        = uint8_t_str;
+    const std::string altlabeltype       = uint8_t_str;
+    const std::string altlabelqvtype     = uint8_t_str;
+
+    const std::string chi2type           = uint16_t_str;
+    const std::string maxsignaltype      = uint16_t_str;
+    const std::string meansignaltype     = uint16_t_str;
+    const std::string midsignaltype      = uint16_t_str;
+    const std::string midstddevtype      = uint16_t_str;
+    const std::string widthinframestype  = uint16_t_str;
+
+    const std::string startframetype     = uint32_t_str;
+
+    std::vector<std::string> names, types;
+
+    if (HasAltLabel()) {
+        names.push_back(PacBio::GroupNames::altlabel);
+        types.push_back(altlabeltype);
     }
-    changeListIDAtom_.Create(pulsecallsGroup_.group, 
-                             PacBio::AttributeNames::Common::changelistid,
-                             basecallerVersion);
-    return true;
+
+    if (HasAltLabelQV()) {
+        names.push_back(PacBio::GroupNames::altlabelqv);
+        types.push_back(altlabelqvtype);
+    }
+
+    if (HasPulseCall()) {
+        names.push_back(PacBio::GroupNames::channel);
+        types.push_back(channeltype);
+    }
+
+    if (fakeChi2) { // fake chi2
+        names.push_back(PacBio::GroupNames::chi2);
+        types.push_back(chi2type);
+    }
+
+    if (HasIsPulse()) {
+        names.push_back(PacBio::GroupNames::ispulse);
+        types.push_back(ispulsetype);
+    }
+
+    if (HasLabelQV()) {
+        names.push_back(PacBio::GroupNames::labelqv);
+        types.push_back(labelqvtype);
+    }
+
+    if (fakeMaxSignal) { // fake maxsignal
+        names.push_back(PacBio::GroupNames::maxsignal);
+        types.push_back(maxsignaltype);
+    }
+
+    if (HasPkmean()) {
+        names.push_back(PacBio::GroupNames::meansignal);
+        types.push_back(meansignaltype);
+    }
+
+    if (HasPulseMergeQV()) {
+        names.push_back(PacBio::GroupNames::mergeqv);
+        types.push_back(mergeqvtype);
+    }
+
+    if (HasPkmid()) {
+        names.push_back(PacBio::GroupNames::midsignal);
+        types.push_back(midsignaltype);
+    }
+
+    if (fakeMidStdDev) { // fake MidStdDev
+        names.push_back(PacBio::GroupNames::midstddev);
+        types.push_back(midstddevtype);
+    }
+
+    if (HasStartFrame()) {
+        names.push_back(PacBio::GroupNames::startframe);
+        types.push_back(startframetype);
+    }
+
+    if (HasPulseCallWidth()) {
+        names.push_back(PacBio::GroupNames::widthinframes);
+        types.push_back(widthinframestype);
+    }
+
+    std::stringstream ss;
+    for (const std::string & name: names) ss << name << ",";
+    for (const std::string & type: types) ss << type << ",";
+
+    std::string ret_str = ss.str();
+
+    if (not ret_str.empty()) return ret_str.substr(0, ret_str.size()-1);
+    else return "";
 }
+
+bool HDFPulseCallsWriter::_WriteAttributes(void) {
+    std::stringstream numss; numss << NumZMWs();
+
+    // ChangeListID
+    bool OK = 
+        AddAttribute(pulsecallsGroup_, 
+                     PacBio::AttributeNames::Common::changelistid,
+                     basecallerVersion_) and
+
+    // Content
+        AddAttribute(pulsecallsGroup_,
+                     PacBio::AttributeNames::Common::content,
+                     Content()) and
+
+    // ContentStored
+        AddAttribute(pulsecallsGroup_,
+                     PacBio::AttributeNames::Common::contentstored,
+                     numss.str()) and
+
+    // DateCreated
+        AddAttribute(pulsecallsGroup_,
+                     PacBio::AttributeNames::Common::datacreated,
+                     GetTimestamp()) and
+
+    // SchemaRevision
+        AddAttribute(pulsecallsGroup_,
+                     PacBio::AttributeNames::Common::schemarevision,
+                     PacBio::AttributeValues::Common::schemarevision);
+
+    return OK;
+}
+
 
 std::vector<std::string> HDFPulseCallsWriter::Errors(void) const {
     std::vector<std::string> retErrors = this->errors_;
@@ -106,7 +224,7 @@ std::vector<std::string> HDFPulseCallsWriter::Errors(void) const {
     return retErrors;
 }
 
-HDFPulseCallsWriter::~HDFPulseCallsWriter(void) {
+HDFPulseCallsWriter::~HDFPulseCallsWriter(void) { 
     this->Close();
 }
 
@@ -148,9 +266,27 @@ bool HDFPulseCallsWriter::WriteOneZmw(const SMRTSequence & read) {
     _WriteStartFrame(record);
     _WritePulseCallWidth(record);
     _WriteAltLabel(record);
-    _WriteAltLabelQV(record);
+    _WriteAltLabelQV(record); 
+
+    arrayLength_ +=  record.PulseCall().size();
 
     return Errors().empty();
+}
+
+bool HDFPulseCallsWriter::WriteFakeDataSets() {
+    uint32_t block_sz = 5000000; // This is a data buffer.
+    std::vector<uint16_t> buffer_uint16_5M_0(block_sz);
+    std::fill(buffer_uint16_5M_0.begin(), buffer_uint16_5M_0.end(), 0);
+
+    // Write Chi2, MaxSignal, MidStdDev 
+    bool OK = __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::chi2, arrayLength_, buffer_uint16_5M_0) and 
+              __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::maxsignal, arrayLength_, buffer_uint16_5M_0) and 
+              __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::midstddev, arrayLength_, buffer_uint16_5M_0);
+
+    if (zmwWriter_)
+        return OK and zmwWriter_->WriteFakeDataSets();
+
+    return OK;
 }
 
 bool HDFPulseCallsWriter::_CheckRead(const PacBio::BAM::BamRecord & read, 
@@ -337,6 +473,14 @@ void HDFPulseCallsWriter::Flush(void) {
 
 void HDFPulseCallsWriter::Close(void) {
     this->Flush();
+
+    // Write attributes to pulsecallsGroup
+    try { _WriteAttributes(); }
+    catch (H5::Exception e) {
+        AddErrorMessage("Failed to write attributes to " +
+                        PacBio::GroupNames::pulsecalls);
+    }
+
     if (HasPulseCall())      pulseCallArray_.Close();
     if (HasIsPulse())        isPulseArray_.Close();
     if (HasLabelQV())        labelQVArray_.Close();

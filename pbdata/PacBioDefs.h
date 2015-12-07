@@ -75,6 +75,10 @@ namespace GroupNames {
     static const std::string holexy           = "HoleXY";
     static const std::string numevent         = "NumEvent";
     static const std::string baselinesigma    = "BaselineSigma";
+    static const std::string baselinelevel    = "BaselineLevel";
+    static const std::string signallevel      = "SignalLevel";
+    static const std::string signalsigma      = "SignalSigma";
+
 
     ///PulseData/BaseCalls/ZMWMetrics/HQRegionSNR
     static const std::string hqregionsnr      = "HQRegionSNR";
@@ -89,9 +93,12 @@ namespace GroupNames {
     static const std::string labelqv          = "LabelQV";
     static const std::string meansignal       = "MeanSignal";
     static const std::string midsignal        = "MidSignal";
+    static const std::string maxsignal        = "MaxSignal";
     static const std::string startframe       = "StartFrame";
     static const std::string altlabel         = "AltLabel";
     static const std::string altlabelqv       = "AltLabelQV";
+    static const std::string chi2             = "Chi2";
+    static const std::string midstddev        = "MidStdDev";
 
 } // namespace Group
 
@@ -100,6 +107,9 @@ namespace AttributeNames {
     namespace Common {
         static const std::string changelistid       = "ChangeListID";
         static const std::string description        = "Description";
+        static const std::string content            = "Content";
+        static const std::string contentstored      = "ContentStored";
+        static const std::string datacreated        = "DataCreated";
         static const std::string schemarevision     = "SchemaRevision";
     } // Common
 

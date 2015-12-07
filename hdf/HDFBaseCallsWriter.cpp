@@ -40,11 +40,13 @@ HDFBaseCallsWriter::HDFBaseCallsWriter(const std::string & filename,
     , zmwWriter_(nullptr)
     , zmwMetricsWriter_(nullptr)
     , fakeQualityValue_(fakeQualityValue)
+    , basecallerVersion_(basecallerVersion)
 {
     // Add BaseCalls as a child group to the parent group.
     AddChildGroup(parentGroup_, basecallsGroup_, PacBio::GroupNames::basecalls);
 
-    if (not _WriteAttributes(basecallerVersion)) {
+    if (basecallerVersion.empty()) {
+        AddErrorMessage("BaseCallerVersion must not be empty!");
         return;
     }
 
@@ -111,28 +113,17 @@ bool HDFBaseCallsWriter::InitializeQVGroups(void) {
     return (ret != 0);
 }
 
-bool HDFBaseCallsWriter::_WriteAttributes(const std::string & basecallerVersion) {
-    _WriteSchemaRevision();
-    return _WriteBaseCallerVersion(basecallerVersion);
-}
-
-bool HDFBaseCallsWriter::_WriteBaseCallerVersion(const std::string & basecallerVersion) {
-    if (basecallerVersion.empty()) {
-        AddErrorMessage("BaseCallerVersion must not be empty!");
-        return false;
-    }
-    changeListIDAtom_.Create(basecallsGroup_.group, 
-                             PacBio::AttributeNames::Common::changelistid,
-                             basecallerVersion);
-    return true;
-}
-
-void HDFBaseCallsWriter::_WriteSchemaRevision(void) {
-    HDFAtom<std::string> schemaRevisionAtom;
-    schemaRevisionAtom.Create(basecallsGroup_.group, 
-                              PacBio::AttributeNames::Common::schemarevision,
-                              PacBio::AttributeValues::Common::schemarevision);
-    schemaRevisionAtom.Close();
+bool HDFBaseCallsWriter::_WriteAttributes(void) {
+    // SchemaRevision
+    bool OK = 
+        AddAttribute(basecallsGroup_,
+                     PacBio::AttributeNames::Common::schemarevision,
+                     PacBio::AttributeValues::Common::schemarevision) and
+    // ChangeListID
+        AddAttribute(basecallsGroup_,
+                     PacBio::AttributeNames::Common::changelistid,
+                     basecallerVersion_);
+    return OK;
 }
 
 bool HDFBaseCallsWriter::WriteOneZmw(const SMRTSequence & read) {
@@ -315,6 +306,9 @@ bool HDFBaseCallsWriter::_WritePulseIndex(const SMRTSequence & read) {
     }
     return true;
 }
+
+bool HDFBaseCallsWriter::WriteFakeDataSets()
+{ return true; }
  
 void HDFBaseCallsWriter::Flush(void) {
     basecallArray_.Flush();
@@ -336,6 +330,12 @@ void HDFBaseCallsWriter::Flush(void) {
 
 void HDFBaseCallsWriter::Close(void) {
     this->Flush();
+
+    try { _WriteAttributes(); }
+    catch (H5::Exception e) {
+        AddErrorMessage("Failed to write attributes to " +
+                        PacBio::GroupNames::basecalls);
+    }
 
     basecallArray_.Close();
 
