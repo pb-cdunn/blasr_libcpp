@@ -46,6 +46,11 @@ public:
     bool WriteFakeDataSets();
 
 public:
+    uint32_t NumZMWs(void) const;
+
+    std::string Content(void) const;
+
+public:
     /// \returns true if has PulseCall dataset and pulseCallArray_
     ///          has been initialized.
     inline bool HasPulseCall(void) const;
@@ -87,13 +92,7 @@ private:
 
     /// \brief Write attributes to PulseCalls group.
     /// \returns Whether or not all attributes written successfully.
-    bool _WriteAttributes(const std::string & basecallerVersion);
-
-    /// \brief Write attribute SchemaRevision to PulseCalls group.
-    void _WriteSchemaRevision(void);
-
-    /// \brief Write base caller version (changeListId)
-    bool _WriteBaseCallerVersion(const std::string & basecallerVersion);
+    bool _WriteAttributes(void);
 
 private:
     HDFGroup & parentGroup_;
@@ -101,8 +100,8 @@ private:
     std::vector<PacBio::BAM::BaseFeature> qvsToWrite_;
     std::unique_ptr<HDFZMWWriter> zmwWriter_;
 	HDFGroup pulsecallsGroup_;
-	HDFAtom<string> changeListIDAtom_;
     uint32_t arrayLength_; /// dataset length e.g., length of Channel
+    std::string basecallerVersion_; /// basecall version, mandatory
 
 private:
 	/// \brief Datasets which exist in both PulseCalls and BAM.

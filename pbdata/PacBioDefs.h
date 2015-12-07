@@ -107,6 +107,9 @@ namespace AttributeNames {
     namespace Common {
         static const std::string changelistid       = "ChangeListID";
         static const std::string description        = "Description";
+        static const std::string content            = "Content";
+        static const std::string contentstored      = "ContentStored";
+        static const std::string datacreated        = "DataCreated";
         static const std::string schemarevision     = "SchemaRevision";
     } // Common
 

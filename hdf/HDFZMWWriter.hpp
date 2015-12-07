@@ -57,6 +57,8 @@ public:
     /// \brief Write fake datasets under /PulseCalls/ZMW
     bool WriteFakeDataSets(void);
 
+    uint32_t NumZMWs(void) const {return arrayLength_;}
+
     /// \note Flushes all data from cache to disc.
     void Flush(void);
 
