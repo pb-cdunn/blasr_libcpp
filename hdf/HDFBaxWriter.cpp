@@ -68,9 +68,9 @@ std::vector<std::string> HDFBaxWriter::Errors(void) {
 }
 
 void HDFBaxWriter::Close(void) {
-    basecallsWriter_->Close();
-    scandataWriter_->Close();
-    if (HasRegions()) regionsWriter_->Close();
+    if (basecallsWriter_) basecallsWriter_.reset();
+    if (scandataWriter_) scandataWriter_.reset();
+    if (HasRegions() and regionsWriter_) regionsWriter_.reset();
     outfile_.Close();
 }
 
