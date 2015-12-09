@@ -69,20 +69,22 @@ protected:
 
     bool AddAttribute(HDFData & group, 
                       const std::string & attributeName, 
-                      const std::string & attributeValue);
+                      const std::vector<std::string> & attributeValues);
 
+    bool AddAttribute(HDFGroup & group, 
+                      const std::string & attributeName, 
+                      const std::vector<std::string> & attributeValues);
+
+    template<typename T>
     bool AddAttribute(HDFData & group, 
                       const std::string & attributeName, 
-                      const std::vector<std::string> & attributeValues);
+                      const T & attributeValue);
 
+    template<typename T>
     bool AddAttribute(HDFGroup & group, 
                       const std::string & attributeName, 
-                      const std::string & attributeValue);
+                      const T & attributeValue);
 
-    bool AddAttribute(HDFGroup & group, 
-                      const std::string & attributeName, 
-                      const std::vector<std::string> & attributeValues);
-    
     void AddErrorMessage(const std::string & errmsg);
 
     void FAILED_TO_CREATE_GROUP_ERROR(const std::string & groupName);
@@ -94,6 +96,40 @@ protected:
     virtual void Close(void) = 0;
 };
 
+
+template<typename T>
+bool HDFWriterBase::AddAttribute(HDFData & group, 
+                                 const std::string & attributeName, 
+                                 const T & attributeValue) {
+    try {
+        HDFAtom<T> attributeAtom;
+        attributeAtom.Create(group.dataset, std::string(attributeName));
+        attributeAtom.Write(attributeValue);
+        attributeAtom.Close();
+    }
+    catch (H5::Exception &e) {
+        this->FAILED_TO_CREATE_ATTRIBUTE_ERROR(attributeName);
+        return false;
+    }
+    return true;
+}
+
+template<typename T>
+bool HDFWriterBase::AddAttribute(HDFGroup & group, 
+                    const std::string & attributeName, 
+                    const T & attributeValue) {
+    try {
+        HDFAtom<T> attributeAtom;
+        attributeAtom.Create(group.group, std::string(attributeName));
+        attributeAtom.Write(attributeValue);
+        attributeAtom.Close();
+    }
+    catch (H5::Exception &e) {
+        FAILED_TO_CREATE_ATTRIBUTE_ERROR(attributeName);
+        return false;
+    }
+    return true;
+}
 
 /// \brief Write a dataset of name 'dsName' under h5 group 'dsGroup' with
 ///        length 'dsLength'. Just fill this dataset with buffer repeatedly.

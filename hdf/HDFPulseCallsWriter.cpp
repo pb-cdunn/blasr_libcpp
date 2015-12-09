@@ -81,7 +81,8 @@ uint32_t HDFPulseCallsWriter::NumZMWs(void) const {
     else return 0;
 }
 
-std::string HDFPulseCallsWriter::Content(void) const {
+void HDFPulseCallsWriter::Content(std::vector<std::string> & names,
+                                  std::vector<std::string> & types) const {
     // Print order matters;
     const bool fakeChi2 =true, fakeMaxSignal = true, fakeMidStdDev = true;
 
@@ -105,7 +106,7 @@ std::string HDFPulseCallsWriter::Content(void) const {
 
     const std::string startframetype     = uint32_t_str;
 
-    std::vector<std::string> names, types;
+    names.clear(); types.clear();
 
     if (HasAltLabel()) {
         names.push_back(PacBio::GroupNames::altlabel);
@@ -171,43 +172,35 @@ std::string HDFPulseCallsWriter::Content(void) const {
         names.push_back(PacBio::GroupNames::widthinframes);
         types.push_back(widthinframestype);
     }
-
-    std::stringstream ss;
-    for (const std::string & name: names) ss << name << ",";
-    for (const std::string & type: types) ss << type << ",";
-
-    std::string ret_str = ss.str();
-
-    if (not ret_str.empty()) return ret_str.substr(0, ret_str.size()-1);
-    else return "";
 }
 
 bool HDFPulseCallsWriter::_WriteAttributes(void) {
-    std::stringstream numss; numss << NumZMWs();
+    std::vector<std::string> content_names, content_types;
+    Content(content_names, content_types);
 
     // ChangeListID
     bool OK = 
-        AddAttribute(pulsecallsGroup_, 
+        AddAttribute<std::string>(pulsecallsGroup_, 
                      PacBio::AttributeNames::Common::changelistid,
                      basecallerVersion_) and
 
     // Content
-        AddAttribute(pulsecallsGroup_,
+        AddAttribute<std::vector<std::string>>(pulsecallsGroup_,
                      PacBio::AttributeNames::Common::content,
-                     Content()) and
+                     content_names) and
 
     // ContentStored
-        AddAttribute(pulsecallsGroup_,
+        AddAttribute<uint32_t>(pulsecallsGroup_,
                      PacBio::AttributeNames::Common::contentstored,
-                     numss.str()) and
+                     NumZMWs()) and
 
     // DateCreated
-        AddAttribute(pulsecallsGroup_,
+        AddAttribute<std::string>(pulsecallsGroup_,
                      PacBio::AttributeNames::Common::datacreated,
                      GetTimestamp()) and
 
     // SchemaRevision
-        AddAttribute(pulsecallsGroup_,
+        AddAttribute<std::string>(pulsecallsGroup_,
                      PacBio::AttributeNames::Common::schemarevision,
                      PacBio::AttributeValues::Common::schemarevision);
 

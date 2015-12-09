@@ -188,20 +188,20 @@ void HDFZMWWriter::_WriteAttributes(void)
     // NumEvent has no attributes.
 
     if (holeNumberArray_.IsInitialized() and holeNumberArray_.size() > 0) {
-        AddAttribute(holeNumberArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleNumber::description);
+        AddAttribute<std::string>(holeNumberArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleNumber::description);
     }
 
     if (holeStatusArray_.IsInitialized() and holeStatusArray_.size() > 0) {
-        AddAttribute(holeStatusArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleStatus::description);
-        AddAttribute(holeStatusArray_, PacBio::AttributeNames::ZMW::HoleStatus::lookuptable, PacBio::AttributeValues::ZMW::HoleStatus::lookuptable);
+        AddAttribute<std::string>(holeStatusArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleStatus::description);
+        AddAttribute<std::vector<std::string>>(holeStatusArray_, PacBio::AttributeNames::ZMW::HoleStatus::lookuptable, PacBio::AttributeValues::ZMW::HoleStatus::lookuptable);
     }
 
     if (holeXYArray_.IsInitialized() and holeXYArray_.GetNRows() > 0) {
-        AddAttribute(holeXYArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleXY::description);
+        AddAttribute<std::string>(holeXYArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::HoleXY::description);
     }
 
     if (HasBaseLineSigma() and baseLineSigmaArray_.GetNRows() > 0) {
-        AddAttribute(baseLineSigmaArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::BaseLineSigma::description);
+        AddAttribute<std::string>(baseLineSigmaArray_, PacBio::AttributeNames::Common::description, PacBio::AttributeValues::ZMW::BaseLineSigma::description);
     }
 }
 #endif
