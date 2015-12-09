@@ -55,13 +55,7 @@ bool HDFWriterBase::AddChildGroup(HDFGroup & parentGroup,
     return true;
 }
 
-bool HDFWriterBase::AddAttribute(HDFData & group, 
-                                 const std::string & attributeName, 
-                                 const std::string & attributeValue)
-{
-    return this->AddAttribute(group, attributeName, std::vector<std::string>({attributeValue}));
-}
-
+template<>
 bool HDFWriterBase::AddAttribute(HDFData & group, 
                                  const std::string & attributeName, 
                                  const std::vector<std::string> & attributeValues)
@@ -78,6 +72,7 @@ bool HDFWriterBase::AddAttribute(HDFData & group,
     return true;
 }
 
+template<>
 bool HDFWriterBase::AddAttribute(HDFGroup & group, 
                                  const std::string & attributeName, 
                                  const std::vector<std::string> & attributeValues)
@@ -92,13 +87,6 @@ bool HDFWriterBase::AddAttribute(HDFGroup & group,
         return false;
     }
     return true;
-}
-
-bool HDFWriterBase::AddAttribute(HDFGroup & group, 
-                                 const std::string & attributeName, 
-                                 const std::string & attributeValue)
-{
-    return this->AddAttribute(group, attributeName, std::vector<std::string>({attributeValue}));
 }
 
 void HDFWriterBase::AddErrorMessage(const std::string & errmsg) {

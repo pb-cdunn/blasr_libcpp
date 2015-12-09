@@ -116,11 +116,11 @@ bool HDFBaseCallsWriter::InitializeQVGroups(void) {
 bool HDFBaseCallsWriter::_WriteAttributes(void) {
     // SchemaRevision
     bool OK = 
-        AddAttribute(basecallsGroup_,
+        AddAttribute<std::string>(basecallsGroup_,
                      PacBio::AttributeNames::Common::schemarevision,
                      PacBio::AttributeValues::Common::schemarevision) and
     // ChangeListID
-        AddAttribute(basecallsGroup_,
+        AddAttribute<std::string>(basecallsGroup_,
                      PacBio::AttributeNames::Common::changelistid,
                      basecallerVersion_);
     return OK;

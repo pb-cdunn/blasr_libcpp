@@ -58,10 +58,10 @@ HDFRegionsWriter::~HDFRegionsWriter(void)
 bool HDFRegionsWriter::WriteAttributes(void) 
 {
     if (curRow_ > 0) {
-        AddAttribute(regionsArray_, PacBio::AttributeNames::Regions::columnnames, PacBio::AttributeValues::Regions::columnnames);
-        AddAttribute(regionsArray_, PacBio::AttributeNames::Regions::regiontypes, regionTypes_);
-        AddAttribute(regionsArray_, PacBio::AttributeNames::Regions::regiondescriptions, PacBio::AttributeValues::Regions::regiondescriptions);
-        AddAttribute(regionsArray_, PacBio::AttributeNames::Regions::regionsources, PacBio::AttributeValues::Regions::regionsources);
+        AddAttribute<std::vector<std::string>>(regionsArray_, PacBio::AttributeNames::Regions::columnnames, PacBio::AttributeValues::Regions::columnnames);
+        AddAttribute<std::vector<std::string>>(regionsArray_, PacBio::AttributeNames::Regions::regiontypes, regionTypes_);
+        AddAttribute<std::vector<std::string>>(regionsArray_, PacBio::AttributeNames::Regions::regiondescriptions, PacBio::AttributeValues::Regions::regiondescriptions);
+        AddAttribute<std::vector<std::string>>(regionsArray_, PacBio::AttributeNames::Regions::regionsources, PacBio::AttributeValues::Regions::regionsources);
         return true;
     } else {
         AddErrorMessage("Could not write attributes when Regions group is empty.");

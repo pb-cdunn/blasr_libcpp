@@ -123,15 +123,15 @@ bool HDFZMWMetricsWriter::InitializeChildHDFGroups(void) {
 bool HDFZMWMetricsWriter::WriteAttributes(void) {
     if (curRow_ > 0) {
         bool OK = 
-        AddAttribute(hqRegionSNRArray_, 
+        AddAttribute<std::string>(hqRegionSNRArray_, 
                      PacBio::AttributeNames::Common::description,
                      PacBio::AttributeValues::ZMWMetrics::HQRegionSNR::description)
         and 
-        AddAttribute(readScoreArray_,
+        AddAttribute<std::string>(readScoreArray_,
                      PacBio::AttributeNames::Common::description, 
                      PacBio::AttributeValues::ZMWMetrics::ReadScore::description)
         and 
-        AddAttribute(productivityArray_,
+        AddAttribute<std::string>(productivityArray_,
                      PacBio::AttributeNames::Common::description, 
                      PacBio::AttributeValues::ZMWMetrics::Productivity::description);
         return OK;

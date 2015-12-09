@@ -46,9 +46,13 @@ public:
     bool WriteFakeDataSets();
 
 public:
+    /// \returns number of zmws stored.
     uint32_t NumZMWs(void) const;
 
-    std::string Content(void) const;
+    /// \params[out] names, names of datasets under PulseCalls in order
+    /// \params[out] types, corresponding content types
+    void Content(std::vector<std::string> & names, 
+                 std::vector<std::string> & types) const;
 
 public:
     /// \returns true if has PulseCall dataset and pulseCallArray_
