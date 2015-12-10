@@ -44,6 +44,7 @@
 #include "HDFGroup.hpp"
 #include "HDFAtom.hpp"
 #include "BufferedHDFArray.hpp"
+#include "BufferedHDF2DArray.hpp"
 
 class HDFWriterBase {
 public:
@@ -153,4 +154,22 @@ bool __WriteFakeDataSet(HDFGroup & dsGroup, const std::string & dsName,
     dsArray_.Close();
     return true;
 }
+
+/// \brief Write a 2D dataset of name 'dSName' under h5 group 'dsGroup' with
+///        row number 'rowNum', column number 'colNum'. Just fill this dataset
+///        with value 'fillData'
+template<typename T>
+bool __WriteFake2DDataSet(HDFGroup & dsGroup, const std::string & dsName,
+                           const uint32_t rowNum, const int colNum, const T & fillData) {
+    BufferedHDF2DArray<T> dsArray;
+    if (dsArray.Initialize(dsGroup, dsName, colNum) == 0) return false;
+    T * data = new T[colNum];
+    for(size_t i = 0; i < colNum; i++) {data[i] = fillData; }
+    for(uint32_t i = 0; i< rowNum; i++) {
+        dsArray.WriteRow(data, colNum);
+    }
+    dsArray.Close();
+    delete data;
+}
+
 #endif
