@@ -135,9 +135,10 @@ private:
 	BufferedHDFArray<unsigned char> pulseCallArray_;
 	BufferedHDFArray<unsigned char> isPulseArray_;
 	BufferedHDFArray<unsigned char> labelQVArray_; 
-    // FIXME: pkmean is 2D array (one value per pulse per channel) in H5,
-    // while is 1D array (one value per pulse) in BAM.
-	BufferedHDFArray<uint16_t>      pkmeanArray_;
+    // pkmean is 2D array (one value per pulse per channel) in H5,
+    // while it is 1D array (one value per pulse) in BAM, so we only
+    // copy pkmean of each base to the specific channel, filling other three channels with 0s.
+	BufferedHDF2DArray<uint16_t>      pkmeanArray_;
 	BufferedHDFArray<unsigned char> pulseMergeQVArray_;
 	BufferedHDFArray<uint16_t>      pkmidArray_;
 	BufferedHDFArray<uint32_t>      startFrameArray_;

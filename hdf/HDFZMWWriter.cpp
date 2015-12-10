@@ -77,12 +77,12 @@ bool HDFZMWWriter::WriteOneZmw(const PacBio::BAM::BamRecord & read) {
 
 bool HDFZMWWriter::WriteFakeDataSets(void) {
     // Fake BaselineLevel, BaselineSigma, SignalLevel, SignalSigma
-    std::vector<float> buffer(arrayLength_);
-    std::fill(buffer.begin(), buffer.end(), 0.0);
-    return __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::baselinelevel, arrayLength_, buffer) and
-           __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::baselinesigma, arrayLength_, buffer) and
-           __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::signallevel, arrayLength_, buffer) and
-           __WriteFakeDataSet<float>(zmwGroup_, PacBio::GroupNames::signalsigma, arrayLength_, buffer);
+    //std::vector<float> buffer(arrayLength_);
+    //std::fill(buffer.begin(), buffer.end(), 0.0);
+    return __WriteFake2DDataSet<float>(zmwGroup_, PacBio::GroupNames::baselinelevel, arrayLength_, 4, 0) and
+           __WriteFake2DDataSet<float>(zmwGroup_, PacBio::GroupNames::baselinesigma, arrayLength_, 4, 0) and
+           __WriteFake2DDataSet<float>(zmwGroup_, PacBio::GroupNames::signallevel, arrayLength_, 4, 0) and
+           __WriteFake2DDataSet<float>(zmwGroup_, PacBio::GroupNames::signalsigma, arrayLength_, 4, 0);
 }
 
 bool HDFZMWWriter::_WriteNumEvent(const uint32_t numEvent) {

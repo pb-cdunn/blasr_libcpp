@@ -229,7 +229,7 @@ bool HDFPulseCallsWriter::InitializeQVGroups(void) {
     if (_HasQV(PacBio::BAM::BaseFeature::LABEL_QV))
         ret *= labelQVArray_.Initialize(pulsecallsGroup_,        PacBio::GroupNames::labelqv);
     if (_HasQV(PacBio::BAM::BaseFeature::PKMEAN))
-        ret *= pkmeanArray_.Initialize(pulsecallsGroup_,         PacBio::GroupNames::meansignal);
+        ret *= pkmeanArray_.Initialize(pulsecallsGroup_,         PacBio::GroupNames::meansignal, 4);
     if (_HasQV(PacBio::BAM::BaseFeature::PULSE_MERGE_QV))
         ret *= pulseMergeQVArray_.Initialize(pulsecallsGroup_,   PacBio::GroupNames::mergeqv);
     if (_HasQV(PacBio::BAM::BaseFeature::PKMID))
@@ -270,9 +270,8 @@ bool HDFPulseCallsWriter::WriteFakeDataSets() {
     uint32_t block_sz = 5000000; // This is a data buffer.
     std::vector<uint16_t> buffer_uint16_5M_0(block_sz);
     std::fill(buffer_uint16_5M_0.begin(), buffer_uint16_5M_0.end(), 0);
-
-    // Write Chi2, MaxSignal, MidStdDev 
-    bool OK = __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::chi2, arrayLength_, buffer_uint16_5M_0) and 
+    // Write 2D Array: Chi2, 1D Arrays: MaxSignal, MidStdDev 
+    bool OK = __WriteFake2DDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::chi2, arrayLength_, 4, 0) and 
               __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::maxsignal, arrayLength_, buffer_uint16_5M_0) and 
               __WriteFakeDataSet<uint16_t>(pulsecallsGroup_, PacBio::GroupNames::midstddev, arrayLength_, buffer_uint16_5M_0);
 
@@ -357,7 +356,13 @@ bool HDFPulseCallsWriter::_WritePkmean(const PacBio::BAM::BamRecord & read) {
             const PacBio::BAM::Tag & tag = read.Impl().TagValue("pa");
             std::vector<uint16_t> data = tag.ToUInt16Array();
             _CheckRead(read, data.size(), "Pkmean");
-            pkmeanArray_.Write(&data[0], data.size());
+
+            const std::string & pulsecall = read.PulseCall();
+            for (size_t i = 0; i < pulsecall.size(); i++) {
+                uint16_t pkm[4] = {0, 0, 0, 0};
+                pkm[baseMap_[std::toupper(pulsecall[i])]] = data[i];
+                pkmeanArray_.WriteRow(pkm, 4);
+            }
         } else {
             AddErrorMessage(std::string("Pkmean is absent in read " + read.FullName()));
         }
