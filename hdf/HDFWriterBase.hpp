@@ -169,7 +169,7 @@ bool __WriteFake2DDataSet(HDFGroup & dsGroup, const std::string & dsName,
         dsArray.WriteRow(data, colNum);
     }
     dsArray.Close();
-    delete data;
+    delete []data;
 }
 
 #endif
